@@ -1,0 +1,8 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle base -->
+  <circle cx="16" cy="24" r="8" fill="#0F172A"/>
+  <!-- Light beam extending upward-right -->
+  <path d="M22 18L32 8" stroke="#0F172A" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Small glow dot at end of beam -->
+  <circle cx="32" cy="8" r="2" fill="#0F172A"/>
+</svg>

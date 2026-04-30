@@ -1,0 +1,16 @@
+<svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon -->
+  <circle cx="16" cy="24" r="8" fill="#06B6D4"/>
+  <path d="M22 18L32 8" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="32" cy="8" r="2" fill="#06B6D4"/>
+  
+  <!-- Text -->
+  <text x="44" y="28" 
+        font-family="Inter, Poppins, sans-serif" 
+        font-weight="600" 
+        font-size="24" 
+        letter-spacing="0.05em" 
+        fill="#ffffff">
+    Lume
+  </text>
+</svg>
