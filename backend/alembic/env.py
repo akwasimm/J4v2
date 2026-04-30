@@ -16,9 +16,19 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.config import settings
 from app.core.database import Base
-from app.models.user import User
+# Import all models in dependency order (User must be last)
 from app.models.auth import PasswordResetToken
-# More model imports will be added in future phases
+from app.models.profile import UserSkill, UserExperience, UserEducation
+from app.models.preferences import UserPreference
+from app.models.resume import UserResume
+from app.models.jobs import Job, JobApplication, SavedJob, SavedJobCollection
+from app.models.ai_pages import (
+    JobMatchHistory, SkillGapAnalysis,
+    ResumeAnalysis, AIRecommendation, MarketInsightsCache
+)
+from app.models.coach import CoachSession, CoachMessage
+from app.models.settings import UserSettings, ConnectedAccount
+from app.models.user import User
 
 # this is the Alembic Config object
 config = context.config

@@ -5,25 +5,19 @@ Security utilities for password hashing and JWT token management.
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from app.core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
-
-# bcrypt has 72 byte limit, configure to truncate automatically
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto",
-    bcrypt__truncate_error=False  # Silently truncate to 72 bytes
-)
 
 
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt (max 72 bytes)."""
     # bcrypt has a 72 byte limit, truncate if necessary
     password_bytes = password.encode('utf-8')[:72]
-    return pwd_context.hash(password_bytes)
+    hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt(rounds=12))
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -31,7 +25,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
         # bcrypt has a 72 byte limit, truncate if necessary
         password_bytes = plain_password.encode('utf-8')[:72]
-        return pwd_context.verify(password_bytes, hashed_password)
+        hashed_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
     except Exception as e:
         logger.error(f"Password verification error: {e}")
         return False

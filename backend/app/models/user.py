@@ -45,6 +45,15 @@ class User(Base):
     oauth_id = Column(String(255), nullable=True)
 
     # Profile
+    headline = Column(String(255), nullable=True)
+    location = Column(String(200), nullable=True)
+    linkedin = Column(String(100), nullable=True)
+    github = Column(String(100), nullable=True)
+    leetcode = Column(String(100), nullable=True)
+    portfolio = Column(String(500), nullable=True)
+    avatar_url = Column(String(500), nullable=True)
+    avatar_uploaded_at = Column(DateTime(timezone=True), nullable=True)
+
     profile_completion = Column(Integer, default=0, nullable=True)
     profile_completion_updated_at = Column(DateTime(timezone=True), nullable=True)
     last_login_at = Column(DateTime(timezone=True), nullable=True)
@@ -53,13 +62,29 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 
-    # Relationships (add as we create other models)
-    # skills = relationship("UserSkill", back_populates="user", cascade="all, delete-orphan")
-    # experience = relationship("UserExperience", back_populates="user", cascade="all, delete-orphan")
-    # education = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
-    # preferences = relationship("UserPreference", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    # resumes = relationship("UserResume", back_populates="user", cascade="all, delete-orphan")
-    # settings = relationship("UserSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    # Relationships
+    skills = relationship(
+        "UserSkill", back_populates="user", cascade="all, delete-orphan"
+    )
+    experience = relationship(
+        "UserExperience", back_populates="user", cascade="all, delete-orphan"
+    )
+    education = relationship(
+        "UserEducation", back_populates="user", cascade="all, delete-orphan"
+    )
+    preferences = relationship(
+        "UserPreference", back_populates="user",
+        uselist=False, cascade="all, delete-orphan"
+    )
+    resumes = relationship(
+        "UserResume", back_populates="user", cascade="all, delete-orphan"
+    )
+    settings = relationship(
+        "UserSettings",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<User {self.email}>"

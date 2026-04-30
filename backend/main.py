@@ -125,19 +125,71 @@ async def ai_status():
 
 # Import and include routers
 from app.routers import auth as auth_router
+from app.routers import profile as profile_router
+from app.routers import skills as skills_router
+from app.routers import experience as experience_router
+from app.routers import education as education_router
+from app.routers import resume as resume_router
+from app.routers import jobs as jobs_router
+from app.routers import ai_pages as ai_router
+from app.routers import coach as coach_router
+from app.routers import settings as settings_router
 
 app.include_router(
     auth_router.router,
     prefix="/api/v1/auth",
     tags=["Authentication"]
 )
+app.include_router(
+    profile_router.router,
+    prefix="/api/v1/profile",
+    tags=["Profile"]
+)
+app.include_router(
+    skills_router.router,
+    prefix="/api/v1/profile/skills",
+    tags=["Skills"]
+)
+app.include_router(
+    experience_router.router,
+    prefix="/api/v1/profile/experience",
+    tags=["Experience"]
+)
+app.include_router(
+    education_router.router,
+    prefix="/api/v1/profile/education",
+    tags=["Education"]
+)
+app.include_router(
+    resume_router.router,
+    prefix="/api/v1/profile",
+    tags=["Resume & Avatar"]
+)
+app.include_router(
+    jobs_router.router,
+    prefix="/api/v1/jobs",
+    tags=["Jobs"]
+)
+app.include_router(
+    ai_router.router,
+    prefix="/api/v1/ai",
+    tags=["AI Features"]
+)
+app.include_router(
+    coach_router.router,
+    prefix="/api/v1/coach",
+    tags=["Career Coach"]
+)
+app.include_router(
+    settings_router.router,
+    prefix="/api/v1/settings",
+    tags=["Settings"]
+)
 
 # Future routers:
-# from app.routers import users, jobs, applications, resume, ai
-# app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+# from app.routers import jobs, applications, ai
 # app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
 # app.include_router(applications.router, prefix="/api/v1/applications", tags=["Applications"])
-# app.include_router(resume.router, prefix="/api/v1/resume", tags=["Resume"])
 # app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"])
 
 
