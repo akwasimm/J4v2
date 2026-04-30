@@ -13,7 +13,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import check_db_connection
+from app.core.ai_client import ai_client
 
 # Configure logging
 logging.basicConfig(
@@ -31,22 +32,33 @@ async def lifespan(app: FastAPI):
     logger.info("JobFor Backend Starting...")
     logger.info("==========================================")
     
-    # Validate configuration
-    if len(settings.SECRET_KEY) < 32:
-        logger.error("WARNING: SECRET_KEY is less than 32 characters!")
-        logger.error("Please set a secure SECRET_KEY of at least 32 characters.")
-    
-    if not settings.GROQ_API_KEY or settings.GROQ_API_KEY == "your-groq-api-key-here":
-        logger.warning("GROQ_API_KEY not configured - AI features will be unavailable")
-    
-    # Create uploads directory
-    upload_dir = settings.UPLOAD_DIR
-    os.makedirs(upload_dir, exist_ok=True)
-    logger.info(f"Uploads directory ready: {upload_dir}")
-    
-    logger.info(f"Database URL: {settings.DATABASE_URL.replace(settings.POSTGRES_PASSWORD, '***')}")
-    logger.info(f"Allowed Origins: {settings.ALLOWED_ORIGINS}")
-    logger.info("Backend is ready to accept connections!")
+    # Check AI providers
+    if not ai_client.is_configured:
+        logger.warning("No AI provider configured - AI features unavailable")
+    else:
+        logger.info(f"AI configured: primary={ai_client.primary_provider}")
+        # Test providers
+        results = ai_client.test_providers()
+        for provider, status in results.items():
+            if status:
+                logger.info(f"  {provider}: OK")
+            else:
+                logger.warning(f"  {provider}: FAILED")
+
+    # Check DB
+    if check_db_connection():
+        logger.info("Database connection verified")
+    else:
+        logger.error("Database connection FAILED - check DATABASE_URL")
+
+    # Ensure uploads dir exists
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    os.makedirs(f"{settings.UPLOAD_DIR}/avatars", exist_ok=True)
+    os.makedirs(f"{settings.UPLOAD_DIR}/resumes", exist_ok=True)
+    logger.info(f"Upload directories ready")
+
+    logger.info(f"CORS Origins: {settings.allowed_origins_list}")
+    logger.info("Backend ready!")
     logger.info("==========================================")
     
     yield
@@ -59,48 +71,69 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app
 app = FastAPI(
-    title="JobFor API",
-    description="JobFor - AI-Powered Job Application Tracker",
-    version="1.0.0",
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    docs_url="/docs",
+    redoc_url="/redoc",
     lifespan=lifespan
 )
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS_LIST,
+    allow_origins=settings.allowed_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# Health check endpoint
-@app.get("/health", tags=["Health"])
+# Health check (no auth required)
+@app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    db_ok = check_db_connection()
     return {
-        "status": "ok",
-        "version": "1.0.0",
-        "service": "jobfor-backend"
+        "status": "ok" if db_ok else "degraded",
+        "version": settings.APP_VERSION,
+        "database": "connected" if db_ok else "disconnected",
+        "ai": "configured" if ai_client.is_configured else "not configured",
+        "services": {
+            "database": db_ok,
+            "groq": bool(settings.GROQ_API_KEY),
+            "nvidia_nim": bool(settings.NVIDIA_NIM_API_KEY),
+        }
     }
 
 
 # AI service status endpoint
 @app.get("/api/v1/ai/status", tags=["AI"])
 async def ai_status():
-    """Check if AI service is configured."""
-    if not settings.GROQ_API_KEY or settings.GROQ_API_KEY == "your-groq-api-key-here":
+    """Check if AI service is configured and test providers."""
+    if not ai_client.is_configured:
         return JSONResponse(
             status_code=503,
             content={"detail": "AI service not configured"}
         )
-    return {"status": "available", "provider": "groq"}
+    
+    results = ai_client.test_providers()
+    return {
+        "status": "available",
+        "primary_provider": ai_client.primary_provider,
+        "providers": results
+    }
 
 
-# Import and include routers (when they exist)
-# from app.api import auth, users, jobs, applications, resume, ai
-# app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+# Import and include routers
+from app.routers import auth as auth_router
+
+app.include_router(
+    auth_router.router,
+    prefix="/api/v1/auth",
+    tags=["Authentication"]
+)
+
+# Future routers:
+# from app.routers import users, jobs, applications, resume, ai
 # app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
 # app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["Jobs"])
 # app.include_router(applications.router, prefix="/api/v1/applications", tags=["Applications"])
@@ -113,15 +146,13 @@ os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 
-# Root endpoint
-@app.get("/", tags=["Root"])
+# Root
+@app.get("/")
 async def root():
-    """Root endpoint with API information."""
     return {
-        "name": "JobFor API",
-        "version": "1.0.0",
-        "documentation": "/docs",
-        "health": "/health"
+        "message": "JobFor API",
+        "version": settings.APP_VERSION,
+        "docs": "/docs"
     }
 
 

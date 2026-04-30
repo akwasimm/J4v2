@@ -16,6 +16,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.config import settings
 from app.core.database import Base
+from app.models.user import User
+from app.models.auth import PasswordResetToken
+# More model imports will be added in future phases
 
 # this is the Alembic Config object
 config = context.config

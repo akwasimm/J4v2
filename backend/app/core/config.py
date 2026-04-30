@@ -2,63 +2,73 @@
 Application configuration using Pydantic Settings.
 """
 
-import os
-from typing import List
+from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import field_validator, ConfigDict
+from pydantic import field_validator, ConfigDict, ValidationInfo
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     
     # Database
-    POSTGRES_USER: str = "jobfor_user"
-    POSTGRES_PASSWORD: str = "jobfor_pass"
-    POSTGRES_DB: str = "jobfor_db"
-    POSTGRES_HOST: str = "postgres"
-    POSTGRES_PORT: int = 5432
-    DATABASE_URL: str = "postgresql://jobfor_user:jobfor_pass@postgres:5432/jobfor_db"
+    DATABASE_URL: str
     
-    # Security
-    SECRET_KEY: str = "your-secret-key-change-in-production-minimum-32-chars"
+    # JWT Auth
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
-    # AI Service
-    GROQ_API_KEY: str = ""
+    # AI Providers
+    GROQ_API_KEY: Optional[str] = None
+    NVIDIA_NIM_API_KEY: Optional[str] = None
+    NVIDIA_NIM_MODEL: str = "meta/llama-3.1-8b-instruct"
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
     
     # File Upload
     UPLOAD_DIR: str = "uploads"
     MAX_FILE_SIZE_MB: int = 10
     
     # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+    ALLOWED_ORIGINS: str = "http://localhost:5173"
     
-    # Computed fields
+    # App
+    APP_NAME: str = "JobFor API"
+    APP_VERSION: str = "1.0.0"
+    DEBUG: bool = False
+    
+    # Computed properties
     @property
-    def ALLOWED_ORIGINS_LIST(self) -> List[str]:
+    def allowed_origins_list(self) -> List[str]:
         """Parse ALLOWED_ORIGINS string into list."""
-        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
+        return [o.strip() for o in self.ALLOWED_ORIGINS.split(",")]
     
     @property
-    def MAX_FILE_SIZE_BYTES(self) -> int:
+    def max_file_size_bytes(self) -> int:
         """Convert MB to bytes."""
         return self.MAX_FILE_SIZE_MB * 1024 * 1024
     
     @field_validator("SECRET_KEY")
     @classmethod
-    def validate_secret_key(cls, v: str) -> str:
-        """Validate SECRET_KEY meets minimum length."""
+    def secret_key_must_be_long(cls, v: str) -> str:
+        """Validate SECRET_KEY must be at least 32 characters."""
         if len(v) < 32:
-            import logging
-            logging.warning("SECRET_KEY is less than 32 characters. Please use a more secure key in production.")
+            raise ValueError("SECRET_KEY must be at least 32 characters")
+        return v
+    
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def database_url_must_be_postgres(cls, v: str) -> str:
+        """Validate DATABASE_URL is a PostgreSQL URL."""
+        if not v.startswith("postgresql"):
+            raise ValueError("DATABASE_URL must be a PostgreSQL URL")
         return v
     
     model_config = ConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        extra="ignore"
+        extra="ignore",
+        case_sensitive=True
     )
 
 

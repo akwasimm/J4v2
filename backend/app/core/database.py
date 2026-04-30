@@ -2,29 +2,24 @@
 Database configuration and session management.
 """
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, text, event
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Create engine with error handling
-try:
-    engine = create_engine(
-        settings.DATABASE_URL,
-        pool_pre_ping=True,  # Verify connections before using
-        pool_recycle=3600,   # Recycle connections after 1 hour
-        echo=False           # Set to True for SQL logging
-    )
-    logger.info("Database engine created successfully")
-except Exception as e:
-    logger.error(f"Failed to create database engine: {str(e)}")
-    logger.error(f"Database URL: {settings.DATABASE_URL.replace(settings.POSTGRES_PASSWORD, '***')}")
-    raise
+# Engine setup
+engine = create_engine(
+    settings.DATABASE_URL,
+    pool_pre_ping=True,        # Test connection before using
+    pool_size=5,               # Small pool for our 50 user scale
+    max_overflow=10,
+    pool_recycle=300,          # Recycle connections every 5 minutes
+    echo=settings.DEBUG        # Log SQL only in debug mode
+)
 
 # Session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -49,7 +44,7 @@ def on_checkin(dbapi_conn, connection_record):
     logger.debug("Database connection returned to pool")
 
 
-def get_db() -> Session:
+def get_db():
     """
     Dependency to get database session.
     Use this in FastAPI dependencies.
@@ -57,8 +52,23 @@ def get_db() -> Session:
     db = SessionLocal()
     try:
         yield db
+    except Exception as e:
+        db.rollback()
+        raise
     finally:
         db.close()
+
+
+def check_db_connection() -> bool:
+    """Check if database connection is working."""
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        logger.info("Database connection successful")
+        return True
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
+        return False
 
 
 def init_db() -> None:
