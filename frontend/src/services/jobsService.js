@@ -14,27 +14,67 @@ export const fetchJobById = async (jobId) => {
   if (isMockMode()) {
     return jobsHandlers.fetchJobById(jobId);
   }
-  // Assuming real API has this function or we construct it
-  return realApi.apiClient ? realApi.apiClient(`/jobs/${jobId}`) : null;
+  return realApi.fetchJobById(jobId);
 };
 
-export const saveJob = async (jobId) => {
+export const saveJob = async (jobId, matchScore = null) => {
   if (isMockMode()) {
     return jobsHandlers.saveJob(jobId);
   }
-  return realApi.apiClient(`/jobs/${jobId}/save`, { method: 'POST' });
+  // Backend expects POST /jobs/saved with body { job_id: ..., match_score: ... }
+  return realApi.apiClient('/jobs/saved', {
+    method: 'POST',
+    body: JSON.stringify({ job_id: jobId, match_score: matchScore })
+  });
 };
 
 export const unsaveJob = async (jobId) => {
   if (isMockMode()) {
     return jobsHandlers.unsaveJob(jobId);
   }
-  return realApi.apiClient(`/jobs/${jobId}/save`, { method: 'DELETE' });
+  // Backend expects DELETE /jobs/saved/{job_id}
+  return realApi.apiClient(`/jobs/saved/${jobId}`, { method: 'DELETE' });
 };
 
 export const getSavedJobs = async () => {
   if (isMockMode()) {
     return jobsHandlers.getSavedJobs();
   }
-  return realApi.apiClient('/jobs/saved');
+  // Backend expects GET /jobs/saved/me
+  return realApi.apiClient('/jobs/saved/me');
+};
+
+export const updateSavedJobNote = async (savedJobId, noteText) => {
+  if (isMockMode()) {
+    return jobsHandlers.updateSavedJobNote(savedJobId, noteText);
+  }
+  return realApi.updateSavedJobNote(savedJobId, noteText);
+};
+
+export const applyToJob = async (jobId, matchScoreAtApply = null) => {
+  if (isMockMode()) {
+    return jobsHandlers.applyToJob(jobId, matchScoreAtApply);
+  }
+  return realApi.applyToJob(jobId, matchScoreAtApply);
+};
+
+export const getMyApplications = async () => {
+  if (isMockMode()) {
+    return jobsHandlers.getMyApplications();
+  }
+  return realApi.getMyApplications();
+};
+
+export const updateApplication = async (applicationId, updateData) => {
+  if (isMockMode()) {
+    return jobsHandlers.updateApplication(applicationId, updateData);
+  }
+  return realApi.updateApplication(applicationId, updateData);
+};
+
+export const deleteApplication = async (applicationId) => {
+  if (isMockMode()) {
+    return jobsHandlers.deleteApplication(applicationId);
+  }
+  return realApi.deleteApplication(applicationId);
 };

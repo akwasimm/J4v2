@@ -3,6 +3,14 @@ import { isMockMode } from './config.js';
 import * as realApi from '../api/client.js';
 import { profileHandlers } from '../mocks/handlers/index.js';
 
+// Helper to prepend backend URL for file paths
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || "http://localhost:8000";
+export const getFileUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  return `${BACKEND_URL}${path}`;
+};
+
 // Basic profile
 export const getProfile = async () => {
   if (isMockMode()) {
@@ -10,6 +18,9 @@ export const getProfile = async () => {
   }
   return realApi.getProfile();
 };
+
+// Alias for getProfile (used by EditProfile.jsx)
+export const getFullProfile = getProfile;
 
 export const updateProfile = async (profileData) => {
   if (isMockMode()) {
@@ -32,6 +43,9 @@ export const uploadProfileImage = async (file) => {
   }
   return realApi.uploadProfileImage(file);
 };
+
+// Alias for uploadProfileImage (used by EditProfile.jsx)
+export const uploadAvatar = uploadProfileImage;
 
 export const uploadResume = async (file) => {
   if (isMockMode()) {

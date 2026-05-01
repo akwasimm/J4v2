@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { login } from "./services/authService.js";
+import { getProfile } from "./services/profileService.js";
 
 const footerLinks = ["Privacy Policy", "Terms of Service"];
 
@@ -88,9 +89,44 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
-      await login(email, password);
-      // Redirect to dashboard upon success
-      navigate("/user");
+      const result = await login(email, password);
+
+      // DEBUG: Log the login result
+      console.log("Login result:", result);
+      console.log("User data:", result?.user);
+      console.log("is_new_user flag:", result?.user?.is_new_user);
+
+      // Check if this is a truly new user or an existing user
+      // If user has profile data (first_name, headline, etc.), they're existing → skip onboarding
+      let hasProfileData = false;
+      let profileData = null;
+      try {
+        profileData = await getProfile();
+        console.log("Profile data fetched:", profileData);
+        const profile = profileData?.profile || {};
+        console.log("Profile object:", profile);
+        // Consider user as "existing" if they have any profile data filled in
+        hasProfileData = !!(profile.first_name || profile.last_name || profile.headline || profile.location || (profile.profile_completion && profile.profile_completion > 0));
+        console.log("Has profile data:", hasProfileData);
+      } catch (profileErr) {
+        // If profile fetch fails, fall back to is_new_user flag
+        console.log("Could not fetch profile:", profileErr);
+        console.log("Using is_new_user flag as fallback");
+      }
+
+      // Decision logic:
+      // - If login succeeded and user has profile data → existing user → dashboard
+      // - If login succeeded but no profile data → truly new → onboarding
+      if (hasProfileData) {
+        console.log("Redirecting to /user (existing user with profile)");
+        navigate("/user");
+      } else {
+        // Use backend flag as fallback
+        const isNewUser = result?.user?.is_new_user ?? true;
+        console.log("isNewUser from backend:", isNewUser);
+        console.log("Redirecting to:", isNewUser ? "/preferences" : "/user");
+        navigate(isNewUser ? "/preferences" : "/user");
+      }
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");
     } finally {

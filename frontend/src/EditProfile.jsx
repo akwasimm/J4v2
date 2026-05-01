@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
-  uploadProfileImage, uploadResume, getProfile, updateCompleteProfile,
-  getSkills, getExperience, getEducation, getResumes, deleteResume, setDefaultResume, getPreferences
+  uploadProfileImage, uploadResume, getProfile, updateProfile, updatePreferences,
+  getSkills, getExperience, getEducation, getResumes, deleteResume, setDefaultResume, getPreferences,
+  bulkUpdateSkills, bulkUpdateExperience, bulkUpdateEducation,
+  getFileUrl
 } from "./services/profileService.js";
 
 // â”€â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -121,50 +123,34 @@ export default function EditProfile() {
     const loadProfile = async () => {
       try {
         const profileData = await getProfile();
-        setProfileCompletion(profileData.profile_completion || 0);
-        
+        // Backend returns: { profile: {...}, skills: [...], experience: [...], education: [...], preferences: {...} }
+        const profile = profileData.profile || {};
+        setProfileCompletion(profile.profile_completion || 0);
+
         // Update form with profile data
         setForm({
-          first_name: profileData.first_name || "",
-          last_name: profileData.last_name || "",
-          location: profileData.location || "",
-          headline: profileData.headline || "",
-          linkedin: profileData.linkedin || "",
-          github: profileData.github || "",
-          leetcode: profileData.leetcode || "",
-          portfolio: profileData.portfolio_links?.[0] || "",
+          first_name: profile.first_name || "",
+          last_name: profile.last_name || "",
+          location: profile.location || "",
+          headline: profile.headline || "",
+          linkedin: profile.linkedin || "",
+          github: profile.github || "",
+          leetcode: profile.leetcode || "",
+          portfolio: profile.portfolio || "",
         });
-        
-        setAvatarUrl(profileData.avatar_url || "");
-        setResumeUrl(profileData.resume_url || "");
-        
-        // Load skills from database
-        try {
-          const skillsData = await getSkills();
-          console.log("Skills data received:", skillsData);
-          setSkills(skillsData.skills || []);
-        } catch (error) {
-          console.error("Error loading skills:", error);
-        }
 
-        // Load experience from database
-        try {
-          const experienceData = await getExperience();
-          console.log("Experience data received:", experienceData);
-          setExperience(experienceData.experience || []);
-        } catch (error) {
-          console.error("Error loading experience:", error);
-        }
+        setAvatarUrl(getFileUrl(profile.avatar_url) || "");
+        setResumeUrl(getFileUrl(profile.resume_url) || "");
 
-        // Load education from database
-        try {
-          const educationData = await getEducation();
-          console.log("Education data received:", educationData);
-          setEducation(educationData.education || []);
-        } catch (error) {
-          console.error("Error loading education:", error);
-        }
-        
+        // Set skills from profile response (already included in getProfile)
+        setSkills(profileData.skills || []);
+
+        // Set experience from profile response
+        setExperience(profileData.experience || []);
+
+        // Set education from profile response
+        setEducation(profileData.education || []);
+
         // Load resumes from database
         try {
           const resumesData = await getResumes();
@@ -175,19 +161,22 @@ export default function EditProfile() {
 
         // Load preferences from database
         try {
-          const preferencesData = await getPreferences();
-          const loadedPreferences = preferencesData.preferences || {};
-          setPreferences(loadedPreferences);
+          const loadedPreferences = await getPreferences();
+          // Backend returns preferences object directly (or empty defaults), not wrapped
+          if (loadedPreferences) {
+            setPreferences(loadedPreferences);
 
-          // Sync salary range with loaded preferences
-          if (loadedPreferences.target_salary_min || loadedPreferences.target_salary_max) {
-            setSalaryRange({
-              min: loadedPreferences.target_salary_min || 500000,
-              max: loadedPreferences.target_salary_max || 2000000
-            });
+            // Sync salary range with loaded preferences
+            if (loadedPreferences.target_salary_min || loadedPreferences.target_salary_max) {
+              setSalaryRange({
+                min: loadedPreferences.target_salary_min || 500000,
+                max: loadedPreferences.target_salary_max || 2000000
+              });
+            }
           }
         } catch (error) {
           console.error("Error loading preferences:", error);
+          // Preferences may be null/empty for new users, that's OK
         }
 
         // The backend GET endpoints (/skills, /experience, /education) already extract
@@ -204,14 +193,28 @@ export default function EditProfile() {
     loadProfile();
   }, []);
 
+  // Helper to validate URL
+  const isValidUrl = (url) => {
+    if (!url || url.trim() === "") return true; // Empty is allowed
+    return url.startsWith("http://") || url.startsWith("https://");
+  };
+
   // Save profile data
   const handleSaveProfile = async () => {
     if (saving) return; // Prevent double-click
+
+    // Validate portfolio URL
+    if (!isValidUrl(form.portfolio)) {
+      setUploadError("Portfolio must be a valid URL starting with http:// or https:// (e.g., https://yourportfolio.com)");
+      return;
+    }
 
     setSaving(true);
     setUploadError("");
 
     try {
+      // Send flat profile data matching backend ProfileUpdate schema
+      // NOTE: Resume is NOT required for profile save - it's completely separate
       const profileUpdate = {
         first_name: form.first_name,
         last_name: form.last_name,
@@ -220,41 +223,108 @@ export default function EditProfile() {
         linkedin: form.linkedin,
         github: form.github,
         leetcode: form.leetcode,
-        portfolio_links: form.portfolio ? [form.portfolio] : [],
+        portfolio: form.portfolio,
       };
 
-      const completeProfileData = {
-        basic_info: profileUpdate,
-        preferences: preferences,
-        skills: skills.map(s => ({
-          name: s.name,
-          level: s.level,
-          source: s.source || "manual"
-        })),
-        experience: experience.map(e => ({
-          title: e.title,
-          company: e.company,
-          location: e.location,
-          start_date: e.start_date,
-          end_date: e.end_date,
-          current: e.current,
-          description: e.description,
-          source: e.source || "manual"
-        })),
-        education: education.map(e => ({
-          degree: e.degree,
-          field: e.field,
-          school: e.school,
-          info: e.info,
-          source: e.source || "manual"
-        }))
-      };
+      console.log("Saving profile data (no resume required):", profileUpdate);
 
-      await updateCompleteProfile(completeProfileData);
+      // Update basic profile - NO resume/PDF required
+      await updateProfile(profileUpdate);
+      console.log("Profile saved successfully");
+
+      // Save skills to backend
+      // Backend expects: { skills: [{ name, level, source }] }
+      // level must be: "Beginner", "Intermediate", "Advanced", "Expert"
+      if (skills && skills.length > 0) {
+        try {
+          const validLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
+          const normalizeLevel = (level) => {
+            if (!level) return "Intermediate";
+            const cleanLevel = level.trim();
+            // Check if level matches valid levels (case insensitive)
+            const matched = validLevels.find(vl => vl.toLowerCase() === cleanLevel.toLowerCase());
+            return matched || "Intermediate";
+          };
+
+          const skillsPayload = skills.map(s => ({
+            name: s.name,
+            level: normalizeLevel(s.level || s.proficiency_level),
+            source: s.source || "manual"
+          }));
+          console.log("Sending skills payload:", skillsPayload);
+          await bulkUpdateSkills({ skills: skillsPayload });
+          console.log("Skills saved:", skills.length);
+        } catch (skillsError) {
+          console.error("Error saving skills:", skillsError);
+          // Don't fail the whole save if skills fail
+        }
+      }
+
+      // Save experience to backend
+      // Backend expects: { experience: [{ title, company, location, start_date, end_date, current, description, source }] }
+      if (experience && experience.length > 0) {
+        try {
+          const expPayload = experience.map(e => ({
+            title: e.title,
+            company: e.company,
+            location: e.location,
+            start_date: e.start_date || null,
+            end_date: e.end_date || null,
+            current: e.current || false,
+            description: Array.isArray(e.description) ? e.description : (e.description ? [e.description] : []),
+            source: e.source || "manual"
+          }));
+          console.log("Sending experience payload:", expPayload);
+          await bulkUpdateExperience({ experience: expPayload });
+          console.log("Experience saved:", experience.length);
+        } catch (expError) {
+          console.error("Error saving experience:", expError);
+          // Don't fail the whole save if experience fails
+        }
+      }
+
+      // Save education to backend
+      // Backend expects: { education: [{ degree, field, school, info, source }] }
+      if (education && education.length > 0) {
+        try {
+          const eduPayload = education.map(e => ({
+            degree: e.degree,
+            field: e.field,
+            school: e.school,
+            info: e.info || "",
+            source: e.source || "manual"
+          }));
+          console.log("Sending education payload:", eduPayload);
+          await bulkUpdateEducation({ education: eduPayload });
+          console.log("Education saved:", education.length);
+        } catch (eduError) {
+          console.error("Error saving education:", eduError);
+          // Don't fail the whole save if education fails
+        }
+      }
+
+      // Update preferences separately if they exist
+      if (preferences && preferences.employment_types) {
+        try {
+          await updatePreferences({
+            employment_types: preferences.employment_types || [],
+            remote_preference: preferences.remote_preference,
+            target_salary_min: salaryRange.min,
+            target_salary_max: salaryRange.max,
+            target_salary_currency: "INR",
+            preferred_locations: preferences.preferred_locations || [],
+            open_to_relocation: preferences.open_to_relocation || false,
+            notice_period: preferences.notice_period,
+          });
+        } catch (prefError) {
+          console.error("Error saving preferences:", prefError);
+          // Don't fail the whole save if preferences fail
+        }
+      }
 
       // Fetch updated profile completion
       const updatedProfile = await getProfile();
-      setProfileCompletion(updatedProfile.profile_completion || 0);
+      setProfileCompletion(updatedProfile.profile?.profile_completion || 0);
 
       // Update localStorage for other components
       localStorage.setItem("user_first_name", form.first_name);
@@ -265,7 +335,7 @@ export default function EditProfile() {
       console.log("Profile updated successfully");
       setUploadSuccess("Profile saved successfully!");
       setTimeout(() => setUploadSuccess(""), 3000);
-      
+
     } catch (error) {
       console.error("Error saving profile:", error);
       setUploadError(error.message || "Failed to save profile");
@@ -404,7 +474,7 @@ export default function EditProfile() {
     setIsUploadingAvatar(true);
     try {
       const data = await uploadProfileImage(file);
-      setAvatarUrl(data.avatar_url);
+      setAvatarUrl(getFileUrl(data.avatar_url));
       // Show success message
       setUploadSuccess("Profile image uploaded successfully!");
       setUploadError("");
@@ -455,10 +525,12 @@ export default function EditProfile() {
           getEducation()
         ]);
 
+        // Backend returns arrays directly for skills, experience, education
+        // and { resumes: [...] } for resumes
         if (resumesData.resumes) setResumes(resumesData.resumes);
-        if (skillsData.skills) setSkills(skillsData.skills);
-        if (experienceData.experience) setExperience(experienceData.experience);
-        if (educationData.education) setEducation(educationData.education);
+        if (Array.isArray(skillsData)) setSkills(skillsData);
+        if (Array.isArray(experienceData)) setExperience(experienceData);
+        if (Array.isArray(educationData)) setEducation(educationData);
       } catch (error) {
         console.error("Error reloading profile data after resume upload:", error);
       }
@@ -601,7 +673,7 @@ export default function EditProfile() {
                     {/* Photo */}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <div style={{ width: "160px", height: "160px", border: "2px solid #000000", position: "relative", marginBottom: "12px", backgroundColor: "#f3f4f6" }}>
-                        <img src={avatarUrl || "https://via.placeholder.com/160x160/f3f4f6/6b7280?text=No+Image"} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: isUploadingAvatar ? 0.5 : 1 }} />
+                        <img src={getFileUrl(avatarUrl) || "https://via.placeholder.com/160x160/f3f4f6/6b7280?text=No+Image"} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: isUploadingAvatar ? 0.5 : 1 }} />
                         <input type="file" ref={avatarInputRef} style={{ display: "none" }} accept="image/*" onChange={handleAvatarChange} />
                         <button 
                           onClick={() => avatarInputRef.current.click()}
@@ -1377,7 +1449,7 @@ export default function EditProfile() {
                           </div>
                         </div>
                         <div style={{ display: "flex", gap: "6px" }}>
-                          <a href={resume.url} target="_blank" rel="noreferrer" style={{ padding: "4px 8px", border: "2px solid #000000", fontWeight: 700, fontSize: "0.6rem", textTransform: "uppercase", background: "transparent", cursor: "pointer", textDecoration: "none", color: "#111", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <a href={getFileUrl(resume.url)} target="_blank" rel="noreferrer" style={{ padding: "4px 8px", border: "2px solid #000000", fontWeight: 700, fontSize: "0.6rem", textTransform: "uppercase", background: "transparent", cursor: "pointer", textDecoration: "none", color: "#111", display: "flex", alignItems: "center", gap: "4px" }}>
                             <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>download</span>
                           </a>
                           {!resume.is_default && (

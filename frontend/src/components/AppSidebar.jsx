@@ -188,7 +188,8 @@ export default function Sidebar() {
     const fetchProfileCompletion = async () => {
       try {
         const profileData = await getProfile();
-        setProfileCompletion(profileData.profile_completion || 0);
+        // Backend returns: { profile: { profile_completion, ... }, ... }
+        setProfileCompletion(profileData.profile?.profile_completion || 0);
       } catch (error) {
         console.error("Error fetching profile completion:", error);
       }

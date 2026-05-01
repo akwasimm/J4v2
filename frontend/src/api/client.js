@@ -66,20 +66,66 @@ export async function fetchJobs(params = {}) {
   return apiClient(`/jobs/search?${query.toString()}`);
 }
 
-export async function fetchSalaryInsights(role, location = "") {
-  const query = new URLSearchParams();
-  query.append("role", role);
-  if (location) query.append("location", location);
+export async function fetchJobById(jobId) {
+  return apiClient(`/jobs/${jobId}`);
+}
 
-  return apiClient(`/insights/salary?${query.toString()}`);
+export async function applyToJob(jobId, matchScoreAtApply = null) {
+  const body = { job_id: jobId };
+  if (matchScoreAtApply !== null) {
+    body.match_score_at_apply = matchScoreAtApply;
+  }
+  return apiClient("/jobs/applications", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateApplication(applicationId, updateData) {
+  return apiClient(`/jobs/applications/${applicationId}`, {
+    method: "PUT",
+    body: JSON.stringify(updateData),
+  });
+}
+
+export async function deleteApplication(applicationId) {
+  return apiClient(`/jobs/applications/${applicationId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function getMyApplications() {
+  return apiClient("/jobs/applications/me");
+}
+
+export async function updateSavedJobNote(savedJobId, noteText) {
+  return apiClient(`/jobs/saved/${savedJobId}/note`, {
+    method: "PUT",
+    body: JSON.stringify({ note_text: noteText }),
+  });
+}
+
+// Note: fetchSalaryInsights, fetchSkillDemand, fetchCompanies are consolidated
+// into getMarketInsights which uses the AI endpoint /ai/market-insights
+// These are kept for backward compatibility but delegate to the unified endpoint
+export async function fetchSalaryInsights(role, location = "") {
+  const data = await getMarketInsights(role, location);
+  // Return salary data from the unified market insights response
+  return data?.data?.salary || data?.salary || null;
 }
 
 export async function fetchSkillDemand(limit = 10) {
-  return apiClient(`/insights/skills/demand?limit=${limit}`);
+  const data = await getMarketInsights();
+  // Return skills data from the unified market insights response (limited)
+  const skills = data?.data?.skills_in_demand || data?.skills_in_demand || [];
+  return skills.slice(0, limit);
 }
 
 export async function fetchCompanies(limit = 20) {
-  return apiClient(`/insights/companies?limit=${limit}`);
+  const data = await getMarketInsights();
+  // Return companies data from the unified market insights response (limited)
+  const companies = data?.data?.top_hiring_companies || data?.top_hiring_companies || [];
+  return companies.slice(0, limit);
 }
 
 // ─── Authentication ──────────────────────────────────────────────────────────
@@ -89,10 +135,12 @@ export async function login(email, password) {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
-  if (data.accessToken) {
-    localStorage.setItem("auth_token", data.accessToken);
-    if (data.first_name) localStorage.setItem("user_first_name", data.first_name);
-    localStorage.setItem("is_new_user", "false");
+  // Backend returns: { user: {...}, tokens: { access_token, refresh_token, ... } }
+  if (data.tokens?.access_token) {
+    localStorage.setItem("auth_token", data.tokens.access_token);
+    localStorage.setItem("refresh_token", data.tokens.refresh_token);
+    if (data.user?.first_name) localStorage.setItem("user_first_name", data.user.first_name);
+    localStorage.setItem("is_new_user", data.user?.is_new_user ? "true" : "false");
   }
   try {
     const me = await apiClient("/auth/me");
@@ -101,15 +149,18 @@ export async function login(email, password) {
   return data;
 }
 
-export async function register(email, password, firstName, lastName) {
+export async function register(email, password, fullName, agreedToTerms = true) {
+  // Backend expects: { email, password, full_name, agreed_to_terms }
   const data = await apiClient("/auth/register", {
     method: "POST",
-    body: JSON.stringify({ email, password, firstName, lastName }),
+    body: JSON.stringify({ email, password, full_name: fullName, agreed_to_terms: agreedToTerms }),
   });
-  if (data.accessToken) {
-    localStorage.setItem("auth_token", data.accessToken);
-    if (data.first_name) localStorage.setItem("user_first_name", data.first_name);
-    localStorage.setItem("is_new_user", "true");
+  // Backend returns: { user: {...}, tokens: { access_token, refresh_token, ... } }
+  if (data.tokens?.access_token) {
+    localStorage.setItem("auth_token", data.tokens.access_token);
+    localStorage.setItem("refresh_token", data.tokens.refresh_token);
+    if (data.user?.first_name) localStorage.setItem("user_first_name", data.user.first_name);
+    localStorage.setItem("is_new_user", data.user?.is_new_user ? "true" : "false");
   }
   try {
     const me = await apiClient("/auth/me");
@@ -121,6 +172,22 @@ export async function register(email, password, firstName, lastName) {
 export async function fetchMe() {
   const data = await apiClient("/auth/me");
   persistProfileAssets(data);
+  return data;
+}
+
+export async function refreshToken() {
+  const refreshToken = localStorage.getItem("refresh_token");
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
+  const data = await apiClient("/auth/refresh", {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+  if (data.access_token) {
+    localStorage.setItem("auth_token", data.access_token);
+    localStorage.setItem("refresh_token", data.refresh_token);
+  }
   return data;
 }
 
@@ -442,11 +509,12 @@ export async function updatePreferences(preferencesData) {
 }
 
 // Bulk update API functions
+// Note: skillsData should be { skills: [...] }
 export async function bulkUpdateSkills(skillsData) {
   try {
     const data = await apiClient("/profile/skills/bulk", {
       method: "PUT",
-      body: JSON.stringify({ skills: skillsData }),
+      body: JSON.stringify(skillsData),
     });
     return data;
   } catch (error) {
@@ -455,11 +523,12 @@ export async function bulkUpdateSkills(skillsData) {
   }
 }
 
+// Note: experienceData should be { experience: [...] }
 export async function bulkUpdateExperience(experienceData) {
   try {
     const data = await apiClient("/profile/experience/bulk", {
       method: "PUT",
-      body: JSON.stringify({ experience: experienceData }),
+      body: JSON.stringify(experienceData),
     });
     return data;
   } catch (error) {
@@ -468,11 +537,12 @@ export async function bulkUpdateExperience(experienceData) {
   }
 }
 
+// Note: educationData should be { education: [...] }
 export async function bulkUpdateEducation(educationData) {
   try {
     const data = await apiClient("/profile/education/bulk", {
       method: "PUT",
-      body: JSON.stringify({ education: educationData }),
+      body: JSON.stringify(educationData),
     });
     return data;
   } catch (error) {
@@ -613,4 +683,61 @@ export async function getLearningPath(skillName) {
     console.error("Error fetching learning path:", error);
     throw error;
   }
+}
+
+// ─── AI Endpoints ────────────────────────────────────────────────────────────
+
+export async function getJobMatch(jobId, force = false) {
+  return apiClient(`/ai/match/${jobId}?force=${force}`);
+}
+
+export async function analyzeSkillGap(targetRole, force = false) {
+  return apiClient(`/ai/skill-gap?force=${force}`, {
+    method: "POST",
+    body: JSON.stringify({ target_role: targetRole }),
+  });
+}
+
+export async function getSkillGapHistory() {
+  return apiClient("/ai/skill-gap/history");
+}
+
+export async function getResumeAnalysis(resumeId = null, force = false) {
+  const query = resumeId ? `?resume_id=${resumeId}&force=${force}` : `?force=${force}`;
+  return apiClient(`/ai/resume-analysis${query}`);
+}
+
+export async function getAIRecommendations(force = false) {
+  return apiClient(`/ai/recommendations?force=${force}`);
+}
+
+export async function getMarketInsights(role = null, location = null, force = false) {
+  const params = new URLSearchParams();
+  if (role) params.append("role", role);
+  if (location) params.append("location", location);
+  params.append("force", force);
+  return apiClient(`/ai/market-insights?${params.toString()}`);
+}
+
+// ─── Coach Endpoints ───────────────────────────────────────────────────────────
+
+export async function getCoachSessions() {
+  return apiClient("/coach/sessions");
+}
+
+export async function getCoachSession(sessionUuid) {
+  return apiClient(`/coach/sessions/${sessionUuid}`);
+}
+
+export async function sendCoachMessage(content, sessionId = null) {
+  return apiClient("/coach/chat", {
+    method: "POST",
+    body: JSON.stringify({ content, session_id: sessionId }),
+  });
+}
+
+export async function deleteCoachSession(sessionUuid) {
+  return apiClient(`/coach/sessions/${sessionUuid}`, {
+    method: "DELETE",
+  });
 }

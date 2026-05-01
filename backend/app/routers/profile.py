@@ -32,6 +32,17 @@ def update_profile(
     return update_profile(db, user_id, data)
 
 
+@router.put("/complete", response_model=ProfileResponse)
+def update_profile_complete(
+    data: ProfileUpdate,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
+):
+    # Same as PUT /me, just an alias for frontend compatibility
+    from app.services.profile_service import update_profile
+    return update_profile(db, user_id, data)
+
+
 @router.get("/preferences", response_model=PreferencesResponse)
 def get_preferences(
     user_id: str = Depends(get_current_user_id),
@@ -40,8 +51,22 @@ def get_preferences(
     from app.services.profile_service import get_preferences
     result = get_preferences(db, user_id)
     if not result:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Preferences not set")
+        # Return empty defaults, never 404
+        return PreferencesResponse(
+            user_id=user_id,
+            employment_types=[],
+            remote_preference=None,
+            target_salary_min=None,
+            target_salary_max=None,
+            target_salary_currency="INR",
+            preferred_locations=[],
+            open_to_relocation=False,
+            notice_period=None,
+            industry_preference=[],
+            job_level_preference=None,
+            created_at=None,
+            updated_at=None
+        )
     return result
 
 

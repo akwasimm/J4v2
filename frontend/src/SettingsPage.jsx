@@ -3,6 +3,8 @@ import {
   getSettings, updateSettings, changePassword,
   getConnectedAccounts, disconnectAccount, exportData, deleteAccount,
 } from "./services/settingsService.js";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -22,6 +24,11 @@ const digestOptions = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
+  // Placeholder check
+  if (!FEATURES.settings) {
+    return <ComingSoon pageName="Settings" description="Account and notification preferences" />
+  }
+
   useEffect(() => {
     document.title = "Settings — JobFor";
   }, []);

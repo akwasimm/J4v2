@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SectionTitle from "./components/SectionTitle";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 const NAV_LINKS = ["Big Opportunities", "Mass Hiring", "Campus Drives"];
 
 const MASS_HIRING = [
@@ -105,6 +107,11 @@ const NEO_SHADOW = { boxShadow: "4px 4px 0px 0px #000000" };
 const NEO_SHADOW_SM = { boxShadow: "2px 2px 0px 0px #000000" };
 
 export default function BigOpportunities() {
+  // Placeholder check
+  if (!FEATURES.opportunities) {
+    return <ComingSoon pageName="Big Opportunities" description="Mass hiring and campus drives" />
+  }
+
   useEffect(() => {
     document.title = "Big Opportunities — JobFor";
   }, []);

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -92,6 +94,11 @@ function JobCard({ job }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function UserDashboard() {
+  // Placeholder check
+  if (!FEATURES.dashboard) {
+    return <ComingSoon pageName="Dashboard" description="Overview of your job search activity" />
+  }
+
   useEffect(() => {
     document.title = "User Dashboard — JobFor";
   }, []);

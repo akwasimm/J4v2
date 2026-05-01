@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { fetchJobs } from "./services/jobsService.js";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -313,6 +315,11 @@ function SkeletonCard() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function JobDiscovery() {
+  // Placeholder check
+  if (!FEATURES.jobDiscovery) {
+    return <ComingSoon pageName="Job Discovery" description="Browse and search all available jobs" />
+  }
+
   useEffect(() => {
     document.title = "Job Discovery — JobFor";
   }, []);

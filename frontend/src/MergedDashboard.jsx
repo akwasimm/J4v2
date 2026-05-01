@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 // ─── AI Data ────────────────────────────────────────────────────────────────
 const topPicks = [
@@ -41,6 +43,11 @@ function RadialProgress({ percent = 85 }) {
 }
 
 export default function MergedDashboard() {
+  // Placeholder check
+  if (!FEATURES.dashboard) {
+    return <ComingSoon pageName="Dashboard" description="Overview of your job search activity" />
+  }
+
   useEffect(() => {
     document.title = "Dashboard — JobFor";
   }, []);

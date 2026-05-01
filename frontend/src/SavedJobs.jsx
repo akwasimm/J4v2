@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 const jobsData = [
   {
     id: 1,
@@ -71,6 +73,11 @@ const collections = [
 ];
 
 export default function SavedJobs() {
+  // Placeholder check
+  if (!FEATURES.savedJobs) {
+    return <ComingSoon pageName="Saved Jobs" description="View your bookmarked jobs" />
+  }
+
   useEffect(() => {
     document.title = "Saved Jobs — JobFor";
   }, []);

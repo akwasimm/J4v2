@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { getRoleTemplates, getLearningPaths } from "./services/skillGapService.js";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 const NEO = { boxShadow: "4px 4px 0px 0px #000000" };
 const NEO_SM = { boxShadow: "2px 2px 0px 0px #000000" };
@@ -46,6 +48,11 @@ const TOP_TECH_ROLES = [
 ];
 
 export default function SkillGapAnalysis() {
+  // Placeholder check
+  if (!FEATURES.skillGap) {
+    return <ComingSoon pageName="Skill Gap Analysis" description="Analyze your readiness for target roles" />
+  }
+
   useEffect(() => {
     document.title = "Skill Gap Analysis — JobFor";
   }, []);

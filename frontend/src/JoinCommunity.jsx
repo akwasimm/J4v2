@@ -60,15 +60,16 @@ export default function JoinCommunity() {
       return;
     }
 
-    const names = form.name.trim().split(" ");
-    const firstName = names[0];
-    const lastName = names.length > 1 ? names.slice(1).join(" ") : "";
+    const fullName = form.name.trim();
 
     try {
       setLoading(true);
-      await register(form.email, form.password, firstName, lastName);
+      // Backend expects: email, password, full_name, agreed_to_terms
+      const result = await register(form.email, form.password, fullName, agreed);
       // Redirect to onboarding preferences page upon success
-      navigate("/preferences");
+      // If is_new_user, go to preferences, otherwise go to dashboard
+      const isNewUser = result?.user?.is_new_user ?? true;
+      navigate(isNewUser ? "/preferences" : "/user");
     } catch (err) {
       setError(err.message || "Registration failed. Please try again.");
     } finally {

@@ -1,7 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageBubble } from "./components/MessageBubble";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 export default function CareerCoach() {
+  // Placeholder check
+  if (!FEATURES.careerCoach) {
+    return <ComingSoon pageName="Career Coach" description="Chat with your AI career coach" />
+  }
+
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -62,12 +69,15 @@ export default function CareerCoach() {
     try {
       const token = localStorage.getItem('auth_token');
       if (token) {
-        const res = await fetch(`http://localhost:8000/api/v1/coach/sessions/${sessionId}/history`, {
+        // Backend returns session with messages array
+        const res = await fetch(`http://localhost:8000/api/v1/coach/sessions/${sessionId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
-          const history = await res.json();
-          const formattedMessages = history.map(msg => ({
+          const session = await res.json();
+          // Backend returns session with messages array
+          const messages = session.messages || [];
+          const formattedMessages = messages.map(msg => ({
             role: msg.role,
             content: msg.content,
             id: msg.id,
@@ -120,9 +130,8 @@ export default function CareerCoach() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          message: userText,
-          session_id: activeSessionId,
-          context: "general"
+          content: userText,
+          session_id: activeSessionId
         }),
       });
       

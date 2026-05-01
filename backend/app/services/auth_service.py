@@ -54,7 +54,7 @@ def build_user_response(user: User) -> UserResponse:
         full_name=user.full_name,
         is_active=user.is_active,
         is_verified=user.is_verified or False,
-        is_new_user=user.is_new_user or True,
+        is_new_user=user.is_new_user if user.is_new_user is not None else True,
         profile_completion=user.profile_completion or 0,
         created_at=user.created_at.isoformat()
     )

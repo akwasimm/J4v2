@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 const INITIAL_DATA = {
   columns: {
     applied: { id: "applied", title: "Applied", badgeBg: "#000000", badgeColor: "#ffffff", op: 1, cardIds: ["card-1", "card-2"] },
@@ -102,6 +104,11 @@ const INITIAL_DATA = {
 };
 
 export default function JobForDashboard() {
+  // Placeholder check
+  if (!FEATURES.appliedJobs) {
+    return <ComingSoon pageName="Applied Jobs" description="Track your job applications" />
+  }
+
   useEffect(() => {
     document.title = "Applied Jobs — JobFor";
   }, []);

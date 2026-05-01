@@ -1,6 +1,14 @@
 import React from "react";
 import { getProfile } from "../services/profileService.js";
 
+// Helper to prepend backend URL for file paths
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api/v1', '') || "http://localhost:8000";
+const getFileUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  return `${BACKEND_URL}${path}`;
+};
+
 const styles = {
   topbar: {
     display: "flex",
@@ -124,13 +132,14 @@ export default function Topbar({
   onProfileClick,
 }) {
   const [userName, setUserName] = React.useState("USER");
-  const [avatarUrl, setAvatarUrl] = React.useState(localStorage.getItem("user_avatar_url") || "");
+  const [avatarUrl, setAvatarUrl] = React.useState(getFileUrl(localStorage.getItem("user_avatar_url")) || "");
 
   React.useEffect(() => {
     const fetchUserName = async () => {
       try {
         const profileData = await getProfile();
-        setUserName((profileData.first_name || "USER").toUpperCase());
+        // Backend returns: { profile: { first_name, ... }, ... }
+        setUserName((profileData.profile?.first_name || "USER").toUpperCase());
       } catch (error) {
         console.error("Error fetching user name:", error);
       }
@@ -145,7 +154,7 @@ export default function Topbar({
     }
     const storedAvatar = localStorage.getItem("user_avatar_url");
     if (storedAvatar) {
-      setAvatarUrl(storedAvatar);
+      setAvatarUrl(getFileUrl(storedAvatar));
     }
 
     // Listen for profile updates
@@ -203,8 +212,8 @@ export default function Topbar({
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
             <div style={styles.avatar}>
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {getFileUrl(avatarUrl) ? (
+                <img src={getFileUrl(avatarUrl)} alt={userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
                 <div style={styles.avatarInner}>
                   <AvatarIcon />

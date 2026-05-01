@@ -30,3 +30,42 @@ export const getLearningPath = async (skillName) => {
   }
   return realApi.getLearningPath(skillName);
 };
+
+// AI Skill Gap Analysis
+export const analyzeSkillGap = async (targetRole, force = false) => {
+  if (isMockMode()) {
+    return skillGapHandlers.analyzeSkillGap(targetRole);
+  }
+  return realApi.analyzeSkillGap(targetRole, force);
+};
+
+export const getSkillGapHistory = async () => {
+  if (isMockMode()) {
+    return skillGapHandlers.getSkillGapHistory();
+  }
+  return realApi.getSkillGapHistory();
+};
+
+// Resume Analysis
+export const getResumeAnalysis = async (resumeId = null, force = false) => {
+  if (isMockMode()) {
+    return skillGapHandlers.getResumeAnalysis(resumeId);
+  }
+  return realApi.getResumeAnalysis(resumeId, force);
+};
+
+// AI Recommendations
+export const getAIRecommendations = async (force = false) => {
+  if (isMockMode()) {
+    return skillGapHandlers.getAIRecommendations();
+  }
+  return realApi.getAIRecommendations(force);
+};
+
+// Job Match
+export const getJobMatch = async (jobId, force = false) => {
+  if (isMockMode()) {
+    return skillGapHandlers.getJobMatch(jobId);
+  }
+  return realApi.getJobMatch(jobId, force);
+};

@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { uploadResume } from "./services/profileService.js";
+import { getResumeAnalysis } from "./services/skillGapService.js";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -267,6 +271,11 @@ function EnhancementCard({ item }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ResumeAnalyzer() {
+  // Placeholder check
+  if (!FEATURES.resumeAnalyzer) {
+    return <ComingSoon pageName="Resume Analyzer" description="Get ATS score and improvement suggestions" />
+  }
+
   useEffect(() => {
     document.title = "Resume Analyzer — JobFor";
   }, []);
@@ -274,6 +283,62 @@ export default function ResumeAnalyzer() {
   const [browseHover, setBrowseHover] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [fabHover, setFabHover] = useState(false);
+
+  // Resume upload state
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [analysis, setAnalysis] = useState(null);
+  const [error, setError] = useState("");
+  const inputRef = useRef(null);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped && (dropped.name.endsWith('.pdf') || dropped.name.endsWith('.docx'))) {
+      setFile(dropped);
+      setError("");
+    } else {
+      setError("Please upload a PDF or DOCX file");
+    }
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files[0]) {
+      setFile(e.target.files[0]);
+      setError("");
+    }
+  };
+
+  const handleBrowseClick = () => {
+    inputRef.current?.click();
+  };
+
+  const handleUploadAndAnalyze = async () => {
+    if (!file) {
+      handleBrowseClick();
+      return;
+    }
+
+    setIsUploading(true);
+    setError("");
+
+    try {
+      // Step 1: Upload resume (triggers AI parsing)
+      const uploadResult = await uploadResume(file);
+      console.log("Resume uploaded:", uploadResult);
+
+      // Step 2: Get AI analysis
+      const analysisResult = await getResumeAnalysis();
+      setAnalysis(analysisResult);
+
+    } catch (err) {
+      console.error("Upload/Analysis error:", err);
+      setError(err.message || "Failed to upload and analyze resume");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   return (
     <>
@@ -382,12 +447,13 @@ export default function ResumeAnalyzer() {
               <div
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
-                onDrop={(e) => { e.preventDefault(); setDragOver(false); }}
+                onDrop={handleDrop}
+                onClick={!file ? handleBrowseClick : undefined}
                 style={{
                   position: "relative",
                   zIndex: 1,
-                  backgroundColor: "#ffffff",
-                  border: "2px dashed #000000",
+                  backgroundColor: file ? "#f0fdf4" : "#ffffff",
+                  border: file ? "2px solid #1A4D2E" : "2px dashed #000000",
                   padding: "32px",
                   textAlign: "center",
                   display: "flex",
@@ -395,56 +461,118 @@ export default function ResumeAnalyzer() {
                   alignItems: "center",
                   justifyContent: "center",
                   minHeight: "220px",
+                  cursor: file ? "default" : "pointer",
                 }}
               >
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: "3rem", marginBottom: "12px", color: "#1A4D2E" }}
-                >
-                  upload_file
-                </span>
-                <h2
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: 900,
-                    marginBottom: "6px",
-                    textTransform: "uppercase"
-                  }}
-                >
-                  Drop Your Blueprint
-                </h2>
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    color: "#6b7280",
-                  }}
-                >
-                  PDF, DOCX (Max 10MB)
-                </p>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept=".pdf,.docx"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
+
+                {file ? (
+                  <>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "3rem", marginBottom: "12px", color: "#1A4D2E" }}
+                    >
+                      description
+                    </span>
+                    <h2
+                      style={{
+                        fontSize: "1.25rem",
+                        fontWeight: 900,
+                        marginBottom: "6px",
+                        textTransform: "uppercase",
+                        color: "#1A4D2E"
+                      }}
+                    >
+                      {file.name}
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        color: "#6b7280",
+                      }}
+                    >
+                      {(file.size / 1024 / 1024).toFixed(2)} MB — Ready for analysis
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "3rem", marginBottom: "12px", color: "#1A4D2E" }}
+                    >
+                      upload_file
+                    </span>
+                    <h2
+                      style={{
+                        fontSize: "1.25rem",
+                        fontWeight: 900,
+                        marginBottom: "6px",
+                        textTransform: "uppercase"
+                      }}
+                    >
+                      Drop Your Blueprint
+                    </h2>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        color: "#6b7280",
+                      }}
+                    >
+                      PDF, DOCX (Max 10MB)
+                    </p>
+                  </>
+                )}
                 <button
+                  onClick={handleUploadAndAnalyze}
+                  disabled={isUploading}
                   onMouseEnter={() => setBrowseHover(true)}
                   onMouseLeave={() => setBrowseHover(false)}
                   style={{
                     marginTop: "20px",
-                    backgroundColor: "#1A4D2E",
+                    backgroundColor: isUploading ? "#6b7280" : "#1A4D2E",
                     color: "#ffffff",
                     border: "2px solid #000000",
                     padding: "10px 24px",
                     fontWeight: 900,
                     boxShadow: browseHover ? "none" : "3px 3px 0px 0px #000000",
                     transform: browseHover ? "translate(2px, 2px)" : "translate(0,0)",
-                    cursor: "pointer",
+                    cursor: isUploading ? "not-allowed" : "pointer",
                     transition: "all 0.15s ease",
                     fontFamily: "'Space Grotesk', sans-serif",
                     fontSize: "0.8rem",
-                    textTransform: "uppercase"
+                    textTransform: "uppercase",
+                    opacity: isUploading ? 0.7 : 1
                   }}
                 >
-                  BROWSE FILES
+                  {isUploading ? "Analyzing..." : (file ? "Analyze Resume" : "Browse Files")}
                 </button>
+
+                {error && (
+                  <div style={{
+                    marginTop: "16px",
+                    padding: "10px 16px",
+                    backgroundColor: "#fef2f2",
+                    border: "2px solid #000000",
+                    color: "#991b1b",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    textTransform: "uppercase"
+                  }}>
+                    {error}
+                  </div>
+                )}
               </div>
             </div>
           </section>

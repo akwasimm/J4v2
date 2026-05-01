@@ -23,3 +23,11 @@ export const fetchCompanies = async (limit = 20) => {
   }
   return realApi.fetchCompanies(limit);
 };
+
+// Unified market insights from AI endpoint
+export const getMarketInsights = async (role = null, location = null, force = false) => {
+  if (isMockMode()) {
+    return insightsHandlers.getMarketInsights(role, location);
+  }
+  return realApi.getMarketInsights(role, location, force);
+};

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -112,6 +114,11 @@ function MatchScore({ percent = 85 }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function JobDetail() {
+  // Placeholder check
+  if (!FEATURES.jobDetail) {
+    return <ComingSoon pageName="Job Detail" description="View full job details and AI match score" />
+  }
+
   useEffect(() => {
     document.title = "Job Details — JobFor";
   }, []);

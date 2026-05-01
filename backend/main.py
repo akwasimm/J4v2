@@ -134,6 +134,7 @@ from app.routers import jobs as jobs_router
 from app.routers import ai_pages as ai_router
 from app.routers import coach as coach_router
 from app.routers import settings as settings_router
+from app.routers import skill_gap as skill_gap_router
 
 app.include_router(
     auth_router.router,
@@ -174,6 +175,11 @@ app.include_router(
     ai_router.router,
     prefix="/api/v1/ai",
     tags=["AI Features"]
+)
+app.include_router(
+    skill_gap_router.router,
+    prefix="/api/v1/skill-gap",
+    tags=["Skill Gap"]
 )
 app.include_router(
     coach_router.router,

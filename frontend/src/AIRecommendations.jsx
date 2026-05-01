@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { getProfile } from "./services/profileService.js";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 
@@ -164,6 +166,11 @@ function RadialProgress({ percent = 85 }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function AIRecommendations() {
+  // Placeholder check
+  if (!FEATURES.aiRecommendations) {
+    return <ComingSoon pageName="AI Recommendations" description="Personalized job picks based on your profile" />
+  }
+
   useEffect(() => {
     document.title = "Dashboard — JobFor";
   }, []);
@@ -176,7 +183,8 @@ export default function AIRecommendations() {
     const fetchUserName = async () => {
       try {
         const profileData = await getProfile();
-        setFirstName(profileData.first_name || "User");
+        // Backend returns: { profile: { first_name, ... }, skills: [...], ... }
+        setFirstName(profileData.profile?.first_name || "User");
       } catch (error) {
         console.error("Error fetching user name:", error);
       }

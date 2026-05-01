@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchSalaryInsights, fetchSkillDemand, fetchCompanies } from "./services/insightsService.js";
+import { FEATURES } from './config/features'
+import ComingSoon from './components/ComingSoon'
 
 const NEO = { boxShadow: "4px 4px 0px 0px #000000" };
 const NEO_SM = { boxShadow: "2px 2px 0px 0px #000000" };
@@ -46,6 +48,11 @@ const GEO_RIGHT = [
 const CHART_LABELS = ["2021", "Q2", "Q4", "2022", "Q2", "Q4", "2023", "Q2", "PRESENT"];
 
 export default function MarketInsights() {
+  // Placeholder check
+  if (!FEATURES.marketInsights) {
+    return <ComingSoon pageName="Market Insights" description="Salary data and hiring trends" />
+  }
+
   useEffect(() => {
     document.title = "Market Insights — JobFor";
   }, []);
