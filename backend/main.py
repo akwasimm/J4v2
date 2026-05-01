@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.database import check_db_connection
 from app.core.ai_client import ai_client
+from app.core.scheduler import start_scheduler, stop_scheduler
 
 # Configure logging
 logging.basicConfig(
@@ -61,11 +62,15 @@ async def lifespan(app: FastAPI):
     logger.info("Backend ready!")
     logger.info("==========================================")
     
+    # Start scheduler
+    start_scheduler()
+    
     yield
     
     # Shutdown
     logger.info("==========================================")
     logger.info("JobFor Backend Shutting down...")
+    stop_scheduler()
     logger.info("==========================================")
 
 
@@ -135,6 +140,7 @@ from app.routers import ai_pages as ai_router
 from app.routers import coach as coach_router
 from app.routers import settings as settings_router
 from app.routers import skill_gap as skill_gap_router
+from app.routers import opportunities as opportunities_router
 
 app.include_router(
     auth_router.router,
@@ -190,6 +196,11 @@ app.include_router(
     settings_router.router,
     prefix="/api/v1/settings",
     tags=["Settings"]
+)
+app.include_router(
+    opportunities_router.router,
+    prefix="/api/v1/opportunities",
+    tags=["Opportunities"]
 )
 
 # Future routers:

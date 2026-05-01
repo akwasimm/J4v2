@@ -141,3 +141,16 @@ class MarketInsightsCache(Base):
 
     def __repr__(self):
         return f"<MarketInsights user={self.user_id} role={self.role}>"
+
+
+class BigOpportunities(Base):
+    __tablename__ = "big_opportunities"
+
+    id = Column(UUID(as_uuid=False), primary_key=True, default=generate_uuid)
+    category = Column(String(50), nullable=False)  # mass_hiring, product_companies, mnc_roles, campus_drives
+    data_json = Column(JSON, nullable=False)  # Array of opportunity objects
+    generated_at = Column(DateTime(timezone=True), default=utcnow)
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+
+    def __repr__(self):
+        return f"<BigOpportunities category={self.category} expires={self.expires_at}>"

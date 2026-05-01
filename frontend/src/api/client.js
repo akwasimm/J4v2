@@ -699,3 +699,21 @@ export async function deleteCoachSession(sessionUuid) {
     method: "DELETE",
   });
 }
+
+// ─── Opportunities Endpoints ─────────────────────────────────────────────────────
+
+export async function getOpportunities(category = null) {
+  const query = category ? `?category=${category}` : "";
+  return apiClient(`/opportunities${query}`);
+}
+
+export async function refreshOpportunities(category = null) {
+  const query = category ? `?category=${category}` : "";
+  return apiClient(`/opportunities/refresh${query}`, {
+    method: "POST",
+  });
+}
+
+export async function getOpportunitiesStatus() {
+  return apiClient("/opportunities/status");
+}
