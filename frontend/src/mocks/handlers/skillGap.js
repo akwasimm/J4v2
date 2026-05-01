@@ -4,46 +4,50 @@ import { mockSkillGapData } from '../data/skillGap.js';
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const skillGapHandlers = {
-  getRoleTemplates: async (category = null) => {
+  // Returns { roles: [...] } to match backend format
+  getRoleTemplates: async () => {
     await delay();
-    let templates = [...mockSkillGapData.role_templates];
-    if (category) {
-      templates = templates.filter(t => t.category.toLowerCase() === category.toLowerCase());
-    }
-    return { items: templates };
+    // Return role names only to match backend /ai/skill-gap/roles format
+    const roleNames = mockSkillGapData.role_templates.map(t => t.name);
+    return { roles: roleNames };
   },
 
-  getRoleTemplate: async (roleName) => {
-    await delay(200);
-    const template = mockSkillGapData.role_templates.find(
-      t => t.name.toLowerCase() === roleName.toLowerCase()
-    );
-    if (!template) {
-      throw new Error("Role template not found");
-    }
-    return { ...template };
-  },
-
-  getLearningPaths: async (skillName = null, difficultyLevel = null) => {
-    await delay();
-    let paths = [...mockSkillGapData.learning_paths];
-    if (skillName) {
-      paths = paths.filter(p => p.skill_name.toLowerCase() === skillName.toLowerCase());
-    }
-    if (difficultyLevel) {
-      paths = paths.filter(p => p.difficulty_level === difficultyLevel);
-    }
-    return { items: paths };
-  },
-
-  getLearningPath: async (skillName) => {
-    await delay(200);
-    const path = mockSkillGapData.learning_paths.find(
-      p => p.skill_name.toLowerCase() === skillName.toLowerCase()
-    );
-    if (!path) {
-      throw new Error("Learning path not found");
-    }
-    return { ...path };
+  // Mock AI skill gap analysis
+  analyzeSkillGap: async (targetRole) => {
+    await delay(800);
+    return {
+      user_id: "mock-user-id",
+      target_role: targetRole,
+      readiness_score: 72,
+      readiness_label: "Almost Ready",
+      matched_skills: ["JavaScript", "React", "HTML", "CSS"],
+      missing_skills: ["TypeScript", "Node.js", "Docker"],
+      skills_to_improve: ["React"],
+      gap_summary: "You have solid frontend skills but need to improve on backend technologies for this role.",
+      personalized_learning_path: [
+        {
+          step: 1,
+          skill: "TypeScript",
+          action: "Complete TypeScript fundamentals course and convert a small JS project",
+          resources: ["TypeScript Handbook", "Udemy TypeScript Course"],
+          estimated_weeks: 2
+        },
+        {
+          step: 2,
+          skill: "Node.js",
+          action: "Build a REST API with Express and connect to a database",
+          resources: ["Node.js Docs", "Express.js Guide"],
+          estimated_weeks: 3
+        },
+        {
+          step: 3,
+          skill: "Docker",
+          action: "Containerize your applications and learn docker-compose",
+          resources: ["Docker Getting Started", "Docker Docs"],
+          estimated_weeks: 2
+        }
+      ],
+      analyzed_at: new Date().toISOString()
+    };
   }
 };

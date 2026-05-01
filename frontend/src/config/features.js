@@ -19,7 +19,7 @@ export const FEATURES = {
   jobDiscovery: false,
   jobDetail: false,
   aiRecommendations: true,
-  skillGap: false,
+  skillGap: true,
   resumeAnalyzer: false,
   careerCoach: false,
   appliedJobs: false,

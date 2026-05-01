@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { getRoleTemplates, getLearningPaths } from "./services/skillGapService.js";
+import { getRoleTemplates, analyzeSkillGap } from "./services/skillGapService.js";
+import { getSkills } from "./api/client.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
 
@@ -61,61 +62,61 @@ export default function SkillGapAnalysis() {
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dbJobs, setDbJobs] = useState([]);
-  const [userProfile, setUserProfile] = useState({
-    resume_ai_data: {
-      skills_inventory: [
-        { skill: "JavaScript", level: "advanced" },
-        { skill: "React", level: "intermediate" },
-        { skill: "TypeScript", level: "intermediate" },
-        { skill: "CSS", level: "advanced" },
-        { skill: "HTML", level: "expert" },
-        { skill: "Python", level: "beginner" },
-        { skill: "Node.js", level: "beginner" }
-      ]
-    }
-  });
-  const [roleSkillsTemplates, setRoleSkillsTemplates] = useState({});
-  const [learningPaths, setLearningPaths] = useState({});
+  const [userSkills, setUserSkills] = useState([]);
+  const [skillGapData, setSkillGapData] = useState(null);
+  const [availableRoles, setAvailableRoles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
   
-  // Fetch role skills templates from database
+  // Fetch available roles from backend
   useEffect(() => {
-    const fetchRoleTemplates = async () => {
+    const fetchRoles = async () => {
       try {
-        const templates = await getRoleTemplates();
-        const templatesMap = {};
-        templates.forEach(template => {
-          templatesMap[template.role_name] = {
-            required_skills: template.required_skills,
-            skill_levels: template.skill_levels
-          };
-        });
-        setRoleSkillsTemplates(templatesMap);
+        const response = await getRoleTemplates();
+        // Backend returns { roles: [...] }
+        if (response && response.roles) {
+          setAvailableRoles(response.roles);
+        }
       } catch (error) {
-        console.error("Failed to fetch role templates:", error);
+        console.error("Failed to fetch roles:", error);
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  // Fetch user skills from profile
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      try {
+        const skills = await getSkills();
+        // Backend returns array directly or { skills: [...] }
+        const skillsArray = Array.isArray(skills) ? skills : (skills?.skills || []);
+        setUserSkills(skillsArray);
+      } catch (error) {
+        console.error("Failed to fetch user skills:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchRoleTemplates();
+    fetchUserSkills();
   }, []);
-  
-  // Fetch learning paths from database
+
+  // Analyze skill gap when role changes
   useEffect(() => {
-    const fetchLearningPaths = async () => {
+    const performSkillGapAnalysis = async () => {
+      if (!selectedRole) return;
+      setAnalyzing(true);
       try {
-        const paths = await getLearningPaths();
-        const pathsMap = {};
-        paths.forEach(path => {
-          pathsMap[path.skill_name] = path;
-        });
-        setLearningPaths(pathsMap);
+        const analysis = await analyzeSkillGap(selectedRole);
+        setSkillGapData(analysis);
       } catch (error) {
-        console.error("Failed to fetch learning paths:", error);
+        console.error("Failed to analyze skill gap:", error);
+      } finally {
+        setAnalyzing(false);
       }
     };
-    fetchLearningPaths();
-  }, []);
+    performSkillGapAnalysis();
+  }, [selectedRole]);
   
   // Mock jobs search
   useEffect(() => {
@@ -151,9 +152,17 @@ export default function SkillGapAnalysis() {
   };
   
   const handleStartLearning = (skillName) => {
-    const learningPath = learningPaths[skillName];
-    if (learningPath && learningPath.resource_links && learningPath.resource_links.length > 0) {
-      window.open(learningPath.resource_links[0], "_blank");
+    // Find learning path step for this skill
+    const step = learningPath.find(p => p.skill?.toLowerCase() === skillName.toLowerCase());
+    if (step && step.resources && step.resources.length > 0) {
+      const resource = step.resources[0];
+      // If resource is a URL, open it; otherwise search
+      if (resource.startsWith('http')) {
+        window.open(resource, "_blank");
+      } else {
+        const searchQuery = encodeURIComponent(`${resource} ${skillName}`);
+        window.open(`https://www.google.com/search?q=${searchQuery}`, "_blank");
+      }
     } else {
       const searchQuery = encodeURIComponent(`${skillName} tutorial for developers`);
       window.open(`https://www.google.com/search?q=${searchQuery}`, "_blank");
@@ -161,56 +170,43 @@ export default function SkillGapAnalysis() {
   };
   
   // Get user skills from profile
-  const skillsInventory = userProfile?.resume_ai_data?.skills_inventory || [];
   const levelOrder = { expert: 4, advanced: 3, intermediate: 2, beginner: 1 };
   
   // Top 5 skills by expertise level
-  const topSkills = [...skillsInventory]
-    .sort((a, b) => (levelOrder[b.level] || 0) - (levelOrder[a.level] || 0))
-    .slice(0, 5);
+  const topSkills = [...userSkills]
+    .sort((a, b) => (levelOrder[b.level?.toLowerCase()] || 0) - (levelOrder[a.level?.toLowerCase()] || 0))
+    .slice(0, 5)
+    .map(s => ({ skill: s.name || s.skill_name || s.skill, level: s.level?.toLowerCase() || 'beginner' }));
   
-  // Get required skills for selected role
-  let requiredSkills = roleSkillsTemplates[selectedRole]?.required_skills || [];
-  
-  // Fallback if no required skills found
-  if (requiredSkills.length === 0) {
-    requiredSkills = ["Python", "JavaScript", "Git", "SQL", "REST APIs", "Data Structures", "Algorithms", "System Design", "CI/CD", "Docker"];
-  }
-  
-  // Skills to improve (matched but need improvement)
-  const skillsToImprove = requiredSkills.map(reqSkill => {
-    const userSkill = skillsInventory.find(
-      s => s.skill.toLowerCase() === reqSkill.toLowerCase()
-    );
-    
-    if (userSkill) {
-      return {
-        skill: reqSkill,
-        currentLevel: userSkill.level,
-        hasSkill: true,
-        needsImprovement: userSkill.level === "beginner" || userSkill.level === "intermediate"
-      };
-    } else {
-      return {
-        skill: reqSkill,
-        currentLevel: "none",
-        hasSkill: false,
-        needsImprovement: true
-      };
-    }
-  }).filter(s => s.needsImprovement);
-  
-  // Skills completely missing (gap skills)
-  const gapSkills = requiredSkills.filter(reqSkill =>
-    !skillsInventory.some(
-      s => s.skill.toLowerCase() === reqSkill.toLowerCase()
-    )
-  );
+  // Get data from AI skill gap analysis
+  const readinessScore = skillGapData?.readiness_score || 0;
+  const readinessLabel = skillGapData?.readiness_label || 'Unknown';
+  const matchedSkills = skillGapData?.matched_skills || [];
+  const gapSkills = skillGapData?.missing_skills || [];
+  const skillsToImprove = (skillGapData?.skills_to_improve || []).map(skill => ({
+    skill: skill,
+    currentLevel: userSkills.find(s => (s.name || s.skill_name || s.skill)?.toLowerCase() === skill.toLowerCase())?.level || 'beginner',
+    hasSkill: true,
+    needsImprovement: true
+  }));
+  const learningPath = skillGapData?.personalized_learning_path || [];
+  const gapSummary = skillGapData?.gap_summary || '';
   
   if (loading) {
     return (
       <div className="bg-gray-50 text-black min-h-screen flex items-center justify-center">
         <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (analyzing) {
+    return (
+      <div className="bg-gray-50 text-black min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl font-semibold mb-2">Analyzing your skills...</p>
+          <p className="text-gray-600">Comparing your profile with {selectedRole} requirements</p>
+        </div>
       </div>
     );
   }
@@ -316,20 +312,11 @@ export default function SkillGapAnalysis() {
       
       {/* Header */}
       <header className="bg-white border-b-2 border-black px-8 py-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-extrabold uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>
-              Skill Gap Analysis
-            </h1>
-            <p className="text-gray-600 mt-1">Identify your skill gaps and create a learning plan</p>
-          </div>
-          <button
-            onClick={() => setShowRoleSelector(true)}
-            className="px-6 py-3 bg-black text-white font-semibold border-2 border-black hover:bg-gray-800 transition-colors"
-            style={NEO_SM}
-          >
-            Change Role
-          </button>
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl font-extrabold uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>
+            Skill Gap Analysis
+          </h1>
+          <p className="text-gray-600 mt-1">Identify your skill gaps and create a learning plan</p>
         </div>
       </header>
 
@@ -337,8 +324,19 @@ export default function SkillGapAnalysis() {
       <main className="max-w-7xl mx-auto px-8 py-8">
         {/* Current Role Display */}
         <div className={`bg-white ${B} p-6 mb-8`} style={NEO}>
-          <h2 className="text-2xl font-bold mb-2">Target Role: {selectedRole}</h2>
-          <p className="text-gray-600">Analyzing your skills against the requirements for this role</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">Target Role: {selectedRole}</h2>
+              <p className="text-gray-600">Analyzing your skills against the requirements for this role</p>
+            </div>
+            <button
+              onClick={() => setShowRoleSelector(true)}
+              className="px-6 py-3 bg-black text-white font-semibold border-2 border-black hover:bg-gray-800 transition-colors"
+              style={NEO_SM}
+            >
+              Change Role
+            </button>
+          </div>
         </div>
 
         {/* Skills Overview */}
@@ -346,42 +344,54 @@ export default function SkillGapAnalysis() {
           {/* Your Top Skills */}
           <div className={`bg-white ${B} p-6`} style={NEO_SM}>
             <h3 className="text-xl font-bold mb-4">Your Top Skills</h3>
-            <div className="space-y-3">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
               {topSkills.map((skill, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">{skill.skill}</span>
-                  <span className="px-3 py-1 text-xs font-semibold rounded-full" 
-                        style={{
-                          backgroundColor: skill.level === "expert" ? "#1A4D2E" : 
-                                         skill.level === "advanced" ? "#06b6d4" : 
-                                         skill.level === "intermediate" ? "#FACC15" : "#e2e8f0",
-                          color: skill.level === "intermediate" ? "#000000" : "white"
-                        }}>
-                    {skill.level}
-                  </span>
+                <div key={index} style={{
+                  backgroundColor: "#E0F2FE",
+                  border: "2px solid #000000",
+                  padding: "12px",
+                  borderRadius: "8px"
+                }}>
+                  <div>
+                    <span style={{ fontWeight: 700, display: "block", textTransform: "uppercase", fontSize: "0.75rem" }}>{skill.skill}</span>
+                    <span style={{ fontSize: "0.6rem", color: "#1A4D2E", fontWeight: 900, textTransform: "uppercase" }}>{skill.level}</span>
+                  </div>
                 </div>
               ))}
+              {topSkills.length === 0 && (
+                <div style={{ gridColumn: "span 2", textAlign: "center", padding: "24px", color: "#6b7280" }}>
+                  <p style={{ fontWeight: 600, textTransform: "uppercase", marginBottom: "4px" }}>No Skills Yet</p>
+                  <p style={{ fontSize: "0.875rem" }}>Add skills to your profile to see your top skills here</p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Readiness Score */}
-          <div className={`bg-white ${B} p-6`} style={NEO_SM}>
-            <h3 className="text-xl font-bold mb-4">Overall Readiness</h3>
+          <div style={{
+            backgroundColor: "#F3E8FF",
+            border: "2px solid #000000",
+            padding: "24px",
+            borderRadius: "8px",
+            boxShadow: "2px 2px 0px 0px #000000"
+          }}>
+            <h3 className="text-xl font-bold mb-4" style={{ textTransform: "uppercase" }}>Overall Readiness</h3>
             <div className="flex items-center justify-center mb-4">
               <div className="relative w-32 h-32">
                 <svg className="w-full h-full transform -rotate-90">
                   <circle cx="64" cy="64" r="56" stroke="#e2e8f0" strokeWidth="12" fill="none" />
                   <circle cx="64" cy="64" r="56" stroke="#1A4D2E" strokeWidth="12" fill="none"
                           strokeDasharray={`${2 * Math.PI * 56}`}
-                          strokeDashoffset={`${2 * Math.PI * 56 * (1 - 0.72)}`}
+                          strokeDashoffset={`${2 * Math.PI * 56 * (1 - readinessScore / 100)}`}
                           strokeLinecap="round" />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-3xl font-bold">72%</span>
+                  <span className="text-3xl font-bold">{readinessScore}%</span>
                 </div>
               </div>
             </div>
-            <p className="text-center text-gray-600">You're 72% ready for this role</p>
+            <p className="text-center" style={{ fontWeight: 700, color: "#1A4D2E", textTransform: "uppercase" }}>{readinessLabel}</p>
+            {gapSummary && <p className="text-center text-sm mt-2" style={{ color: "#6b7280" }}>{gapSummary}</p>}
           </div>
         </div>
 
@@ -394,9 +404,9 @@ export default function SkillGapAnalysis() {
                 <div key={index} className={`p-4 bg-gray-50 rounded-lg ${B}`} style={NEO_SM}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold">{skill.skill}</span>
-                    <span className="text-xs px-2 py-1 bg-yellow-200 text-black rounded">Est. 8 hours</span>
+                    <span className="text-xs px-2 py-1 bg-yellow-200 text-black rounded">Needs improvement</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">Current: {skill.currentLevel}</p>
+                  <p className="text-sm text-gray-600 mb-3">Current level: {skill.currentLevel}</p>
                   <button
                     onClick={() => handleStartLearning(skill.skill)}
                     className="w-full px-4 py-2 bg-black text-white text-sm font-semibold border-2 border-black hover:bg-gray-800 transition-colors"
@@ -413,17 +423,23 @@ export default function SkillGapAnalysis() {
 
         {/* Gap Skills */}
         <div className={`bg-white ${B} p-6 mb-8`} style={NEO}>
-          <h3 className="text-xl font-bold mb-4">Missing Skills</h3>
+          <h3 className="text-xl font-bold mb-4" style={{ textTransform: "uppercase" }}>Missing Skills</h3>
           {gapSkills.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "12px" }}>
               {gapSkills.map((skill, index) => (
-                <span key={index} className="px-4 py-2 bg-red-100 text-red-800 rounded-full font-medium border-2 border-red-300">
-                  {skill}
-                </span>
+                <div key={index} style={{
+                  backgroundColor: "#FEE2E2",
+                  border: "2px solid #000000",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  boxShadow: "2px 2px 0px 0px #000000"
+                }}>
+                  <span style={{ fontWeight: 700, textTransform: "uppercase", fontSize: "0.75rem", color: "#991B1B" }}>{skill}</span>
+                </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No missing skills!</p>
+            <p style={{ color: "#6b7280", fontWeight: 600, textTransform: "uppercase" }}>No missing skills!</p>
           )}
         </div>
 
@@ -433,29 +449,84 @@ export default function SkillGapAnalysis() {
             Personalized Learning Path
           </h2>
 
-          <div className="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-black">
-            {gapSkills.length > 0 && learningPaths[gapSkills[0]]?.modules ? (
-              learningPaths[gapSkills[0]].modules.map((module, index) => (
-                <div key={index} className="relative flex items-center justify-between md:justify-normal gap-4 group">
-                  <div className={`flex items-center justify-center w-10 h-10 ${B} ${index === 0 ? 'bg-[#1A4D2E] text-white' : index === 1 ? 'bg-[#D8B4FE] text-black' : 'bg-[#FACC15] text-black'} shrink-0 md:order-1 md:-translate-x-1/2`}>
-                    <span className="font-bold">{String(index + 1).padStart(2, '0')}</span>
+          <div style={{ position: "relative" }}>
+            {/* Vertical line */}
+            <div style={{
+              position: "absolute",
+              left: "50%",
+              top: 0,
+              bottom: 0,
+              width: "2px",
+              backgroundColor: "#000000",
+              transform: "translateX(-50%)"
+            }}></div>
+
+            {learningPath.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+                {learningPath.map((step, index) => (
+                  <div key={index} style={{
+                    display: "flex",
+                    justifyContent: index % 2 === 0 ? "flex-start" : "flex-end",
+                    width: "100%",
+                    position: "relative"
+                  }}>
+                    {/* Step number badge - centered on line */}
+                    <div style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "16px",
+                      transform: "translateX(-50%)",
+                      width: "40px",
+                      height: "40px",
+                      backgroundColor: index % 2 === 0 ? "#1A4D2E" : index % 2 === 1 ? "#D8B4FE" : "#FACC15",
+                      border: "2px solid #000000",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: index % 2 === 0 ? "white" : "black",
+                      fontWeight: 700,
+                      fontSize: "14px",
+                      boxShadow: "2px 2px 0px 0px #000000",
+                      zIndex: 10
+                    }}>
+                      {String(step.step || index + 1).padStart(2, '0')}
+                    </div>
+
+                    {/* Content box */}
+                    <div style={{
+                      width: "calc(50% - 40px)",
+                      backgroundColor: index % 2 === 0 ? "#E0F2FE" : "#F3E8FF",
+                      border: "2px solid #000000",
+                      padding: "20px",
+                      borderRadius: "8px",
+                      boxShadow: "2px 2px 0px 0px #000000"
+                    }}>
+                      <h4 style={{
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        fontSize: "0.875rem",
+                        color: "#1A4D2E",
+                        marginBottom: "8px"
+                      }}>
+                        {step.skill?.toUpperCase()}
+                      </h4>
+                      <p style={{ color: "#374151", marginBottom: "12px", lineHeight: "1.5" }}>{step.action}</p>
+                      {step.resources && step.resources.length > 0 && (
+                        <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "8px" }}>
+                          📚 {step.resources.join(', ')}
+                        </p>
+                      )}
+                      <p style={{ fontSize: "0.875rem", color: "#6b7280", fontWeight: 600 }}>
+                        ⏱️ {step.estimated_weeks} week{step.estimated_weeks !== 1 ? 's' : ''}
+                      </p>
+                    </div>
                   </div>
-                  <div className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white ${B} p-6`} style={NEO_SM}>
-                    <time className="font-extrabold text-[#1A4D2E] text-sm block mb-2 uppercase" style={{ fontFamily: "'Syne', sans-serif" }}>
-                      {module.week ? `WEEK ${module.week}: ${module.title.toUpperCase()}` : module.title.toUpperCase()}
-                    </time>
-                    <p className="text-gray-600 mb-4">{module.description}</p>
-                    <p className="text-sm text-gray-500 mb-2">⏱️ {module.hours} hours</p>
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
-              <div className="text-gray-500 text-center py-8">
-                {gapSkills.length > 0 ? (
-                  <p>Learning path for {gapSkills[0]} will be loaded from database.</p>
-                ) : (
-                  <p>No learning path available.</p>
-                )}
+              <div style={{ textAlign: "center", padding: "32px", color: "#6b7280" }}>
+                <p style={{ fontWeight: 600, textTransform: "uppercase" }}>Select a target role to see your personalized learning path.</p>
               </div>
             )}
           </div>
@@ -495,7 +566,7 @@ export default function SkillGapAnalysis() {
                 </>
               ) : (
                 <div className="role-selector-grid">
-                  {TOP_TECH_ROLES.map(role => (
+                  {(availableRoles.length > 0 ? availableRoles : TOP_TECH_ROLES).map(role => (
                     <div key={role} className={`role-card ${selectedRole === role ? 'selected' : ''}`} onClick={() => handleSelectRole(role)}>
                       {role}
                     </div>

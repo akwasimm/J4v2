@@ -638,52 +638,9 @@ export async function deleteAccount(password) {
 
 // ─── Skill Gap Data ─────────────────────────────────────────────────────────────
 
-export async function getRoleTemplates(category = null) {
-  try {
-    const url = category 
-      ? `/skill-gap/roles?category=${encodeURIComponent(category)}`
-      : "/skill-gap/roles";
-    const data = await apiClient(url);
-    return data;
-  } catch (error) {
-    console.error("Error fetching role templates:", error);
-    throw error;
-  }
-}
-
-export async function getRoleTemplate(roleName) {
-  try {
-    const data = await apiClient(`/skill-gap/roles/${encodeURIComponent(roleName)}`);
-    return data;
-  } catch (error) {
-    console.error("Error fetching role template:", error);
-    throw error;
-  }
-}
-
-export async function getLearningPaths(skillName = null, difficultyLevel = null) {
-  try {
-    const params = new URLSearchParams();
-    if (skillName) params.append("skill_name", skillName);
-    if (difficultyLevel) params.append("difficulty_level", difficultyLevel);
-    
-    const url = `/skill-gap/learning-paths${params.toString() ? `?${params.toString()}` : ""}`;
-    const data = await apiClient(url);
-    return data;
-  } catch (error) {
-    console.error("Error fetching learning paths:", error);
-    throw error;
-  }
-}
-
-export async function getLearningPath(skillName) {
-  try {
-    const data = await apiClient(`/skill-gap/learning-paths/${encodeURIComponent(skillName)}`);
-    return data;
-  } catch (error) {
-    console.error("Error fetching learning path:", error);
-    throw error;
-  }
+export async function getRoleTemplates() {
+  // Uses /ai/skill-gap/roles which returns { roles: [...] }
+  return apiClient("/ai/skill-gap/roles");
 }
 
 // ─── AI Endpoints ────────────────────────────────────────────────────────────
