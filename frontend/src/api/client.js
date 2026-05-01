@@ -576,11 +576,11 @@ export async function updateSettings(settingsData) {
   }
 }
 
-export async function changePassword(oldPassword, newPassword) {
+export async function changePassword(currentPassword, newPassword) {
   try {
     const data = await apiClient("/settings/password", {
       method: "PUT",
-      body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+      body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
     });
     return data;
   } catch (error) {
@@ -623,10 +623,11 @@ export async function exportData() {
   }
 }
 
-export async function deleteAccount() {
+export async function deleteAccount(password) {
   try {
     const data = await apiClient("/settings/account", {
       method: "DELETE",
+      body: JSON.stringify({ password }),
     });
     return data;
   } catch (error) {

@@ -26,6 +26,6 @@ export const FEATURES = {
   savedJobs: false,
   marketInsights: false,
   opportunities: false,
-  settings: false,
+  settings: true,
   dashboard: false,
 }

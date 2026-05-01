@@ -423,7 +423,9 @@ export default function EditProfile() {
     
     try {
       const data = await uploadResume(file);
-      setResumes((prev) => [...prev, { ...data.resume, id: Date.now().toString() }]);
+      // Use the backend-generated resume ID - don't overwrite with fake ID
+      const newResume = data.resume || data;
+      setResumes((prev) => [...prev, newResume]);
       setNewResume({ name: "" });
       setUploadSuccess("Resume uploaded successfully!");
       setTimeout(() => setUploadSuccess(""), 3000);
@@ -1444,14 +1446,17 @@ export default function EditProfile() {
                         <div style={{ display: "flex", alignItems: "center", gap: "12px", opacity: resume.is_default ? 1 : 0.7 }}>
                           <span className="material-symbols-outlined" style={{ fontSize: "24px", color: resume.is_default ? "#1A4D2E" : "#6b7280" }}>description</span>
                           <div>
-                            <p style={{ fontWeight: 700, textTransform: "uppercase", fontSize: "0.75rem", marginBottom: "2px" }}>{resume.name}</p>
+                            <p style={{ fontWeight: 700, textTransform: "uppercase", fontSize: "0.75rem", marginBottom: "2px" }}>{resume.filename || resume.name}</p>
                             <p style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", color: resume.is_default ? "#D8B4FE" : "#9ca3af" }}>{resume.is_default ? "Default Resume" : resume.uploaded_at || resume.date}</p>
                           </div>
                         </div>
                         <div style={{ display: "flex", gap: "6px" }}>
-                          <a href={getFileUrl(resume.url)} target="_blank" rel="noreferrer" style={{ padding: "4px 8px", border: "2px solid #000000", fontWeight: 700, fontSize: "0.6rem", textTransform: "uppercase", background: "transparent", cursor: "pointer", textDecoration: "none", color: "#111", display: "flex", alignItems: "center", gap: "4px" }}>
+                          <button 
+                            onClick={() => setUploadError("File not found")} 
+                            style={{ padding: "4px 8px", border: "2px solid #000000", fontWeight: 700, fontSize: "0.6rem", textTransform: "uppercase", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                          >
                             <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>download</span>
-                          </a>
+                          </button>
                           {!resume.is_default && (
                             <button onClick={() => handleSetDefaultResume(resume.id)} style={{ padding: "4px 8px", border: "2px solid #000000", fontWeight: 700, fontSize: "0.6rem", textTransform: "uppercase", background: "transparent", cursor: "pointer" }}>Set Default</button>
                           )}

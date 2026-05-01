@@ -999,13 +999,21 @@ export default function SettingsPage() {
                     onMouseEnter={() => setDeleteHover(true)}
                     onMouseLeave={() => setDeleteHover(false)}
                     onClick={async () => {
-                      if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-                        try {
-                          await deleteAccount();
-                          alert("Account deletion initiated");
-                        } catch (error) {
-                          alert("Failed to delete account: " + error.message);
-                        }
+                      if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+                        return;
+                      }
+                      const password = prompt("Enter your password to confirm account deletion:");
+                      if (!password) {
+                        return;
+                      }
+                      try {
+                        await deleteAccount(password);
+                        alert("Account deleted successfully");
+                        // Clear auth and redirect to landing
+                        localStorage.clear();
+                        window.location.href = "/";
+                      } catch (error) {
+                        alert("Failed to delete account: " + error.message);
                       }
                     }}
                     style={{
@@ -1050,7 +1058,9 @@ export default function SettingsPage() {
                 style={{
                   border: "2px solid #000000",
                   overflow: "hidden",
-                  boxShadow: "4px 4px 0px 0px #000000"
+                  boxShadow: "4px 4px 0px 0px #000000",
+                  filter: "blur(4px)",
+                  pointerEvents: "none"
                 }}
               >
                 <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>

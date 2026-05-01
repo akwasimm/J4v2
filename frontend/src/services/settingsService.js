@@ -45,9 +45,9 @@ export const exportData = async () => {
   return realApi.exportData();
 };
 
-export const deleteAccount = async () => {
+export const deleteAccount = async (password) => {
   if (isMockMode()) {
-    return settingsHandlers.deleteAccount();
+    return settingsHandlers.deleteAccount(password);
   }
-  return realApi.deleteAccount();
+  return realApi.deleteAccount(password);
 };

@@ -30,7 +30,7 @@ export const settingsHandlers = {
 
   getConnectedAccounts: async () => {
     await delay();
-    return { items: [...settingsStore.connected_accounts] };
+    return [...settingsStore.connected_accounts];
   },
 
   disconnectAccount: async (platform) => {
@@ -53,8 +53,11 @@ export const settingsHandlers = {
     };
   },
 
-  deleteAccount: async () => {
+  deleteAccount: async (password) => {
     await delay(800);
-    return { success: true, message: "Account scheduled for deletion" };
+    if (!password) {
+      throw new Error("Password is required to delete account");
+    }
+    return { success: true, message: "Account deleted successfully" };
   }
 };
