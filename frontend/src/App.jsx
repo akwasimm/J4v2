@@ -1,5 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AIScoreProvider } from './contexts/AIScoreContext';
 
 // Layout components
 import PublicLayout from './components/PublicLayout';
@@ -38,6 +39,7 @@ import DevIndex from './DevIndex';
 
 export default function App() {
   return (
+    <AIScoreProvider>
     <BrowserRouter>
       <Routes>
         {/* ── Public pages ── */}
@@ -63,8 +65,9 @@ export default function App() {
         {/* Main Dashboard is now AIRecommendations */}
         <Route path="/user" element={<AppLayout><AIRecommendations /></AppLayout>} />
         <Route path="/user-archived" element={<AppLayout><UserDashboard /></AppLayout>} />
-        
-        <Route path="/applied" element={<AppLayout><JobForDashboard /></AppLayout>} />
+
+        {/* Saved/Applied Jobs - unified view with toggle */}
+        <Route path="/applied" element={<Navigate to="/saved?tab=applied" replace />} />
         <Route path="/saved" element={<AppLayout><SavedJobs /></AppLayout>} />
         <Route path="/ai" element={<AppLayout><AIRecommendations /></AppLayout>} />
         <Route path="/merged" element={<AppLayout><MergedDashboard /></AppLayout>} />
@@ -78,5 +81,6 @@ export default function App() {
         <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
       </Routes>
     </BrowserRouter>
+    </AIScoreProvider>
   );
 }

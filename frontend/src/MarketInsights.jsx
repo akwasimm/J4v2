@@ -114,9 +114,20 @@ export default function MarketInsights() {
     }
   };
 
+  // Only load on initial mount and when currency toggle changes
   useEffect(() => {
+    // Load once on mount
     loadInsights();
-  }, [role, location, showInr]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
+  // Re-load when currency toggle changes (same data, different display)
+  useEffect(() => {
+    if (marketData) {
+      loadInsights();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showInr]);
 
 
   return (

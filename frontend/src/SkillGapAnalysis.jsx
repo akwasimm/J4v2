@@ -3,6 +3,7 @@ import { getRoleTemplates, analyzeSkillGap } from "./services/skillGapService.js
 import { getSkills } from "./api/client.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
+import { useAIScore } from './contexts/AIScoreContext'
 
 const NEO = { boxShadow: "4px 4px 0px 0px #000000" };
 const NEO_SM = { boxShadow: "2px 2px 0px 0px #000000" };
@@ -49,6 +50,8 @@ const TOP_TECH_ROLES = [
 ];
 
 export default function SkillGapAnalysis() {
+  const { updateAIScore } = useAIScore();
+
   // Placeholder check
   if (!FEATURES.skillGap) {
     return <ComingSoon pageName="Skill Gap Analysis" description="Analyze your readiness for target roles" />
@@ -178,8 +181,14 @@ export default function SkillGapAnalysis() {
     .slice(0, 5)
     .map(s => ({ skill: s.name || s.skill_name || s.skill, level: s.level?.toLowerCase() || 'beginner' }));
   
-  // Get data from AI skill gap analysis
+  // Get data from AI skill gap analysis and update global AI score
   const readinessScore = skillGapData?.readiness_score || 0;
+  
+  useEffect(() => {
+    if (readinessScore > 0) {
+      updateAIScore(readinessScore);
+    }
+  }, [readinessScore, updateAIScore]);
   const readinessLabel = skillGapData?.readiness_label || 'Unknown';
   const matchedSkills = skillGapData?.matched_skills || [];
   const gapSkills = skillGapData?.missing_skills || [];

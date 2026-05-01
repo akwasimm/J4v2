@@ -98,6 +98,10 @@ export async function getMyApplications() {
   return apiClient("/jobs/applications/me");
 }
 
+export async function getSavedJobs() {
+  return apiClient("/jobs/saved/me");
+}
+
 export async function updateSavedJobNote(savedJobId, noteText) {
   return apiClient(`/jobs/saved/${savedJobId}/note`, {
     method: "PUT",

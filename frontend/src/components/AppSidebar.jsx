@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getProfile } from "../services/profileService.js";
+import { useAIScore } from "../contexts/AIScoreContext";
 
 const navItems = [
   {
@@ -182,7 +183,11 @@ const styles = {
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { aiScore } = useAIScore();
   const [profileCompletion, setProfileCompletion] = useState(0);
+
+  // Skip showing AI score on /discover and /user pages
+  const hideAIScore = location.pathname === "/discover" || location.pathname === "/user";
 
   useEffect(() => {
     const fetchProfileCompletion = async () => {
@@ -278,12 +283,14 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* AI Match Score Box */}
-        <div style={styles.matchScoreBox}>
-          <div style={styles.matchScoreLabel}>AI MATCH SCORE</div>
-          <div style={styles.matchScoreValue}>94%</div>
-          <div style={styles.matchScoreSubtext}>Profile is {profileCompletion}% complete</div>
-        </div>
+        {/* AI Match Score Box - Hidden on /discover and /user */}
+        {!hideAIScore && (
+          <div style={styles.matchScoreBox}>
+            <div style={styles.matchScoreLabel}>AI MATCH SCORE</div>
+            <div style={styles.matchScoreValue}>{aiScore !== null ? `${aiScore}%` : "--"}</div>
+            <div style={styles.matchScoreSubtext}>Profile is {profileCompletion}% complete</div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -57,8 +57,8 @@ class RateLimiter:
         self.last_call_time = time.time()
 
 
-# Global rate limiter instance
-rate_limiter = RateLimiter(calls_per_minute=20)
+# Global rate limiter instance - 2 calls per minute to stay within Groq free tier
+rate_limiter = RateLimiter(calls_per_minute=2)
 
 
 # Default roles and locations (expandable)
@@ -371,7 +371,7 @@ def populate_all_combinations(roles: List[str], locations: List[str], force: boo
     
     logger.info(f"Starting population: {len(roles)} roles x {len(locations)} locations = {total} combinations")
     logger.info(f"Force update: {force}")
-    logger.info(f"Rate limit: 20 calls/minute (approx {total * 3 // 60} minutes estimated)")
+    logger.info(f"Rate limit: 2 calls/minute (approx {total * 30 // 60} minutes estimated)")
     
     start_time = time.time()
     
