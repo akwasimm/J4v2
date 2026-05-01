@@ -122,3 +122,14 @@ class CoachChatResponse(BaseModel):
     session_uuid: str
     user_message: CoachMessageResponse
     assistant_message: CoachMessageResponse
+    response: str = ""  # Frontend expects this field with assistant's text
+
+    def __init__(self, **data):
+        # Auto-populate response from assistant_message.content if not provided
+        if "response" not in data and "assistant_message" in data:
+            assistant = data.get("assistant_message")
+            if hasattr(assistant, "content"):
+                data["response"] = assistant.content
+            elif isinstance(assistant, dict):
+                data["response"] = assistant.get("content", "")
+        super().__init__(**data)

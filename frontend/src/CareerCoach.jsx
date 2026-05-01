@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageBubble } from "./components/MessageBubble";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
+import * as coachService from './services/coachService'
 
 export default function CareerCoach() {
   // Placeholder check
@@ -17,6 +18,7 @@ export default function CareerCoach() {
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // { sessionId, title }
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -47,18 +49,14 @@ export default function CareerCoach() {
   const fetchAllSessions = async () => {
     try {
       setIsLoadingSessions(true);
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        const res = await fetch('http://localhost:8000/api/v1/coach/sessions', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setSessions(data);
-        }
-      }
+      const data = await coachService.getCoachSessions();
+      setSessions(data);
     } catch (error) {
       console.error("Failed to load sessions:", error);
+      if (error.message?.includes("Authentication") || error.message?.includes("401")) {
+        // Token issue - sessions will be empty
+        setSessions([]);
+      }
     } finally {
       setIsLoadingSessions(false);
     }
@@ -67,25 +65,16 @@ export default function CareerCoach() {
   // Load specific chat history
   const loadChatHistory = async (sessionId) => {
     try {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        // Backend returns session with messages array
-        const res = await fetch(`http://localhost:8000/api/v1/coach/sessions/${sessionId}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const session = await res.json();
-          // Backend returns session with messages array
-          const messages = session.messages || [];
-          const formattedMessages = messages.map(msg => ({
-            role: msg.role,
-            content: msg.content,
-            id: msg.id,
-            alreadyDisplayed: true // Mark history as already displayed
-          }));
-          setMessages(formattedMessages);
-        }
-      }
+      const session = await coachService.getCoachSession(sessionId);
+      // Backend returns session with messages array
+      const messages = session.messages || [];
+      const formattedMessages = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        id: msg.id,
+        alreadyDisplayed: true // Mark history as already displayed
+      }));
+      setMessages(formattedMessages);
     } catch (error) {
       console.error("Failed to load history:", error);
       setMessages([]);
@@ -118,30 +107,7 @@ export default function CareerCoach() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        throw new Error("Authentication required. Please log in.");
-      }
-      
-      const res = await fetch("http://localhost:8000/api/v1/coach/chat", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          content: userText,
-          session_id: activeSessionId
-        }),
-      });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("API error response:", errorText);
-        throw new Error(`API error: ${res.status} - ${errorText}`);
-      }
-      
-      const data = await res.json();
+      const data = await coachService.sendCoachMessage(userText, activeSessionId);
       const reply = data.response || "Sorry, I couldn't process that. Please try again.";
 
       // Save the session_id returned by backend
@@ -170,11 +136,16 @@ export default function CareerCoach() {
       await fetchAllSessions();
     } catch (error) {
       console.error("Chat error:", error);
+      const isAuthError = error.message?.includes("Authentication") || 
+                          error.message?.includes("401") || 
+                          error.message?.includes("token");
       setMessages((prev) => [
         ...prev,
         { 
           role: "assistant", 
-          content: error.message.includes("Authentication") ? "Please log in to use the Career Coach." : `Connection error: ${error.message}. Check console for details.`,
+          content: isAuthError 
+            ? "Please log in to use the Career Coach. Your session may have expired." 
+            : `Connection error: ${error.message}. Check console for details.`,
           alreadyDisplayed: true // Error messages show instantly
         },
       ]);
@@ -222,6 +193,9 @@ export default function CareerCoach() {
     setActiveSessionId(null);
     localStorage.removeItem("lume_session_id");
     inputRef.current?.focus();
+    
+    // Close sidebar after creating new chat
+    setSidebarOpen(false);
   };
 
   const handleSelectSession = async (sessionId) => {
@@ -240,6 +214,9 @@ export default function CareerCoach() {
     // Load that session's history
     await loadChatHistory(sessionId);
     inputRef.current?.focus();
+    
+    // Close sidebar after selecting session
+    setSidebarOpen(false);
   };
 
   const handleDeleteSession = async (sessionId, event) => {
@@ -261,19 +238,7 @@ export default function CareerCoach() {
     setIsDeleting(true);
     
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-      
-      const res = await fetch(`http://localhost:8000/api/v1/coach/sessions/${sessionIdToDelete}`, {
-        method: "DELETE",
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!res.ok) {
-        throw new Error("Failed to delete session");
-      }
+      await coachService.deleteCoachSession(sessionIdToDelete);
       
       // If deleted session was active, clear it
       if (activeSessionId === sessionIdToDelete) {
@@ -341,6 +306,72 @@ export default function CareerCoach() {
           flex-shrink: 0;
           overflow: hidden;
           min-height: 0;
+          position: absolute;
+          left: 0;
+          top: 0;
+          z-index: 100;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+        }
+
+        .lume-sidebar.open {
+          transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.3);
+          z-index: 99;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .sidebar-overlay.open {
+          opacity: 1;
+          visibility: visible;
+        }
+
+        .burger-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          background: transparent;
+          border: 2px solid #000000;
+          cursor: pointer;
+          margin-right: 12px;
+          transition: all 0.15s ease;
+          flex-shrink: 0;
+        }
+
+        .burger-btn:hover {
+          background: #D8B4FE;
+          transform: translate(-1px, -1px);
+          box-shadow: 2px 2px 0px 0px #000000;
+        }
+
+        .burger-btn:active {
+          transform: translate(0, 0);
+          box-shadow: none;
+        }
+
+        .burger-icon {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .burger-icon span {
+          display: block;
+          width: 18px;
+          height: 2px;
+          background: #000000;
         }
 
         .sidebar-header {
@@ -554,24 +585,27 @@ export default function CareerCoach() {
           flex: 1;
           min-height: 0;
           overflow-y: auto;
-          padding: 16px;
+          padding: 12px 16px;
           display: flex;
           flex-direction: column;
+          background: linear-gradient(135deg, rgba(216, 180, 254, 0.08) 0%, rgba(245, 245, 240, 0.4) 50%, rgba(26, 77, 46, 0.05) 100%);
         }
 
         .lume-messages-container::-webkit-scrollbar {
-          width: 6px;
+          width: 4px;
         }
         .lume-messages-container::-webkit-scrollbar-thumb {
-          background: #D8B4FE;
+          background: rgba(26, 77, 46, 0.3);
           border-radius: 4px;
         }
 
         .lume-input-area {
           padding: 12px 16px;
-          border-top: 2px solid #000000;
+          border-top: 1px solid rgba(0, 0, 0, 0.1);
           flex-shrink: 0;
-          background: #ffffff;
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           display: flex;
           gap: 8px;
           align-items: center;
@@ -579,42 +613,43 @@ export default function CareerCoach() {
 
         .lume-input-area input {
           flex: 1;
-          padding: 10px 16px;
-          border: 2px solid #000000;
-          border-radius: 0;
+          padding: 12px 16px;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          border-radius: 24px;
           font-size: 14px;
           outline: none;
           transition: all 0.15s ease;
           font-family: 'Space Grotesk', sans-serif;
           font-weight: 500;
+          background: rgba(255, 255, 255, 0.8);
         }
 
         .lume-input-area input:focus {
-          border-color: #D8B4FE;
-          box-shadow: 2px 2px 0px 0px #D8B4FE;
+          border-color: rgba(26, 77, 46, 0.4);
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 2px 12px rgba(26, 77, 46, 0.1);
         }
 
         .lume-input-area button {
-          padding: 10px 20px;
-          background: #1A4D2E;
+          padding: 12px 24px;
+          background: rgba(26, 77, 46, 0.9);
           color: white;
-          border: 2px solid #000000;
+          border: none;
+          border-radius: 24px;
           cursor: pointer;
           font-size: 14px;
-          font-weight: 700;
+          font-weight: 600;
           transition: all 0.15s ease;
           font-family: 'Space Grotesk', sans-serif;
         }
 
         .lume-input-area button:hover {
-          background: #D8B4FE;
-          color: #000000;
-          transform: translate(-1px, -1px);
-          box-shadow: 2px 2px 0px 0px #000000;
+          background: rgba(26, 77, 46, 1);
+          box-shadow: 0 4px 16px rgba(26, 77, 46, 0.25);
         }
 
         .lume-input-area button:disabled {
-          background: #9ca3af;
+          background: rgba(156, 163, 175, 0.6);
           cursor: not-allowed;
           transform: none;
           box-shadow: none;
@@ -683,31 +718,34 @@ export default function CareerCoach() {
         }
 
         .message {
-          max-width: 70%;
-          padding: 10px 14px;
-          margin-bottom: 8px;
-          border-radius: 0;
+          max-width: 80%;
+          padding: 12px 16px;
+          margin-bottom: 4px;
+          border-radius: 16px;
           font-size: 14px;
           line-height: 1.5;
           word-wrap: break-word;
           white-space: pre-wrap;
           font-family: 'Space Grotesk', sans-serif;
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
         }
 
         .message.user {
-          background: #1A4D2E;
-          color: white;
+          background: rgba(26, 77, 46, 0.12);
+          color: #1A4D2E;
           margin-left: auto;
-          border: 2px solid #000000;
-          box-shadow: 2px 2px 0px 0px #000000;
+          border: 1px solid rgba(26, 77, 46, 0.25);
+          border-bottom-right-radius: 4px;
+          font-weight: 500;
         }
 
         .message.assistant {
-          background: #f5f5f0;
+          background: rgba(255, 255, 255, 0.6);
           color: #111827;
           margin-right: auto;
-          border: 2px solid #000000;
-          box-shadow: 2px 2px 0px 0px #000000;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          border-bottom-left-radius: 4px;
           position: relative;
         }
 
@@ -753,12 +791,17 @@ export default function CareerCoach() {
           align-items: center;
           gap: 4px;
           padding: 12px 16px;
+          background: rgba(255, 255, 255, 0.5);
+          border-radius: 16px;
+          border-bottom-left-radius: 4px;
+          backdrop-filter: blur(8px);
+          max-width: fit-content;
         }
 
         .thinking-indicator .dot {
           width: 8px;
           height: 8px;
-          background: #1A4D2E;
+          background: rgba(26, 77, 46, 0.6);
           border-radius: 50%;
           animation: bounce 1.4s infinite ease-in-out both;
         }
@@ -781,8 +824,14 @@ export default function CareerCoach() {
         }
       `}</style>
 
+      {/* SIDEBAR OVERLAY */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* SIDEBAR */}
-      <div className="lume-sidebar hidden lg:flex">
+      <div className={`lume-sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <div style={{ fontSize: "14px", fontWeight: "700", color: "#111827", marginBottom: "8px", fontFamily: "'Space Grotesk', sans-serif" }}>
             Lume AI Coach
@@ -829,6 +878,17 @@ export default function CareerCoach() {
       <div className="lume-chat-area">
         <div className="lume-chat-header">
           <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <button
+              className="burger-btn"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              title="Toggle chat history"
+            >
+              <div className="burger-icon">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </button>
             <svg width="48" height="48" viewBox="0 0 180 40" xmlns="http://www.w3.org/2000/svg" role="img">
               <defs>
                 <style>

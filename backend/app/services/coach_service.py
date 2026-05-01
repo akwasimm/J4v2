@@ -205,7 +205,7 @@ User Profile Context:
         raise HTTPException(status_code=500, detail="Could not save messages")
 
     return {
-        "session_id": str(session.id),
+        "session_id": session.session_uuid,  # Return UUID as the primary session identifier
         "session_uuid": session.session_uuid,
         "user_message": user_msg,
         "assistant_message": assistant_msg

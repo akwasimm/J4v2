@@ -5,3 +5,4 @@ export { profileHandlers } from './profile.js';
 export { insightsHandlers } from './insights.js';
 export { skillGapHandlers } from './skillGap.js';
 export { settingsHandlers } from './settings.js';
+export { coachHandlers } from './coach.js';

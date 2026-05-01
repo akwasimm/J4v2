@@ -272,7 +272,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Change Password */}
-                  <div style={{ borderTop: "2px solid #000000", paddingTop: "24px" }}>
+                  <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "24px" }}>
                     <button
                       style={{
                         display: "flex",
@@ -309,7 +309,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Active Sessions */}
-                  <div style={{ borderTop: "2px solid #000000", paddingTop: "24px" }}>
+                  <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "24px" }}>
                     <h4
                       style={{
                         fontWeight: 900,
@@ -441,7 +441,7 @@ export default function SettingsPage() {
                         justifyContent: "space-between",
                         alignItems: "center",
                         color: "#ffffff",
-                        borderBottom: "2px solid #e5e7eb",
+                        borderBottom: "1px solid rgba(255,255,255,0.3)",
                         paddingBottom: "8px",
                       }}
                     >
@@ -454,7 +454,7 @@ export default function SettingsPage() {
                         justifyContent: "space-between",
                         alignItems: "center",
                         color: "#ffffff",
-                        borderBottom: "2px solid #e5e7eb",
+                        borderBottom: "1px solid rgba(255,255,255,0.3)",
                         paddingBottom: "8px",
                       }}
                     >
@@ -740,7 +740,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Application Alerts */}
-                <div style={{ borderTop: "2px solid #000000", paddingTop: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
                     <h3 style={{ fontWeight: 900, textTransform: "uppercase", fontSize: "1rem", fontFamily: "Syne, sans-serif" }}>
                       Application Updates
@@ -767,7 +767,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Message Alerts */}
-                <div style={{ borderTop: "2px solid #000000", paddingTop: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div>
                     <h3 style={{ fontWeight: 900, textTransform: "uppercase", fontSize: "1rem", fontFamily: "Syne, sans-serif" }}>
                       Message Notifications
@@ -1086,13 +1086,13 @@ export default function SettingsPage() {
                       <tr
                         key={i}
                         style={{
-                          borderBottom: i < billingHistory.length - 1 ? "2px solid #000000" : "none",
+                          borderBottom: i < billingHistory.length - 1 ? "1px solid #e5e7eb" : "none",
                           transition: "background-color 0.15s ease",
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f4f3f3")}
                         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
                       >
-                        <td style={{ padding: "12px", fontWeight: 700, borderRight: "2px solid #000000" }}>
+                        <td style={{ padding: "12px", fontWeight: 700, borderRight: "1px solid #e5e7eb" }}>
                           {row.date}
                         </td>
                         <td
@@ -1100,12 +1100,12 @@ export default function SettingsPage() {
                             padding: "12px",
                             color: "#4b5563",
                             fontFamily: "monospace",
-                            borderRight: "2px solid #000000",
+                            borderRight: "1px solid #e5e7eb",
                           }}
                         >
                           {row.invoiceId}
                         </td>
-                        <td style={{ padding: "12px", fontWeight: 900, borderRight: "2px solid #000000" }}>
+                        <td style={{ padding: "12px", fontWeight: 900, borderRight: "1px solid #e5e7eb" }}>
                           {row.amount}
                         </td>
                         <td style={{ padding: "12px" }}>

@@ -7,6 +7,8 @@ import { fetchMe } from "../services/authService.js";
 
 export default function AppLayout({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const hideFooter = location.pathname === "/coach";
 
   React.useEffect(() => {
     const token = localStorage.getItem("auth_token");
@@ -40,8 +42,8 @@ export default function AppLayout({ children }) {
         </div>
       </div>
 
-      {/* Full-width Footer */}
-      <Footer />
+      {/* Full-width Footer - Hidden on Coach page */}
+      {!hideFooter && <Footer />}
     </div>
   );
 }
