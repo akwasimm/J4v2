@@ -16,16 +16,16 @@ export const FEATURES = {
   profile: true,
 
   // To be activated one by one
-  jobDiscovery: false,
-  jobDetail: false,
+  jobDiscovery: true,
+  jobDetail: true,
   aiRecommendations: true,
   skillGap: true,
-  resumeAnalyzer: false,
+  resumeAnalyzer: false,  // No backend API yet
   careerCoach: true,
-  appliedJobs: false,
-  savedJobs: false,
-  marketInsights: false,
+  appliedJobs: true,
+  savedJobs: true,
+  marketInsights: true,
   opportunities: true,
   settings: true,
-  dashboard: false,
+  dashboard: false,  // Unused - using aiRecommendations as main dashboard
 }

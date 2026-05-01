@@ -31,3 +31,18 @@ export const getMarketInsights = async (role = null, location = null, force = fa
   }
   return realApi.getMarketInsights(role, location, force);
 };
+
+// NEW: Database-powered market insights (reads from pre-populated market_data table)
+export const fetchMarketInsightsDB = async (role, location, showInr = false) => {
+  if (isMockMode()) {
+    // Fallback to mock data in mock mode
+    return insightsHandlers.getMarketInsights(role, location);
+  }
+  // Use the new database endpoint (fast, no AI API calls)
+  return realApi.apiClient(`/market/market-insights-db?role=${encodeURIComponent(role)}&location=${encodeURIComponent(location)}&show_inr=${showInr}`);
+};
+
+// Get supported currencies
+export const fetchSupportedCurrencies = async () => {
+  return realApi.apiClient('/ai/market-insights/currencies');
+};

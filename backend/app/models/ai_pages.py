@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
     Column, String, Boolean, DateTime,
-    Integer, ForeignKey, Text, JSON, Float
+    Integer, ForeignKey, Text, JSON, Float, UniqueConstraint
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -154,3 +154,61 @@ class BigOpportunities(Base):
 
     def __repr__(self):
         return f"<BigOpportunities category={self.category} expires={self.expires_at}>"
+
+
+class MarketData(Base):
+    """
+    Global market data for role + location combinations.
+    Pre-populated by script, read by frontend directly.
+    """
+    __tablename__ = "market_data"
+
+    id = Column(UUID(as_uuid=False), primary_key=True, default=generate_uuid)
+    
+    # Key fields for lookup
+    role = Column(String(200), nullable=False, index=True)
+    location = Column(String(200), nullable=False, index=True)
+    location_type = Column(String(50), nullable=False, default="onsite")  # onsite, remote, hybrid
+    
+    # Currency info
+    local_currency = Column(String(10), nullable=False, default="USD")
+    inr_available = Column(Boolean, default=False)
+    
+    # Salary metrics (in local currency)
+    salary_min = Column(Integer, nullable=True)
+    salary_median = Column(Integer, nullable=True)
+    salary_max = Column(Integer, nullable=True)
+    
+    # Salary in INR (if available)
+    salary_min_inr = Column(Integer, nullable=True)
+    salary_median_inr = Column(Integer, nullable=True)
+    salary_max_inr = Column(Integer, nullable=True)
+    
+    # Market trend data
+    growth_percentage = Column(Float, nullable=True)
+    active_listings = Column(Integer, nullable=True)
+    avg_time_to_hire = Column(Integer, nullable=True)
+    
+    # JSON arrays for complex data
+    skills_in_demand = Column(JSON, nullable=True)  # [{skill, demand_score, trend}]
+    top_hiring_companies = Column(JSON, nullable=True)  # [{company_name, active_openings, hiring_velocity}]
+    experience_distribution = Column(JSON, nullable=True)  # [{level, percentage, avg_salary}]
+    geographic_distribution = Column(JSON, nullable=True)  # [{country, percentage}]
+    salary_trends = Column(JSON, nullable=True)  # [{period, median_salary, median_salary_inr}]
+    
+    # Metadata
+    market_summary = Column(Text, nullable=True)
+    data_source = Column(String(50), nullable=False, default="groq")  # groq, perplexity, manual
+    confidence_score = Column(Float, nullable=True)  # 0.0 to 1.0
+    
+    created_at = Column(DateTime(timezone=True), default=utcnow)
+    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Unique constraint on role+location
+    __table_args__ = (
+        UniqueConstraint('role', 'location', name='uix_role_location'),
+    )
+
+    def __repr__(self):
+        return f"<MarketData role={self.role} location={self.location} currency={self.local_currency}>"

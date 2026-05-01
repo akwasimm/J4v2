@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000
 /**
  * Enhanced generic fetch wrapper.
  */
-async function apiClient(endpoint, customConfig = {}) {
+export async function apiClient(endpoint, customConfig = {}) {
   const token = localStorage.getItem("auth_token");
   const headers = {
     "Content-Type": "application/json",

@@ -141,6 +141,7 @@ from app.routers import coach as coach_router
 from app.routers import settings as settings_router
 from app.routers import skill_gap as skill_gap_router
 from app.routers import opportunities as opportunities_router
+from app.routers import market_data as market_data_router
 
 app.include_router(
     auth_router.router,
@@ -201,6 +202,11 @@ app.include_router(
     opportunities_router.router,
     prefix="/api/v1/opportunities",
     tags=["Opportunities"]
+)
+app.include_router(
+    market_data_router.router,
+    prefix="/api/v1/market",
+    tags=["Market Data"]
 )
 
 # Future routers:

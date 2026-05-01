@@ -102,3 +102,81 @@ def get_market_insights(
         "generated_at": result.generated_at,
         "expires_at": result.expires_at
     }
+
+
+@router.get("/market-insights-v2")
+def get_market_insights_v2(
+    role: str = Query(..., description="Job role title (e.g., 'Full Stack Developer')"),
+    location: str = Query(..., description="Location (e.g., 'New York, USA' or 'India')"),
+    show_inr: bool = Query(default=False, description="Convert all values to Indian Rupees"),
+    force: bool = Query(default=False),
+    user_id: str = Depends(get_current_user_id)
+):
+    """
+    Enhanced market insights with real-time web search.
+    
+    - Searches real job market data from the web
+    - Returns salary in local currency (auto-detected from location)
+    - Toggle 'show_inr' to convert all values to Rupees
+    - Includes dynamic charts: salary trends, skills, companies, geo-distribution
+    """
+    from app.services.market_ai_service import get_real_time_market_insights, format_for_frontend
+    
+    try:
+        # Get real-time data from web search + AI
+        insights_data = get_real_time_market_insights(
+            role=role,
+            location=location,
+            convert_to_rupees=True  # Always get INR for toggle option
+        )
+        
+        # Format for frontend
+        formatted = format_for_frontend(insights_data, show_inr=show_inr)
+        
+        return {
+            "user_id": user_id,
+            "role": role,
+            "location": location,
+            "data": formatted,
+            "generated_at": insights_data.get("_metadata", {}).get("generated_at"),
+            "is_real_time": insights_data.get("_metadata", {}).get("real_time", False),
+            "api_version": "v2-websearch"
+        }
+        
+    except Exception as e:
+        # Fallback to v1 if v2 fails
+        from app.services.ai_pages_service import get_market_insights
+        from app.core.database import get_db
+        db = next(get_db())
+        result = get_market_insights(db, user_id, role, location, force_recalculate=force)
+        return {
+            "user_id": user_id,
+            "role": result.role,
+            "location": result.location,
+            "data": result.data_json,
+            "generated_at": result.generated_at,
+            "expires_at": result.expires_at,
+            "fallback": True,
+            "error": str(e)
+        }
+
+
+@router.get("/market-insights/currencies")
+def get_supported_currencies():
+    """Get list of supported currencies and conversion rates."""
+    from app.services.market_ai_service import CURRENCY_RATES, LOCATION_CURRENCY
+    return {
+        "currencies": {
+            "USD": "US Dollar",
+            "GBP": "British Pound",
+            "EUR": "Euro",
+            "SGD": "Singapore Dollar",
+            "AUD": "Australian Dollar",
+            "CAD": "Canadian Dollar",
+            "AED": "UAE Dirham",
+            "INR": "Indian Rupee"
+        },
+        "conversion_rates_to_inr": CURRENCY_RATES,
+        "location_currency_mapping": LOCATION_CURRENCY,
+        "note": "Rates are approximate for salary estimation purposes"
+    }
