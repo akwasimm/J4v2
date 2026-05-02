@@ -1,0 +1,46 @@
+services:
+  # Backend API service
+  - type: web
+    name: jobfor-backend
+    env: python
+    plan: starter
+    region: oregon
+    branch: main
+    buildCommand: |
+      pip install -r requirements.txt
+    startCommand: |
+      uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "60"
+      - key: REFRESH_TOKEN_EXPIRE_DAYS
+        value: "7"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: NVIDIA_NIM_API_KEY
+        sync: false
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: MAX_FILE_SIZE_MB
+        value: "10"
+      - key: ALLOWED_ORIGINS
+        value: https://your-frontend.vercel.app
+      - key: APP_NAME
+        value: JobFor API
+      - key: APP_VERSION
+        value: "1.0.0"
+      - key: DEBUG
+        value: "false"
+
+  # PostgreSQL database
+  - type: postgres
+    name: jobfor-db
+    plan: free
+    region: oregon
+    ipAllowList: []
