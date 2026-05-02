@@ -39,9 +39,8 @@ services:
       - key: DEBUG
         value: "false"
 
-  # PostgreSQL database
-  - type: postgres
-    name: jobfor-db
-    plan: free
+databases:
+  - name: jobfor-db
     region: oregon
+    plan: free
     ipAllowList: []
