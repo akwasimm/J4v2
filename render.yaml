@@ -6,7 +6,7 @@ services:
     plan: starter
     region: oregon
     branch: main
-    repoDir: backend
+    rootDir: backend
     buildCommand: |
       pip install -r requirements.txt
     startCommand: |
