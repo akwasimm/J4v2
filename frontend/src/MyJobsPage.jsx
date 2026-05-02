@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
-import { getMyApplications, deleteApplication, updateApplication, getSavedJobs } from './api/client'
+import { getMyApplications, deleteApplication, updateApplication, getSavedJobs, unsaveJob, createManualApplication } from './api/client'
 
 // Mock collections for saved jobs
 const collections = [
@@ -34,6 +34,15 @@ const STATUS_TO_COLUMN = {
   "accepted": "offered"
 };
 
+// Default empty manual job form
+const EMPTY_MANUAL_JOB = {
+  company: '',
+  title: '',
+  location: 'Remote',
+  status: 'applied',
+  notes: ''
+};
+
 export default function SavedJobs() {
   // Placeholder check
   if (!FEATURES.savedJobs) {
@@ -49,6 +58,11 @@ export default function SavedJobs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Modal states
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
+  const [formData, setFormData] = useState(EMPTY_MANUAL_JOB);
+
   useEffect(() => {
     document.title = activeTab === 'saved' ? "Saved Jobs — JobFor" : "Applied Jobs — JobFor";
   }, [activeTab]);
@@ -61,6 +75,23 @@ export default function SavedJobs() {
       fetchApplications();
     }
   }, [activeTab]);
+
+  // Organize applications into columns whenever they change
+  useEffect(() => {
+    const newColumns = { ...INITIAL_COLUMNS };
+    Object.keys(newColumns).forEach(key => {
+      newColumns[key] = { ...newColumns[key], cardIds: [] };
+    });
+
+    applications.forEach((app) => {
+      const columnId = STATUS_TO_COLUMN[app.status?.toLowerCase()] || "applied";
+      if (newColumns[columnId]) {
+        newColumns[columnId].cardIds.push(`card-${app.id}`);
+      }
+    });
+
+    setColumns(newColumns);
+  }, [applications]);
 
   const fetchSavedJobs = async () => {
     setLoading(true);
@@ -84,21 +115,6 @@ export default function SavedJobs() {
       const response = await getMyApplications();
       const apps = response.data || response || [];
       setApplications(apps);
-
-      // Organize applications into columns based on status
-      const newColumns = { ...INITIAL_COLUMNS };
-      Object.keys(newColumns).forEach(key => {
-        newColumns[key] = { ...newColumns[key], cardIds: [] };
-      });
-
-      apps.forEach((app, index) => {
-        const columnId = STATUS_TO_COLUMN[app.status?.toLowerCase()] || "applied";
-        if (newColumns[columnId]) {
-          newColumns[columnId].cardIds.push(`card-${app.id || index}`);
-        }
-      });
-
-      setColumns(newColumns);
     } catch (err) {
       setError('Failed to load applications');
       console.error('Error fetching applications:', err);
@@ -133,6 +149,73 @@ export default function SavedJobs() {
     } else {
       setSearchParams({});
     }
+  };
+
+  // Manual job management functions (using localStorage pipeline)
+  const handleCreateJob = () => {
+    setEditingJob(null);
+    setFormData({ ...EMPTY_MANUAL_JOB });
+    setShowCreateModal(true);
+  };
+
+  const handleEditJob = (job) => {
+    setEditingJob(job);
+    setFormData({
+      company: job.job?.company || '',
+      title: job.job?.title || '',
+      location: job.job?.location || 'Remote',
+      status: job.status || 'applied',
+      notes: job.notes || ''
+    });
+    setShowCreateModal(true);
+  };
+
+  const handleSaveJob = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (editingJob) {
+        // Update existing via API
+        await updateApplication(editingJob.id, {
+          status: formData.status,
+          notes: formData.notes,
+          job: {
+            company: formData.company,
+            title: formData.title,
+            location: formData.location
+          }
+        });
+      } else {
+        // Create new via API
+        await createManualApplication({
+          company: formData.company,
+          title: formData.title,
+          location: formData.location,
+          status: formData.status,
+          notes: formData.notes
+        });
+      }
+
+      // Refresh applications list
+      await fetchApplications();
+
+      setShowCreateModal(false);
+      setEditingJob(null);
+      setFormData(EMPTY_MANUAL_JOB);
+    } catch (err) {
+      console.error('Error saving job:', err);
+      alert('Failed to save application. Please try again.');
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+    setEditingJob(null);
+    setFormData(EMPTY_MANUAL_JOB);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
   return (
     <>
@@ -557,9 +640,16 @@ export default function SavedJobs() {
                         className="icon-btn icon-btn-delete shadow-neo-sm btn-hover"
                         title="Remove from saved"
                         style={{ width: "32px", height: "32px", backgroundColor: "#ffffff" }}
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          // Remove from saved logic
+                          try {
+                            await unsaveJob(job.job_id || job.job?.id);
+                            // Refresh saved jobs list
+                            fetchSavedJobs();
+                          } catch (err) {
+                            console.error("Failed to remove saved job:", err);
+                            alert("Failed to remove job. Please try again.");
+                          }
                         }}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>
@@ -625,6 +715,35 @@ export default function SavedJobs() {
         ) : (
           /* Applied Jobs Kanban View */
           <div>
+            {/* Create Personal Application Button */}
+            <div style={{ marginBottom: '24px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleCreateJob}
+                className="shadow-neo btn-hover"
+                style={{
+                  padding: '12px 20px',
+                  background: '#1A4D2E',
+                  color: '#ffffff',
+                  border: '3px solid #000000',
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
+                Add Personal Application
+              </button>
+              <span style={{ fontSize: '0.875rem', color: '#6b7280', display: 'flex', alignItems: 'center' }}>
+                Track jobs you applied to outside JobFor
+              </span>
+            </div>
+
             {loading ? (
               <div style={{ textAlign: 'center', padding: '48px' }}>
                 <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>sync</span>
@@ -654,32 +773,51 @@ export default function SavedJobs() {
                 </span>
                 <h3 style={{ marginTop: '24px', fontSize: '1.5rem' }}>No applications yet</h3>
                 <p style={{ marginTop: '12px', color: '#6b7280' }}>Start applying to jobs and track your progress here!</p>
-                <button
-                  onClick={() => navigate('/discover')}
-                  className="shadow-neo btn-hover"
-                  style={{
-                    marginTop: '24px',
-                    padding: '12px 24px',
-                    background: '#D8B4FE',
-                    border: '3px solid #000000',
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontWeight: 700,
-                    fontSize: '0.875rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Find Jobs to Apply
-                </button>
+                <div style={{ marginTop: '24px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => navigate('/discover')}
+                    className="shadow-neo btn-hover"
+                    style={{
+                      padding: '12px 24px',
+                      background: '#D8B4FE',
+                      border: '3px solid #000000',
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Find Jobs to Apply
+                  </button>
+                  <button
+                    onClick={handleCreateJob}
+                    className="shadow-neo btn-hover"
+                    style={{
+                      padding: '12px 24px',
+                      background: '#1A4D2E',
+                      color: '#ffffff',
+                      border: '3px solid #000000',
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Add Personal Application
+                  </button>
+                </div>
               </div>
             ) : (
               <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '16px' }}>
                 {COLUMN_ORDER.map(columnId => {
                   const column = columns[columnId];
                   const columnApps = column.cardIds.map(cardId => {
-                    const index = parseInt(cardId.split('-')[1]);
-                    return applications[index];
+                    const id = cardId.replace('card-', '');
+                    return applications.find(app => String(app.id) === id);
                   }).filter(Boolean);
 
                   return (
@@ -695,7 +833,7 @@ export default function SavedJobs() {
                       </div>
                       <div style={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(100vh - 300px)' }}>
                         {columnApps.map((app) => (
-                          <div key={app.id} className="kanban-card">
+                          <div key={app.id} className="kanban-card" style={{ position: 'relative' }}>
                             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
                               <div
                                 style={{
@@ -721,8 +859,13 @@ export default function SavedJobs() {
                               </div>
                             </div>
 
-                            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
+                            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
                               <span className="tag" style={{ fontSize: '0.625rem', padding: '2px 6px' }}>{app.job?.location || 'Remote'}</span>
+                              {app.notes && (
+                                <span className="material-symbols-outlined" style={{ fontSize: '14px', color: '#9ca3af' }} title={app.notes}>
+                                  sticky_note_2
+                                </span>
+                              )}
                             </div>
 
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -740,6 +883,14 @@ export default function SavedJobs() {
                                 <option value="rejected">Rejected</option>
                                 <option value="withdrawn">Withdrawn</option>
                               </select>
+                              <button
+                                onClick={() => handleEditJob(app)}
+                                className="icon-btn"
+                                style={{ width: '28px', height: '28px' }}
+                                title="Edit application"
+                              >
+                                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>edit</span>
+                              </button>
                               <button
                                 onClick={() => handleDeleteApplication(app.id)}
                                 className="icon-btn icon-btn-delete"
@@ -766,6 +917,211 @@ export default function SavedJobs() {
           </div>
         )}
       </main>
+
+      {/* Create/Edit Manual Job Modal */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '24px'
+        }}>
+          <div className="shadow-neo-lg" style={{
+            background: '#ffffff',
+            border: '4px solid #000000',
+            width: '100%',
+            maxWidth: '500px',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '20px 24px',
+              borderBottom: '3px solid #000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              backgroundColor: '#1A4D2E',
+              color: '#ffffff'
+            }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>
+                {editingJob ? 'Edit Application' : 'Add Application'}
+              </h3>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  background: 'transparent',
+                  border: '2px solid #ffffff',
+                  color: '#ffffff',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '1.25rem'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSaveJob} style={{ padding: '24px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', marginBottom: '6px' }}>
+                  Company Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.company}
+                  onChange={(e) => handleInputChange('company', e.target.value)}
+                  placeholder="e.g., Google, Microsoft, etc."
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '3px solid #000000',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '1rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', marginBottom: '6px' }}>
+                  Job Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  placeholder="e.g., Software Engineer, Product Manager"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '3px solid #000000',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '1rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', marginBottom: '6px' }}>
+                  Location
+                </label>
+                <input
+                  type="text"
+                  value={formData.location}
+                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  placeholder="e.g., Remote, New York, London"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '3px solid #000000',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '1rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', marginBottom: '6px' }}>
+                  Application Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '3px solid #000000',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '1rem',
+                    background: '#ffffff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="applied">Applied</option>
+                  <option value="viewed">Viewed</option>
+                  <option value="interviewing">Interviewing</option>
+                  <option value="offered">Offered</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="withdrawn">Withdrawn</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontWeight: 700, fontSize: '0.875rem', marginBottom: '6px' }}>
+                  Notes
+                </label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  placeholder="Add any notes about this application (contact info, referral, etc.)"
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '3px solid #000000',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '1rem',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    background: '#ffffff',
+                    border: '3px solid #000000',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    background: '#1A4D2E',
+                    color: '#ffffff',
+                    border: '3px solid #000000',
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {editingJob ? 'Save Changes' : 'Add Application'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

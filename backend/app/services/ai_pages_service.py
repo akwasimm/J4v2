@@ -162,6 +162,7 @@ Rules:
     result = call_groq_json(
         prompt=prompt,
         system_prompt="You are an expert technical recruiter and career coach. Analyze job-candidate fit accurately.",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",  # 30K tokens/min, 1K req/day
         temperature=0.1,
         max_tokens=2000
     )
@@ -271,6 +272,7 @@ Rules:
     result = call_groq_json(
         prompt=prompt,
         system_prompt="You are an expert technical career advisor. Give accurate, specific skill gap analysis.",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",  # 30K tokens/min, 1K req/day
         temperature=0.1,
         max_tokens=2500
     )
@@ -413,6 +415,7 @@ Rules:
     result = call_groq_json(
         prompt=prompt,
         system_prompt="You are an expert ATS and resume optimization specialist. Give precise, actionable feedback.",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",  # 30K tokens/min, 1K req/day
         temperature=0.1,
         max_tokens=2500
     )
@@ -532,6 +535,7 @@ Rules:
     result = call_groq_json(
         prompt=prompt,
         system_prompt="You are an expert job recommendation engine. Match candidates to jobs accurately.",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",  # 30K tokens/min, 1K req/day
         temperature=0.2,
         max_tokens=2000
     )
@@ -694,6 +698,7 @@ Rules:
     result = call_groq_json(
         prompt=prompt,
         system_prompt="You are an expert Indian IT job market analyst. Provide accurate, current market data.",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",  # 30K tokens/min, 1K req/day
         temperature=0.2,
         max_tokens=2500
     )

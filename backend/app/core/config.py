@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     GROQ_API_KEY: Optional[str] = None
     NVIDIA_NIM_API_KEY: Optional[str] = None
     NVIDIA_NIM_MODEL: str = "meta/llama-3.1-8b-instruct"
-    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"  # 30K tokens/min, 1K req/day
+    GROQ_FALLBACK_MODEL: str = "compound-beta"  # Free/unlimited fallback model
     
     # File Upload
     UPLOAD_DIR: str = "uploads"

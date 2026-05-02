@@ -23,6 +23,7 @@ class JobResponse(BaseModel):
     is_active: bool = True
     posted_at: Optional[datetime] = None
     created_at: datetime
+    match_score: Optional[int] = None  # Personalized match score (0-100)
 
     class Config:
         from_attributes = True
@@ -36,11 +37,13 @@ class JobSearchParams(BaseModel):
     max_exp: Optional[int] = None
     salary_min: Optional[int] = None
     salary_max: Optional[int] = None
+    user_id: Optional[str] = None  # For personalized match scoring
+    sort_by: Optional[str] = Field(default="match_score", pattern="^(match_score|posted_at|relevance)$")
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=10, ge=1, le=50)
 
 class JobSearchResponse(BaseModel):
-    jobs: List[JobResponse]
+    items: List[JobResponse]
     total: int
     page: int
     page_size: int

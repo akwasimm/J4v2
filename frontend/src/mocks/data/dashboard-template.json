@@ -1,0 +1,105 @@
+{
+  "_template_info": {
+    "description": "User-agnostic dashboard data template. Replace placeholder values with actual user data.",
+    "version": "1.0",
+    "usage": "Copy this structure and replace all placeholder values with user-specific data."
+  },
+  "stats": {
+    "first_name": "John",
+    "full_name": "John Doe"
+  },
+  "profile_completion": 75,
+  "recommended_actions": [
+    {
+      "action": "Apply to 5 relevant jobs",
+      "reason": "Your skills match current market demand",
+      "priority": "high",
+      "estimated_impact": "+30% response rate"
+    }
+  ],
+  "market_trends": {
+    "chart": {
+      "title": "Top 5 Job Categories (Last 30 Days)",
+      "labels": ["Category 1", "Category 2", "Category 3", "Category 4", "Category 5"],
+      "values": [100, 200, 150, 180, 120]
+    },
+    "insight_cards": [
+      {
+        "title": "Market Insight Title",
+        "description": "Description of the market trend",
+        "color": "#E6F6D4"
+      }
+    ]
+  },
+  "application_pipeline": {
+    "pipeline": [
+      { "stage": "Applied", "count": 10, "trend": "+2 this week" },
+      { "stage": "Interview", "count": 2, "trend": "1 scheduled" },
+      { "stage": "Offer", "count": 0, "trend": "-" }
+    ],
+    "weekly_applications": 3,
+    "response_rate": "25%",
+    "time_to_offer": "N/A"
+  },
+  "career_growth": {
+    "radar_chart": {
+      "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+      "values": [80, 70, 75, 65, 60, 72]
+    },
+    "insights": [
+      {
+        "title": "Growth Insight",
+        "description": "Description of growth opportunity",
+        "priority": "medium"
+      }
+    ],
+    "upskill_recommendations": [
+      {
+        "skill": "Skill Name",
+        "reason": "Reason for learning this skill",
+        "resources": ["Resource 1", "Resource 2"]
+      }
+    ]
+  },
+  "top_picks": [
+    {
+      "job_id": "001",
+      "title": "Job Title",
+      "company": "Company Name",
+      "location": "City",
+      "work_model": "hybrid",
+      "match_score": 85,
+      "salary_range": "₹10L - ₹20L",
+      "tags": ["Skill1", "Skill2", "Skill3"],
+      "match_reasons": ["Reason 1", "Reason 2", "Reason 3"],
+      "cardBg": "#E6F6D4",
+      "matchBg": "#D8B4FE",
+      "matchColor": "#000000"
+    }
+  ],
+  "employer_insights": {
+    "top_employers": [
+      {
+        "name": "Company Name",
+        "job_count": 20,
+        "match_score": 85,
+        "trend": "+10%",
+        "benefits": ["Benefit 1", "Benefit 2", "Benefit 3"],
+        "culture_tags": ["Tag 1", "Tag 2"],
+        "cardBg": "#E6F6D4",
+        "avatarColor": "#F472B6"
+      }
+    ],
+    "market_insights": [
+      "Market insight 1",
+      "Market insight 2"
+    ]
+  },
+  "strategy_cards": [
+    {
+      "title": "Strategy Title",
+      "body": "Strategy description",
+      "priority": "high"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, and_, func
@@ -19,11 +19,100 @@ logger = logging.getLogger(__name__)
 
 # ─── Jobs ────────────────────────────────────────────────────────────────────
 
+def calculate_match_score(job: Job, user_skills: List[str], user_exp_years: int = 0) -> int:
+    """
+    Calculate personalized match score (0-100) based on:
+    - Skill overlap (70%)
+    - Experience match (20%)
+    - Job freshness (10%)
+    """
+    if not user_skills:
+        # No user skills - return baseline score with randomness for variety
+        base = 65
+        freshness_boost = 10 if job.posted_at and (datetime.now(timezone.utc) - job.posted_at).days < 7 else 0
+        return min(100, base + freshness_boost)
+    
+    # Normalize skills to lowercase for comparison
+    user_skills_lower = [s.lower().strip() for s in user_skills]
+    job_skills = job.core_skills or []
+    job_skills_lower = [s.lower().strip() for s in job_skills]
+    
+    if not job_skills:
+        # Job has no skills listed - can't calculate overlap
+        return 70
+    
+    # Calculate skill overlap
+    matches = 0
+    for job_skill in job_skills_lower:
+        # Check for exact match or partial match
+        if any(job_skill in user_skill or user_skill in job_skill for user_skill in user_skills_lower):
+            matches += 1
+    
+    skill_score = (matches / len(job_skills)) * 70  # 70% weight
+    
+    # Experience match (20% weight)
+    exp_score = 0
+    if job.min_experience_years:
+        if user_exp_years >= job.min_experience_years:
+            exp_score = 20  # Fully qualified
+        elif user_exp_years >= job.min_experience_years * 0.7:
+            exp_score = 10  # Partially qualified
+        else:
+            exp_score = 5   # Underqualified but close
+    else:
+        exp_score = 15  # No exp requirement specified
+    
+    # Freshness boost (10% weight)
+    freshness_score = 0
+    if job.posted_at:
+        days_old = (datetime.now(timezone.utc) - job.posted_at).days
+        if days_old < 3:
+            freshness_score = 10
+        elif days_old < 7:
+            freshness_score = 7
+        elif days_old < 14:
+            freshness_score = 5
+        else:
+            freshness_score = 2
+    
+    total_score = int(skill_score + exp_score + freshness_score)
+    return min(100, max(60, total_score))  # Clamp between 60-100
+
+
 def search_jobs(
     db: Session,
     params: JobSearchParams,
     user_id: Optional[str] = None
 ) -> dict:
+    """
+    Search jobs with optional personalized match scoring.
+    """
+    # Get user skills if user_id provided (from params or function arg)
+    effective_user_id = params.user_id or user_id
+    user_skills = []
+    user_exp_years = 0
+    
+    if effective_user_id:
+        from app.models.user import User
+        from app.models.profile import UserSkill, UserExperience
+        
+        # Fetch user with skills
+        user = db.query(User).filter(User.id == effective_user_id).first()
+        if user:
+            # Get skills
+            skills = db.query(UserSkill).filter(UserSkill.user_id == effective_user_id).all()
+            user_skills = [s.name for s in skills]
+            
+            # Calculate total experience years
+            experiences = db.query(UserExperience).filter(
+                UserExperience.user_id == effective_user_id
+            ).all()
+            for exp in experiences:
+                if exp.start_date:
+                    end = exp.end_date or date.today()
+                    years = (end - exp.start_date).days / 365.25
+                    user_exp_years += years
+    
     query = db.query(Job).filter(Job.is_active == True)
 
     # Keyword search across title, company, description
@@ -89,20 +178,41 @@ def search_jobs(
             )
         )
 
-    # Count total before pagination
-    total = query.count()
-
-    # Order by newest first
-    query = query.order_by(Job.posted_at.desc())
-
+    # Get all matching jobs for processing
+    all_jobs = query.all()
+    total = len(all_jobs)
+    
+    # Calculate match scores for each job
+    jobs_with_scores = []
+    for job in all_jobs:
+        match_score = calculate_match_score(job, user_skills, user_exp_years)
+        job.match_score = match_score  # Attach to job object
+        jobs_with_scores.append(job)
+    
+    # Sort based on params
+    if params.sort_by == "match_score":
+        # Sort by match score descending, then by posted date
+        jobs_with_scores.sort(key=lambda j: (-j.match_score, j.posted_at or datetime.min.replace(tzinfo=timezone.utc)))
+    elif params.sort_by == "relevance" and params.q:
+        # Simple relevance: title contains query gets priority
+        query_lower = params.q.lower()
+        jobs_with_scores.sort(key=lambda j: (
+            0 if query_lower in j.title.lower() else 1,
+            -(j.match_score or 0),
+            j.posted_at or datetime.min.replace(tzinfo=timezone.utc)
+        ), reverse=False)
+    else:
+        # Default: sort by posted date descending
+        jobs_with_scores.sort(key=lambda j: j.posted_at or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    
     # Pagination
     offset = (params.page - 1) * params.page_size
-    jobs = query.offset(offset).limit(params.page_size).all()
-
+    paginated_jobs = jobs_with_scores[offset:offset + params.page_size]
+    
     total_pages = (total + params.page_size - 1) // params.page_size
 
     return {
-        "jobs": jobs,
+        "items": paginated_jobs,
         "total": total,
         "page": params.page,
         "page_size": params.page_size,

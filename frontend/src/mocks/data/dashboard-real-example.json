@@ -1,0 +1,344 @@
+{
+  "_info": "This example uses ONLY data available from the database tables (users, job_applications, saved_jobs, market_data, user_dashboard_data)",
+  "stats": {
+    "first_name": "John",
+    "full_name": "John Doe",
+    "profile_completion": 75,
+    "total_applications": 12,
+    "saved_jobs": 8,
+    "interviews_scheduled": 3,
+    "offers_received": 1,
+    "active_applications": 5,
+    "application_success_rate": 8.3,
+    "member_since": "2024-01-15T10:30:00Z",
+    "last_activity": "2024-05-01T14:22:00Z"
+  },
+  "profile_completion": 75,
+  "recommended_actions": [
+    {
+      "action": "Complete your profile to 100%",
+      "reason": "You're at 75% completion - add skills and experience to unlock better matches",
+      "priority": "high",
+      "estimated_impact": "+25% match score"
+    },
+    {
+      "action": "Apply to 3 more jobs this week",
+      "reason": "Your application success rate is 8.3% - more applications increase offer chances",
+      "priority": "medium",
+      "estimated_impact": "+15% response rate"
+    },
+    {
+      "action": "Follow up on pending applications",
+      "reason": "You have 5 active applications - follow up to stay top of mind",
+      "priority": "medium",
+      "estimated_impact": "+10% interview rate"
+    }
+  ],
+  "market_trends": {
+    "chart": {
+      "title": "Top 5 Job Categories (Last 30 Days)",
+      "labels": ["Full Stack", "Backend", "Frontend", "DevOps", "AI/ML"],
+      "values": [450, 380, 350, 280, 320]
+    },
+    "insight_cards": [
+      {
+        "title": "🚀 Full Stack demand up 15%",
+        "description": "Companies prefer engineers who can work across the stack",
+        "color": "#E6F6D4"
+      },
+      {
+        "title": "💰 Backend salaries up 12%",
+        "description": "Senior backend engineers commanding ₹25L+ packages",
+        "color": "#D8B4FE"
+      }
+    ]
+  },
+  "application_pipeline": {
+    "pipeline": [
+      { "stage": "Applied", "count": 12, "trend": "+3 this week" },
+      { "stage": "Interview", "count": 3, "trend": "1 scheduled tomorrow" },
+      { "stage": "Offer", "count": 1, "trend": "1 received yesterday" }
+    ],
+    "weekly_applications": 3,
+    "response_rate": "25%",
+    "time_to_offer": "18 days"
+  },
+  "career_growth": {
+    "radar_chart": {
+      "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+      "values": [85, 70, 75, 65, 50, 72]
+    },
+    "insights": [
+      {
+        "title": "Strong Technical Foundation",
+        "description": "Your skills match 85% of market demand - focus on leadership for senior roles",
+        "priority": "medium"
+      }
+    ],
+    "upskill_recommendations": [
+      {
+        "skill": "System Design",
+        "reason": "Required for 90% of senior engineering roles",
+        "resources": ["DDIA Book", "System Design Primer"]
+      }
+    ]
+  },
+  "top_picks": [
+    {
+      "job_id": "job_001",
+      "title": "Senior Software Engineer",
+      "company": "TechCorp India",
+      "location": "Bangalore",
+      "work_model": "hybrid",
+      "match_score": 95,
+      "salary_range": "₹20L - ₹35L",
+      "tags": ["React.js", "Python", "AWS"],
+      "match_reasons": ["95% skill match with your profile", "Matches your 3+ years experience", "Hybrid work model available"],
+      "cardBg": "#E6F6D4",
+      "matchBg": "#D8B4FE",
+      "matchColor": "#000000"
+    },
+    {
+      "job_id": "job_002",
+      "title": "Full Stack Developer",
+      "company": "StartupXYZ",
+      "location": "Remote",
+      "work_model": "remote",
+      "match_score": 92,
+      "salary_range": "₹15L - ₹25L",
+      "tags": ["React", "Node.js", "PostgreSQL"],
+      "match_reasons": ["Full stack matches your skills", "100% remote work", "Fast-growing team"],
+      "cardBg": "#D8B4FE",
+      "matchBg": "#FEF08A",
+      "matchColor": "#000000"
+    },
+    {
+      "job_id": "job_003",
+      "title": "Backend Engineer",
+      "company": "BigTech Solutions",
+      "location": "Hyderabad",
+      "work_model": "hybrid",
+      "match_score": 90,
+      "salary_range": "₹18L - ₹30L",
+      "tags": ["Python", "AWS", "Microservices"],
+      "match_reasons": ["Backend focus matches your skills", "Great career growth potential", "Competitive compensation"],
+      "cardBg": "#FEF08A",
+      "matchBg": "#E6F6D4",
+      "matchColor": "#000000"
+    },
+    {
+      "job_id": "job_004",
+      "title": "Frontend Specialist",
+      "company": "InnovateLabs",
+      "location": "Pune",
+      "work_model": "onsite",
+      "match_score": 88,
+      "salary_range": "₹14L - ₹22L",
+      "tags": ["React", "TypeScript", "UI/UX"],
+      "match_reasons": ["UI skills in high demand", "Modern tech stack", "Design-focused culture"],
+      "cardBg": "#E6F6D4",
+      "matchBg": "#D8B4FE",
+      "matchColor": "#000000"
+    },
+    {
+      "job_id": "job_005",
+      "title": "DevOps Engineer",
+      "company": "CloudFirst",
+      "location": "Chennai",
+      "work_model": "hybrid",
+      "match_score": 85,
+      "salary_range": "₹16L - ₹28L",
+      "tags": ["Docker", "Kubernetes", "AWS"],
+      "match_reasons": ["DevOps skills highly valued", "Growing market demand", "Cloud-native environment"],
+      "cardBg": "#D8B4FE",
+      "matchBg": "#FEF08A",
+      "matchColor": "#000000"
+    },
+    {
+      "job_id": "job_006",
+      "title": "Product Engineer",
+      "company": "Productive.io",
+      "location": "Remote",
+      "work_model": "remote",
+      "match_score": 87,
+      "salary_range": "₹20L - ₹35L",
+      "tags": ["Product Management", "React", "Node.js"],
+      "match_reasons": ["Product mindset matches profile", "Leadership potential", "High equity stake"],
+      "cardBg": "#FEF08A",
+      "matchBg": "#E6F6D4",
+      "matchColor": "#000000"
+    }
+  ],
+  "missing_skills": [
+    {
+      "skill": "Kubernetes",
+      "importance": "High",
+      "impact": "Required for 60% of senior DevOps roles",
+      "jobs_requiring": 45
+    },
+    {
+      "skill": "System Design",
+      "importance": "High",
+      "impact": "Critical for Staff/Principal engineering interviews",
+      "jobs_requiring": 38
+    },
+    {
+      "skill": "GraphQL",
+      "importance": "Medium",
+      "impact": "Growing adoption in modern API development",
+      "jobs_requiring": 28
+    },
+    {
+      "skill": "TypeScript",
+      "importance": "Medium",
+      "impact": "Becoming standard for frontend development",
+      "jobs_requiring": 52
+    }
+  ],
+  "skills_in_demand": [
+    {
+      "skill_name": "React.js",
+      "demand_score": 0.95,
+      "trend_direction": "up",
+      "user_has": true,
+      "salary_premium": "+18%"
+    },
+    {
+      "skill_name": "Python",
+      "demand_score": 0.93,
+      "trend_direction": "up",
+      "user_has": true,
+      "salary_premium": "+15%"
+    },
+    {
+      "skill_name": "Node.js",
+      "demand_score": 0.88,
+      "trend_direction": "stable",
+      "user_has": true,
+      "salary_premium": "+12%"
+    },
+    {
+      "skill_name": "AWS",
+      "demand_score": 0.90,
+      "trend_direction": "up",
+      "user_has": true,
+      "salary_premium": "+20%"
+    },
+    {
+      "skill_name": "TypeScript",
+      "demand_score": 0.85,
+      "trend_direction": "up",
+      "user_has": false,
+      "salary_premium": "+10%"
+    },
+    {
+      "skill_name": "Docker",
+      "demand_score": 0.82,
+      "trend_direction": "up",
+      "user_has": false,
+      "salary_premium": "+14%"
+    },
+    {
+      "skill_name": "Kubernetes",
+      "demand_score": 0.78,
+      "trend_direction": "up",
+      "user_has": false,
+      "salary_premium": "+22%"
+    },
+    {
+      "skill_name": "AI/ML",
+      "demand_score": 0.96,
+      "trend_direction": "up",
+      "user_has": false,
+      "salary_premium": "+35%"
+    }
+  ],
+  "market_snapshot": {
+    "hot_roles": ["Full Stack Developer", "AI Engineer", "DevOps Engineer", "Backend Engineer", "Frontend Developer"],
+    "avg_salary_for_profile": "₹18L - ₹28L",
+    "market_trend": "Tech hiring is growing 15% YoY. Your skills are in high demand.",
+    "companies_actively_hiring": 150,
+    "message": "Your profile matches current market trends well"
+  },
+  "employer_insights": {
+    "top_employers": [
+      {
+        "name": "TechCorp India",
+        "job_count": 45,
+        "match_score": 95,
+        "trend": "+12%",
+        "benefits": ["Health Insurance", "ESOPs", "Remote work"],
+        "culture_tags": ["Innovation", "Growth"],
+        "cardBg": "#E6F6D4",
+        "avatarColor": "#F472B6"
+      },
+      {
+        "name": "StartupXYZ",
+        "job_count": 28,
+        "match_score": 92,
+        "trend": "+18%",
+        "benefits": ["Stock options", "Flexible hours", "Learning budget"],
+        "culture_tags": ["Fast-paced", "Startup"],
+        "cardBg": "#D8B4FE",
+        "avatarColor": "#60A5FA"
+      },
+      {
+        "name": "BigTech Solutions",
+        "job_count": 35,
+        "match_score": 90,
+        "trend": "+8%",
+        "benefits": ["Health + Dental", "Relocation", "Performance bonus"],
+        "culture_tags": ["Enterprise", "Stable"],
+        "cardBg": "#FEF08A",
+        "avatarColor": "#34D399"
+      },
+      {
+        "name": "InnovateLabs",
+        "job_count": 22,
+        "match_score": 88,
+        "trend": "+15%",
+        "benefits": ["Premium healthcare", "Gym membership", "Remote days"],
+        "culture_tags": ["Design-driven", "Agile"],
+        "cardBg": "#E6F6D4",
+        "avatarColor": "#FBBF24"
+      },
+      {
+        "name": "CloudFirst",
+        "job_count": 18,
+        "match_score": 85,
+        "trend": "+10%",
+        "benefits": ["Cloud certification support", "Remote-first", "Unlimited PTO"],
+        "culture_tags": ["Cloud-native", "Autonomy"],
+        "cardBg": "#D8B4FE",
+        "avatarColor": "#A78BFA"
+      }
+    ],
+    "market_insights": [
+      "Full Stack roles have increased 15% in the last quarter",
+      "Companies offering remote work have grown 40% YoY",
+      "AI/ML skills command 35% salary premium in the market"
+    ]
+  },
+  "strategy_cards": [
+    {
+      "title": "Complete your profile to 100%",
+      "body": "Add missing skills and experience details to unlock better job matches",
+      "priority": "high"
+    },
+    {
+      "title": "Learn Kubernetes",
+      "body": "This skill is required for 60% of senior DevOps roles and adds 22% salary premium",
+      "priority": "medium"
+    },
+    {
+      "title": "Apply to 3 more jobs this week",
+      "body": "Increase your application volume to improve offer chances",
+      "priority": "medium"
+    }
+  ],
+  "generated_at": "2024-05-02T10:00:00Z",
+  "expires_at": "2024-05-02T16:00:00Z",
+  "data_source": "database",
+  "is_fresh": true,
+  "is_empty": false
+}

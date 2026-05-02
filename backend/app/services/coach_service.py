@@ -155,7 +155,7 @@ User Profile Context:
 
     try:
         response = client.chat.completions.create(
-            model=settings.GROQ_MODEL,
+            model="llama-3.1-8b-instant",
             messages=messages,
             temperature=0.7,
             max_tokens=1000

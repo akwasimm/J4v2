@@ -4,9 +4,7 @@ import { Link } from "react-router-dom";
 const routes = [
   { category: "Public", links: [
     { path: "/", label: "Landing Page" },
-    { path: "/v2-landing", label: "Experimental Landing (V2)" },
     { path: "/job", label: "Job Detail" },
-    { path: "/skill-gap", label: "Skill Gap Analysis" },
   ]},
   { category: "Auth & Onboarding", links: [
     { path: "/join", label: "Join Community (Sign Up)" },
@@ -16,23 +14,20 @@ const routes = [
     { path: "/upload", label: "Upload Resume Page" },
   ]},
   { category: "Dashboard (Requires Layout)", links: [
-    { path: "/user", label: "Dashboard (Now AI Recommendations)" },
-    { path: "/user-archived", label: "User Dashboard (Archived)" },
+    { path: "/user", label: "Dashboard" },
     { path: "/applied", label: "Applied Jobs (Dashboard)" },
     { path: "/saved", label: "Saved Jobs" },
     { path: "/discover", label: "Job Discovery" },
     { path: "/opportunities", label: "Big Opportunities" },
     { path: "/coach", label: "Career Coach (Nova)" },
     { path: "/analyzer", label: "Resume Analyzer" },
-    { path: "/ai", label: "AI Recommendations" },
-    { path: "/merged", label: "Experimental Merged Board" },
-    { path: "/insights", label: "Market Insights" },
     { path: "/profile", label: "Edit Profile" },
     { path: "/settings", label: "Settings" },
+    { path: "/skillgap", label: "Skill Gap Analysis" },
   ]}
 ];
 
-export default function DevIndex() {
+export default function DevIndexPage() {
   return (
     <>
       <style>{`
@@ -72,7 +67,7 @@ export default function DevIndex() {
         ))}
         
         <div style={{ marginTop: "40px", paddingTop: "20px", borderTop: "2px solid rgba(0,0,0,0.1)", textAlign: "center", fontSize: "0.80rem", color: "#6b7280" }}>
-          You can delete DevIndex.jsx when testing is finished.
+          You can delete DevIndexPage.jsx when testing is finished.
         </div>
       </div>
     </>

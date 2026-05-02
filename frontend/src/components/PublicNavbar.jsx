@@ -1,17 +1,25 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const NAV_LINKS = [
-  { label: "Discover", to: "/discover" },
-  { label: "Insights", to: "/insights" },
-  { label: "Skill Gap", to: "/skill-gap" },
-  { label: "Career Coach", to: "/coach" },
-  { label: "Big Opps", to: "/opportunities" },
+  { label: "Discover", to: "/discover", requireAuth: true },
+  { label: "Insights", to: "/insights", requireAuth: true },
+  { label: "Skill Gap", to: "/skillgap", requireAuth: true },
+  { label: "Career Coach", to: "/coach", requireAuth: true },
+  { label: "Big Opps", to: "/opportunities", requireAuth: true },
 ];
 
 export default function PublicNavbar() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const handleNavClick = (link, e) => {
+    if (link.requireAuth) {
+      e.preventDefault();
+      navigate("/login");
+    }
+  };
 
   const linkStyle = (active) => ({
     fontFamily: "'Inter', sans-serif",
@@ -115,9 +123,15 @@ export default function PublicNavbar() {
 
           {/* Desktop nav links */}
           <nav className="pub-nav-center" style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            {NAV_LINKS.map(({ label, to }) => (
-              <Link key={to} to={to} className="pub-nav-link" style={linkStyle(pathname === to)}>
-                {label}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="pub-nav-link"
+                style={linkStyle(pathname === link.to)}
+                onClick={(e) => handleNavClick(link, e)}
+              >
+                {link.label}
               </Link>
             ))}
           </nav>
@@ -148,9 +162,17 @@ export default function PublicNavbar() {
             backgroundColor: "#ffffff", borderBottom: "4px solid #1a1c1c",
             boxShadow: "0 8px 0 0 #1a1c1c", zIndex: 99,
           }}>
-            {NAV_LINKS.map(({ label, to }) => (
-              <Link key={to} to={to} className={`pub-mobile-link${pathname === to ? " active" : ""}`} onClick={() => setOpen(false)}>
-                {label}
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`pub-mobile-link${pathname === link.to ? " active" : ""}`}
+                onClick={(e) => {
+                  setOpen(false);
+                  handleNavClick(link, e);
+                }}
+              >
+                {link.label}
               </Link>
             ))}
             <div style={{ display: "flex", gap: 12, padding: 16, borderTop: "2px solid #e5e5e5" }}>

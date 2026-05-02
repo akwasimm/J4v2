@@ -322,6 +322,7 @@ Make it detailed and realistic based on your knowledge of the tech industry."""
         raw_data = call_groq_json(
             prompt=fallback_prompt,
             system_prompt="You are a tech industry analyst. Provide realistic, well-researched market data.",
+            model="groq/compound-mini",  # 70K tokens/min, no daily limit
             temperature=0.3,
             max_tokens=2500
         )
@@ -337,6 +338,7 @@ Make it detailed and realistic based on your knowledge of the tech industry."""
     structured_data = call_groq_json(
         prompt=structuring_prompt,
         system_prompt="You are a data structuring specialist. Convert unstructured market research into clean, valid JSON.",
+        model="groq/compound-mini",  # 70K tokens/min, no daily limit
         temperature=0.1,
         max_tokens=3000
     )

@@ -46,6 +46,7 @@ class User(Base):
 
     # Profile
     headline = Column(String(255), nullable=True)
+    bio = Column(Text, nullable=True)  # About me / professional summary
     location = Column(String(200), nullable=True)
     linkedin = Column(String(100), nullable=True)
     github = Column(String(100), nullable=True)

@@ -30,11 +30,13 @@ export const logout = async () => {
     localStorage.removeItem('user_first_name');
     localStorage.removeItem('user_avatar_url');
     localStorage.removeItem('user_resume_url');
+    localStorage.removeItem('user_id');
     return authHandlers.logout();
   }
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user_first_name');
   localStorage.removeItem('user_avatar_url');
   localStorage.removeItem('user_resume_url');
+  localStorage.removeItem('user_id');
   return { success: true };
 };

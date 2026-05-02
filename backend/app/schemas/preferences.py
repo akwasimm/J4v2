@@ -25,6 +25,7 @@ class PreferencesUpdate(BaseModel):
     notice_period: Optional[str] = None
     industry_preference: Optional[List[str]] = None
     job_level_preference: Optional[str] = None
+    target_role: Optional[str] = None  # User's target job role for dashboard personalization
 
     @validator('employment_types')
     def validate_employment_types(cls, v):
@@ -72,6 +73,7 @@ class PreferencesResponse(BaseModel):
     notice_period: Optional[str] = None
     industry_preference: Optional[List[str]] = None
     job_level_preference: Optional[str] = None
+    target_role: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

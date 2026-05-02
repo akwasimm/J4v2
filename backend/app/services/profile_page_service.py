@@ -130,6 +130,7 @@ Important:
         result = call_groq_json(
             prompt=prompt,
             system_prompt=system_prompt,
+            model="groq/compound-mini",  # 70K tokens/min, no daily limit
             temperature=0.1,
             max_tokens=4000
         )

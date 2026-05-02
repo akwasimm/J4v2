@@ -49,6 +49,7 @@ export async function apiClient(endpoint, customConfig = {}) {
 function persistProfileAssets(data = {}) {
   if (data.avatar_url) localStorage.setItem("user_avatar_url", data.avatar_url);
   if (data.resume_url) localStorage.setItem("user_resume_url", data.resume_url);
+  if (data.id) localStorage.setItem("user_id", data.id);
 }
 
 // ─── API Methods ─────────────────────────────────────────────────────────────
@@ -62,6 +63,10 @@ export async function fetchJobs(params = {}) {
   if (params.min_exp !== undefined && params.min_exp !== null) query.append("min_exp", params.min_exp);
   if (params.page) query.append("page", params.page);
   if (params.page_size) query.append("page_size", params.page_size);
+  
+  // Add user_id for personalized match scoring
+  if (params.user_id) query.append("user_id", params.user_id);
+  if (params.sort_by) query.append("sort_by", params.sort_by);
 
   return apiClient(`/jobs/search?${query.toString()}`);
 }
@@ -81,21 +86,116 @@ export async function applyToJob(jobId, matchScoreAtApply = null) {
   });
 }
 
+// LocalStorage-based Manual Applications (replaces backend API)
+const MANUAL_APPLICATIONS_KEY = 'manualApplications';
+
+function getManualApplicationsFromStorage() {
+  try {
+    const stored = localStorage.getItem(MANUAL_APPLICATIONS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    console.error('Error reading manual applications:', e);
+    return [];
+  }
+}
+
+function saveManualApplicationsToStorage(applications) {
+  localStorage.setItem(MANUAL_APPLICATIONS_KEY, JSON.stringify(applications));
+}
+
+// Create a new manual application (user-created job card)
+export async function createManualApplication(jobData) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const applications = getManualApplicationsFromStorage();
+      const newApplication = {
+        id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: jobData.status || 'applied',
+        applied_at: new Date().toISOString(),
+        notes: jobData.notes || '',
+        source: 'manual',
+        job: {
+          id: null, // manual jobs don't have a real job ID
+          title: jobData.title,
+          company: jobData.company,
+          location: jobData.location || 'Remote',
+          company_logo: null
+        }
+      };
+      applications.push(newApplication);
+      saveManualApplicationsToStorage(applications);
+      resolve({ data: newApplication, success: true });
+    }, 100); // Simulate network delay
+  });
+}
+
 export async function updateApplication(applicationId, updateData) {
-  return apiClient(`/jobs/applications/${applicationId}`, {
-    method: "PUT",
-    body: JSON.stringify(updateData),
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const applications = getManualApplicationsFromStorage();
+      const index = applications.findIndex(app => app.id === applicationId);
+
+      if (index === -1) {
+        reject(new Error('Application not found'));
+        return;
+      }
+
+      // Update application fields
+      applications[index] = {
+        ...applications[index],
+        ...updateData,
+        // Preserve nested job updates if provided
+        job: updateData.job ? { ...applications[index].job, ...updateData.job } : applications[index].job
+      };
+
+      saveManualApplicationsToStorage(applications);
+      resolve({ data: applications[index], success: true });
+    }, 100);
   });
 }
 
 export async function deleteApplication(applicationId) {
-  return apiClient(`/jobs/applications/${applicationId}`, {
-    method: "DELETE",
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const applications = getManualApplicationsFromStorage();
+      const filtered = applications.filter(app => app.id !== applicationId);
+
+      if (filtered.length === applications.length) {
+        reject(new Error('Application not found'));
+        return;
+      }
+
+      saveManualApplicationsToStorage(filtered);
+      resolve({ success: true });
+    }, 100);
   });
 }
 
 export async function getMyApplications() {
-  return apiClient("/jobs/applications/me");
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const applications = getManualApplicationsFromStorage();
+      // Return in format matching backend API response
+      resolve({ data: applications, success: true });
+    }, 150);
+  });
+}
+
+export async function saveJob(jobId, matchScore = null) {
+  const body = { job_id: jobId };
+  if (matchScore !== null) {
+    body.match_score = matchScore;
+  }
+  return apiClient("/jobs/saved", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function unsaveJob(jobId) {
+  return apiClient(`/jobs/saved/${jobId}`, {
+    method: "DELETE",
+  });
 }
 
 export async function getSavedJobs() {
@@ -144,10 +244,12 @@ export async function login(email, password) {
     localStorage.setItem("auth_token", data.tokens.access_token);
     localStorage.setItem("refresh_token", data.tokens.refresh_token);
     if (data.user?.first_name) localStorage.setItem("user_first_name", data.user.first_name);
+    if (data.user?.id) localStorage.setItem("user_id", data.user.id);
     localStorage.setItem("is_new_user", data.user?.is_new_user ? "true" : "false");
   }
   try {
     const me = await apiClient("/auth/me");
+    if (me?.id) localStorage.setItem("user_id", me.id);
     persistProfileAssets(me);
   } catch (e) { }
   return data;
@@ -164,10 +266,12 @@ export async function register(email, password, fullName, agreedToTerms = true) 
     localStorage.setItem("auth_token", data.tokens.access_token);
     localStorage.setItem("refresh_token", data.tokens.refresh_token);
     if (data.user?.first_name) localStorage.setItem("user_first_name", data.user.first_name);
+    if (data.user?.id) localStorage.setItem("user_id", data.user.id);
     localStorage.setItem("is_new_user", data.user?.is_new_user ? "true" : "false");
   }
   try {
     const me = await apiClient("/auth/me");
+    if (me?.id) localStorage.setItem("user_id", me.id);
     persistProfileAssets(me);
   } catch (e) { }
   return data;
@@ -720,4 +824,21 @@ export async function refreshOpportunities(category = null) {
 
 export async function getOpportunitiesStatus() {
   return apiClient("/opportunities/status");
+}
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+
+export async function getDashboardData(forceRefresh = false) {
+  return apiClient(`/dashboard?force_refresh=${forceRefresh}`);
+}
+
+export async function getDashboardCached() {
+  // Fast cached-only dashboard - no AI blocking
+  return apiClient("/dashboard/cached");
+}
+
+export async function refreshDashboard() {
+  return apiClient("/dashboard/refresh", {
+    method: "POST",
+  });
 }

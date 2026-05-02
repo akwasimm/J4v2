@@ -42,6 +42,7 @@ class UserPreference(Base):
     notice_period = Column(String(50), nullable=True)
     industry_preference = Column(JSON, nullable=True)
     job_level_preference = Column(String(50), nullable=True)
+    target_role = Column(String(100), nullable=True)  # User's target job role for dashboard personalization
     created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
     updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 

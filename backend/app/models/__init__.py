@@ -7,4 +7,5 @@ from app.models.jobs import Job, JobApplication, SavedJob, SavedJobCollection
 from app.models.ai_pages import JobMatchHistory, SkillGapAnalysis, ResumeAnalysis, AIRecommendation, MarketInsightsCache, BigOpportunities, MarketData
 from app.models.coach import CoachSession, CoachMessage
 from app.models.settings import UserSettings, ConnectedAccount
+from app.models.dashboard import UserDashboardData, UserAICallTracking
 from app.models.user import User

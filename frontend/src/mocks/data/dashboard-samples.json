@@ -1,0 +1,2372 @@
+[
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_1}}",
+      "full_name": "{{USER_FULL_NAME_1}}"
+    },
+    "profile_completion": 82,
+    "recommended_actions": [
+      {
+        "action": "Apply to 4 React Developer jobs",
+        "reason": "88% match with your frontend skills",
+        "priority": "high",
+        "estimated_impact": "+30% response rate"
+      },
+      {
+        "action": "Add TypeScript to your skills",
+        "reason": "High demand in top startups",
+        "priority": "medium",
+        "estimated_impact": "+15% match rate"
+      },
+      {
+        "action": "Update portfolio with recent projects",
+        "reason": "Recruiters check portfolios first",
+        "priority": "low",
+        "estimated_impact": "+10% profile views"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["Frontend", "Backend", "AI/ML", "DevOps", "Product"],
+        "values": [420, 380, 350, 200, 150]
+      },
+      "insight_cards": [
+        {
+          "title": "🚀 Frontend roles up 18%",
+          "description": "React and Next.js roles surging in Bangalore & Mumbai",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💰 AI/ML salaries up 12%",
+          "description": "Highest paying bracket for mid-level engineers",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 14, "trend": "+4 this week" },
+        { "stage": "Interview", "count": 3, "trend": "1 scheduled tomorrow" },
+        { "stage": "Offer", "count": 1, "trend": "Awaiting decision" }
+      ],
+      "weekly_applications": 4,
+      "response_rate": "28%",
+      "time_to_offer": "21 days"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [88, 75, 70, 80, 55, 85]
+      },
+      "insights": [
+        {
+          "title": "Leadership Skills Gap",
+          "description": "Mentoring juniors can boost your profile by 15%",
+          "priority": "medium"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "System Design",
+          "reason": "Required for 80% of senior frontend roles",
+          "resources": ["Alex Xu's Book", "DesignGurus.io"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "101",
+        "title": "Senior Frontend Engineer",
+        "company": "Razorpay",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 95,
+        "salary_range": "₹22L - ₹35L",
+        "tags": ["React", "TypeScript", "GraphQL"],
+        "match_reasons": ["95% skill match", "Matches your salary expectations", "Fast-growing team"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "102",
+        "title": "React Developer",
+        "company": "Zerodha",
+        "location": "Bangalore",
+        "work_model": "remote",
+        "match_score": 92,
+        "salary_range": "₹18L - ₹28L",
+        "tags": ["React", "JavaScript", "Websockets"],
+        "match_reasons": ["92% skill match", "Excellent work-life balance"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "103",
+        "title": "Frontend Engineer",
+        "company": "CRED",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 89,
+        "salary_range": "₹20L - ₹32L",
+        "tags": ["React Native", "TypeScript", "iOS"],
+        "match_reasons": ["Strong culture fit", "High growth potential"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "104",
+        "title": "UI Engineer",
+        "company": "Meesho",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 87,
+        "salary_range": "₹15L - ₹25L",
+        "tags": ["React", "Micro-frontends", "AWS"],
+        "match_reasons": ["Matches your recent projects", "Equity options"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "105",
+        "title": "Web Developer",
+        "company": "Freshworks",
+        "location": "Chennai",
+        "work_model": "office",
+        "match_score": 85,
+        "salary_range": "₹14L - ₹22L",
+        "tags": ["JavaScript", "HTML/CSS", "React"],
+        "match_reasons": ["Core tech team", "Stable company"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "106",
+        "title": "Lead Frontend",
+        "company": "Groww",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 82,
+        "salary_range": "₹28L - ₹40L",
+        "tags": ["React", "Performance", "System Design"],
+        "match_reasons": ["Leadership opportunity", "High impact work"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Razorpay",
+          "job_count": 35,
+          "match_score": 95,
+          "trend": "+15%",
+          "benefits": ["Health Insurance", "Remote flexibility", "ESOPs"],
+          "culture_tags": ["Engineering-first", "Fast-paced"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Zerodha",
+          "job_count": 12,
+          "match_score": 92,
+          "trend": "+5%",
+          "benefits": ["Profit-sharing", "Zero micromanagement", "Free meals"],
+          "culture_tags": ["Autonomy", "Flat hierarchy"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "CRED",
+          "job_count": 28,
+          "match_score": 89,
+          "trend": "+10%",
+          "benefits": ["Premium healthcare", "Learning budget", "Stock options"],
+          "culture_tags": ["Design-driven", "Quality-focused"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Meesho",
+          "job_count": 40,
+          "match_score": 87,
+          "trend": "+20%",
+          "benefits": ["WFH setup allowance", "Wellness program", "ESOPs"],
+          "culture_tags": ["Inclusive", "Growth-mindset"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "Freshworks",
+          "job_count": 22,
+          "match_score": 85,
+          "trend": "+8%",
+          "benefits": ["Dental coverage", "Gym membership", "Relocation support"],
+          "culture_tags": ["Stable", "Global exposure"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "Fintech companies are hiring aggressively in Bangalore",
+        "ESOPs are becoming standard for senior engineers"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Target Fintech startups",
+        "body": "Fintech hiring is up 25% this quarter for frontend roles.",
+        "priority": "high"
+      },
+      {
+        "title": "Highlight System Design",
+        "body": "Add system design case studies to your portfolio.",
+        "priority": "medium"
+      },
+      {
+        "title": "Learn Next.js",
+        "body": "60% of new React roles prefer Next.js experience.",
+        "priority": "medium"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_2}}",
+      "full_name": "{{USER_FULL_NAME_2}}"
+    },
+    "profile_completion": 65,
+    "recommended_actions": [
+      {
+        "action": "Apply to 5 Data Scientist roles",
+        "reason": "High demand for your Python & ML skills",
+        "priority": "high",
+        "estimated_impact": "+35% response rate"
+      },
+      {
+        "action": "Complete ML project showcase",
+        "reason": "Profiles with projects get 40% more views",
+        "priority": "medium",
+        "estimated_impact": "+20% profile views"
+      },
+      {
+        "action": "Add LinkedIn link",
+        "reason": "Recruiters cross-verify profiles",
+        "priority": "low",
+        "estimated_impact": "+5% trust score"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["AI/ML", "Data Engineering", "Backend", "Frontend", "DevOps"],
+        "values": [500, 380, 340, 250, 180]
+      },
+      "insight_cards": [
+        {
+          "title": "🚀 AI/ML roles up 22%",
+          "description": "GenAI and LLM roles dominating Hyderabad & Pune",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💰 Data roles up 14%",
+          "description": "Highest salary hikes seen in data engineering",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 8, "trend": "+2 this week" },
+        { "stage": "Interview", "count": 2, "trend": "1 next Monday" },
+        { "stage": "Offer", "count": 0, "trend": "-" }
+      ],
+      "weekly_applications": 2,
+      "response_rate": "25%",
+      "time_to_offer": "N/A"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [90, 65, 85, 70, 40, 75]
+      },
+      "insights": [
+        {
+          "title": "Leadership Experience",
+          "description": "Leading a small ML team can increase your seniority score by 20%",
+          "priority": "high"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "LLM Fine-tuning",
+          "reason": "95% of top AI roles ask for GenAI experience",
+          "resources": ["HuggingFace Course", "DeepLearning.AI"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "201",
+        "title": "Data Scientist - ML",
+        "company": "Swiggy",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 94,
+        "salary_range": "₹20L - ₹35L",
+        "tags": ["Python", "TensorFlow", "NLP"],
+        "match_reasons": ["94% skill match", "Strong data culture", "Matches salary expectations"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "202",
+        "title": "ML Engineer",
+        "company": "Flipkart",
+        "location": "Bangalore",
+        "work_model": "office",
+        "match_score": 91,
+        "salary_range": "₹22L - ₹38L",
+        "tags": ["PyTorch", "MLOps", "AWS"],
+        "match_reasons": ["91% skill match", "Large scale data"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "203",
+        "title": "AI Engineer",
+        "company": "Unacademy",
+        "location": "Bangalore",
+        "work_model": "remote",
+        "match_score": 88,
+        "salary_range": "₹18L - ₹28L",
+        "tags": ["GenAI", "Python", "LLMs"],
+        "match_reasons": ["GenAI focus", "Fast growth"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "204",
+        "title": "Data Scientist",
+        "company": "PhonePe",
+        "location": "Pune",
+        "work_model": "hybrid",
+        "match_score": 86,
+        "salary_range": "₹19L - ₹30L",
+        "tags": ["Statistics", "SQL", "Python"],
+        "match_reasons": ["Fintech domain", "Great benefits"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "205",
+        "title": "Applied ML Scientist",
+        "company": "Walmart Labs",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 83,
+        "salary_range": "₹25L - ₹40L",
+        "tags": ["Recommendation Systems", "Python", "Spark"],
+        "match_reasons": ["Research oriented", "High compensation"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "206",
+        "title": "NLP Engineer",
+        "company": "Haptik",
+        "location": "Mumbai",
+        "work_model": "remote",
+        "match_score": 80,
+        "salary_range": "₹15L - ₹25L",
+        "tags": ["NLP", "Transformers", "Chatbots"],
+        "match_reasons": ["NLP specialization match", "AI product company"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Swiggy",
+          "job_count": 30,
+          "match_score": 94,
+          "trend": "+18%",
+          "benefits": ["Swiggy Money", "Health + Dental", "ESOPs"],
+          "culture_tags": ["Data-driven", "Agile"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Flipkart",
+          "job_count": 45,
+          "match_score": 91,
+          "trend": "+10%",
+          "benefits": ["Medical coverage", "Relocation", "Stock options"],
+          "culture_tags": ["Scale", "Innovation"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "PhonePe",
+          "job_count": 25,
+          "match_score": 86,
+          "trend": "+14%",
+          "benefits": ["Insurance", "Remote days", "Learning budget"],
+          "culture_tags": ["Engineering-first", "Transparent"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Walmart Labs",
+          "job_count": 18,
+          "match_score": 83,
+          "trend": "+6%",
+          "benefits": ["Gym", "Free meals", "401k match"],
+          "culture_tags": ["Research", "Global impact"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "Haptik",
+          "job_count": 10,
+          "match_score": 80,
+          "trend": "+12%",
+          "benefits": ["Flexible hours", "Healthcare", "Subscriptions"],
+          "culture_tags": ["AI-first", "Startup culture"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "GenAI skills command a 20% salary premium",
+        "E-commerce companies are doubling their ML teams"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Showcase GenAI projects",
+        "body": "LLM projects increase shortlisting chances by 40%.",
+        "priority": "high"
+      },
+      {
+        "title": "Target E-commerce & Fintech",
+        "body": "These sectors have the highest ML hiring budgets right now.",
+        "priority": "medium"
+      },
+      {
+        "title": "Publish research papers",
+        "body": "Top companies weigh publications heavily for ML roles.",
+        "priority": "low"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_3}}",
+      "full_name": "{{USER_FULL_NAME_3}}"
+    },
+    "profile_completion": 94,
+    "recommended_actions": [
+      {
+        "action": "Apply to 3 DevOps Lead roles",
+        "reason": "100% match with your AWS & Kubernetes skills",
+        "priority": "high",
+        "estimated_impact": "+45% response rate"
+      },
+      {
+        "action": "Get AWS Solutions Architect Cert",
+        "reason": "Certified profiles get 30% more callbacks",
+        "priority": "medium",
+        "estimated_impact": "+20% match rate"
+      },
+      {
+        "action": "Add CI/CD pipeline metrics",
+        "reason": "Show impact via deployment frequency",
+        "priority": "low",
+        "estimated_impact": "+10% recruiter views"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["DevOps", "Cloud", "Backend", "Security", "AI/ML"],
+        "values": [380, 350, 300, 220, 200]
+      },
+      "insight_cards": [
+        {
+          "title": "☁️ Cloud roles up 20%",
+          "description": "AWS & GCP certified engineers in huge demand in Pune & Hyderabad",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💰 DevOps salaries up 15%",
+          "description": "Senior DevOps roles crossing ₹35L packages",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 22, "trend": "+5 this week" },
+        { "stage": "Interview", "count": 5, "trend": "2 this week" },
+        { "stage": "Offer", "count": 2, "trend": "1 expires in 3 days" }
+      ],
+      "weekly_applications": 5,
+      "response_rate": "35%",
+      "time_to_offer": "15 days"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [95, 85, 70, 75, 80, 80]
+      },
+      "insights": [
+        {
+          "title": "Cloud Architecture Mastery",
+          "description": "Your cloud skills are top 5% in the market",
+          "priority": "low"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "Terraform Advanced",
+          "reason": "Infrastructure as Code is mandatory for Lead roles",
+          "resources": ["HashiCorp Learn", "KodeKloud"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "301",
+        "title": "DevOps Lead",
+        "company": "PhonePe",
+        "location": "Pune",
+        "work_model": "hybrid",
+        "match_score": 98,
+        "salary_range": "₹30L - ₹45L",
+        "tags": ["AWS", "Kubernetes", "Terraform"],
+        "match_reasons": ["98% skill match", "Leadership opportunity", "Top-tier compensation"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "302",
+        "title": "SRE Engineer",
+        "company": "Infosys (Top Tier)",
+        "location": "Hyderabad",
+        "work_model": "hybrid",
+        "match_score": 95,
+        "salary_range": "₹22L - ₹35L",
+        "tags": ["GCP", "Docker", "Monitoring"],
+        "match_reasons": ["95% skill match", "Enterprise scale"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "303",
+        "title": "Cloud Architect",
+        "company": "TCS Digital",
+        "location": "Mumbai",
+        "work_model": "office",
+        "match_score": 92,
+        "salary_range": "₹25L - ₹40L",
+        "tags": ["AWS", "Microservices", "Security"],
+        "match_reasons": ["Architecture role", "Stable career path"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "304",
+        "title": "Platform Engineer",
+        "company": "Groww",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 89,
+        "salary_range": "₹28L - ₹38L",
+        "tags": ["Kubernetes", "CI/CD", "Linux"],
+        "match_reasons": ["Fintech scale", "Modern tech stack"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "305",
+        "title": "DevOps Engineer",
+        "company": "Zomato",
+        "location": "Gurgaon",
+        "work_model": "hybrid",
+        "match_score": 87,
+        "salary_range": "₹20L - ₹32L",
+        "tags": ["AWS", "Ansible", "Python"],
+        "match_reasons": ["Hyper-growth team", "Good ESOPs"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "306",
+        "title": "Infrastructure Lead",
+        "company": "Freshworks",
+        "location": "Chennai",
+        "work_model": "office",
+        "match_score": 84,
+        "salary_range": "₹24L - ₹36L",
+        "tags": ["CloudFormation", "Azure", "DevSecOps"],
+        "match_reasons": ["Global SaaS", "Team management"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "PhonePe",
+          "job_count": 28,
+          "match_score": 98,
+          "trend": "+22%",
+          "benefits": ["Premium Health", "ESOPs", "Flexible WFH"],
+          "culture_tags": ["Ownership", "Tech-driven"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Infosys",
+          "job_count": 60,
+          "match_score": 95,
+          "trend": "+8%",
+          "benefits": ["Healthcare", "Insurance", "Relocation"],
+          "culture_tags": ["Process-oriented", "Stable"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "TCS Digital",
+          "job_count": 50,
+          "match_score": 92,
+          "trend": "+5%",
+          "benefits": ["Learning budget", "Gym", "Medical"],
+          "culture_tags": ["Innovation Labs", "Global"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Groww",
+          "job_count": 15,
+          "match_score": 89,
+          "trend": "+30%",
+          "benefits": ["Stock options", "Wellness", "Free meals"],
+          "culture_tags": ["Startup", "High impact"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "Zomato",
+          "job_count": 20,
+          "match_score": 87,
+          "trend": "+12%",
+          "benefits": ["Food perks", "Health", "Stocks"],
+          "culture_tags": ["Fast-paced", "Customer-first"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "Fintech leads DevOps hiring with premium salaries",
+        "Multi-cloud skills (AWS + GCP) are highly valued"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Negotiate with competing offers",
+        "body": "High demand means companies will match or beat offers.",
+        "priority": "high"
+      },
+      {
+        "title": "Highlight cost savings",
+        "body": "Show how your DevOps improvements saved money/uptime.",
+        "priority": "medium"
+      },
+      {
+        "title": "Target Lead/Architect roles",
+        "body": "Your profile is ready for the next level.",
+        "priority": "medium"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_4}}",
+      "full_name": "{{USER_FULL_NAME_4}}"
+    },
+    "profile_completion": 71,
+    "recommended_actions": [
+      {
+        "action": "Apply to 4 Product Manager roles",
+        "reason": "Your analytics skills match PM requirements",
+        "priority": "high",
+        "estimated_impact": "+25% response rate"
+      },
+      {
+        "action": "Add product case studies",
+        "reason": "PM roles require proof of product thinking",
+        "priority": "medium",
+        "estimated_impact": "+30% shortlist rate"
+      },
+      {
+        "action": "Take A/B testing certification",
+        "reason": "Data-driven PMs are in top demand",
+        "priority": "low",
+        "estimated_impact": "+10% profile weight"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["Product", "Data", "Engineering", "Design", "Marketing"],
+        "values": [280, 350, 400, 150, 120]
+      },
+      "insight_cards": [
+        {
+          "title": "📈 Product roles up 12%",
+          "description": "B2B SaaS companies hiring PMs aggressively in Bangalore",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "🎯 Data-PM combo rare",
+          "description": "PMs with SQL skills get 15% higher starting pay",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 6, "trend": "+1 this week" },
+        { "stage": "Interview", "count": 2, "trend": "1 pending assignment" },
+        { "stage": "Offer", "count": 0, "trend": "-" }
+      ],
+      "weekly_applications": 1,
+      "response_rate": "33%",
+      "time_to_offer": "N/A"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [65, 70, 80, 90, 75, 95]
+      },
+      "insights": [
+        {
+          "title": "Technical Depth",
+          "description": "Understanding APIs and system design will boost PM interviews by 20%",
+          "priority": "high"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "System Design for PMs",
+          "reason": "85% of PM interviews include technical rounds",
+          "resources": ["Grokking the PM Interview", "Exponent"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "401",
+        "title": "Product Manager",
+        "company": "Meesho",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 91,
+        "salary_range": "₹25L - ₹40L",
+        "tags": ["B2C", "Analytics", "SQL"],
+        "match_reasons": ["91% analytics match", "Responsible for core metrics", "High visibility role"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "402",
+        "title": "Associate PM",
+        "company": "CRED",
+        "location": "Bangalore",
+        "work_model": "office",
+        "match_score": 88,
+        "salary_range": "₹18L - ₹28L",
+        "tags": ["Fintech", "UX", "Growth"],
+        "match_reasons": ["Great brand", "Strong mentorship"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "403",
+        "title": "Product Manager - SaaS",
+        "company": "Freshworks",
+        "location": "Chennai",
+        "work_model": "hybrid",
+        "match_score": 85,
+        "salary_range": "₹22L - ₹35L",
+        "tags": ["B2B", "API", "Roadmapping"],
+        "match_reasons": ["Global product", "SaaS experience valued"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "404",
+        "title": "Senior PM",
+        "company": "Razorpay",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 82,
+        "salary_range": "₹30L - ₹45L",
+        "tags": ["Payments", "Strategy", "Data"],
+        "match_reasons": ["Fintech leader", "High impact"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "405",
+        "title": "PM - Core",
+        "company": "Zomato",
+        "location": "Gurgaon",
+        "work_model": "office",
+        "match_score": 79,
+        "salary_range": "₹20L - ₹32L",
+        "tags": ["Logistics", "Operations", "SQL"],
+        "match_reasons": ["Hyper-local scale", "Operations focus"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "406",
+        "title": "Technical PM",
+        "company": "Zoho",
+        "location": "Chennai",
+        "work_model": "office",
+        "match_score": 76,
+        "salary_range": "₹15L - ₹25L",
+        "tags": ["SaaS", "Integration", "API"],
+        "match_reasons": ["Technical PM role", "Stable environment"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Meesho",
+          "job_count": 20,
+          "match_score": 91,
+          "trend": "+25%",
+          "benefits": ["ESOPs", "Remote days", "Wellness"],
+          "culture_tags": ["Ownership", "Impact-driven"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "CRED",
+          "job_count": 15,
+          "match_score": 88,
+          "trend": "+10%",
+          "benefits": ["Premium healthcare", "Learning budget", "Stocks"],
+          "culture_tags": ["Elite", "Quality-first"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "Freshworks",
+          "job_count": 18,
+          "match_score": 85,
+          "trend": "+8%",
+          "benefits": ["Insurance", "Subscriptions", "Gym"],
+          "culture_tags": ["Global", "SaaS-focused"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Razorpay",
+          "job_count": 12,
+          "match_score": 82,
+          "trend": "+15%",
+          "benefits": ["Health", "ESOPs", "Flexi-work"],
+          "culture_tags": ["Engineering-heavy", "Fintech"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "Zoho",
+          "job_count": 30,
+          "match_score": 76,
+          "trend": "+5%",
+          "benefits": ["Free meals", "No hierarchy", "Sabbatical"],
+          "culture_tags": ["Bootstrapped", "Long-term"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "B2B SaaS product managers are in the highest demand",
+        "PMs with SQL/analytics skills command a 15% premium"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Build a product portfolio",
+        "body": "Write 2-3 product teardowns to stand out.",
+        "priority": "high"
+      },
+      {
+        "title": "Network with Head of Products",
+        "body": "Referrals are responsible for 60% of PM hires.",
+        "priority": "medium"
+      },
+      {
+        "title": "Practice product metrics",
+        "body": "Be ready to discuss North Star metrics fluently.",
+        "priority": "medium"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_5}}",
+      "full_name": "{{USER_FULL_NAME_5}}"
+    },
+    "profile_completion": 88,
+    "recommended_actions": [
+      {
+        "action": "Apply to 5 AI/ML Engineer roles",
+        "reason": "Deep learning skills are in top 2% demand",
+        "priority": "high",
+        "estimated_impact": "+40% response rate"
+      },
+      {
+        "action": "Contribute to open-source LLMs",
+        "reason": "Shows hands-on expertise to recruiters",
+        "priority": "medium",
+        "estimated_impact": "+25% profile weight"
+      },
+      {
+        "action": "Write technical blogs",
+        "reason": "Thought leadership increases recruiter outreach",
+        "priority": "low",
+        "estimated_impact": "+15% inbound messages"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["AI/ML", "Backend", "Cloud", "Data", "Security"],
+        "values": [550, 400, 320, 280, 150]
+      },
+      "insight_cards": [
+        {
+          "title": "🔥 GenAI demand up 35%",
+          "description": "LLM & RAG roles exploding across Indian startups",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💰 AI salaries at all-time high",
+          "description": "Mid-level AI engineers hitting ₹30L+ easily",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 11, "trend": "+3 this week" },
+        { "stage": "Interview", "count": 3, "trend": "2 technical rounds lined up" },
+        { "stage": "Offer", "count": 1, "trend": "Negotiation in progress" }
+      ],
+      "weekly_applications": 3,
+      "response_rate": "36%",
+      "time_to_offer": "20 days"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [92, 78, 85, 68, 50, 72]
+      },
+      "insights": [
+        {
+          "title": "Communication Skills",
+          "description": "Improving presentation skills can boost team lead chances by 25%",
+          "priority": "medium"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "RAG Architecture",
+          "reason": "85% of new AI jobs require Retrieval-Augmented Generation",
+          "resources": ["LangChain Docs", "LlamaIndex"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "501",
+        "title": "AI/ML Engineer",
+        "company": "Jio Platforms",
+        "location": "Mumbai",
+        "work_model": "hybrid",
+        "match_score": 96,
+        "salary_range": "₹25L - ₹40L",
+        "tags": ["Deep Learning", "PyTorch", "NLP"],
+        "match_reasons": ["96% skill match", "Massive scale data", "AI-first culture"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "502",
+        "title": "LLM Engineer",
+        "company": "Unacademy",
+        "location": "Bangalore",
+        "work_model": "remote",
+        "match_score": 93,
+        "salary_range": "₹22L - ₹35L",
+        "tags": ["GenAI", "LLMs", "RAG"],
+        "match_reasons": ["GenAI specialists needed", "EdTech impact"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "503",
+        "title": "ML Engineer",
+        "company": "Ola Electric",
+        "location": "Bangalore",
+        "work_model": "office",
+        "match_score": 90,
+        "salary_range": "₹20L - ₹32L",
+        "tags": ["Computer Vision", "TensorFlow", "Edge AI"],
+        "match_reasons": ["Core tech team", "Hardware + AI intersection"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "504",
+        "title": "Senior Data Scientist",
+        "company": "Myntra",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 87,
+        "salary_range": "₹28L - ₹42L",
+        "tags": ["Recommendation", "Python", "Spark"],
+        "match_reasons": ["Fashion tech", "High salary band"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "505",
+        "title": "Applied Scientist",
+        "company": "MakeMyTrip",
+        "location": "Gurgaon",
+        "work_model": "hybrid",
+        "match_score": 84,
+        "salary_range": "₹22L - ₹36L",
+        "tags": ["NLP", "Pricing", "ML"],
+        "match_reasons": ["Travel domain", "Applied research"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "506",
+        "title": "GenAI Developer",
+        "company": "Postman",
+        "location": "Bangalore",
+        "work_model": "remote",
+        "match_score": 81,
+        "salary_range": "₹25L - ₹38L",
+        "tags": ["GenAI", "API", "Python"],
+        "match_reasons": ["Global dev tools", "AI integration"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Jio Platforms",
+          "job_count": 40,
+          "match_score": 96,
+          "trend": "+20%",
+          "benefits": ["Health", "Subsidized telecom", "Campus facilities"],
+          "culture_tags": ["Scale", "Data-rich"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Unacademy",
+          "job_count": 18,
+          "match_score": 93,
+          "trend": "+15%",
+          "benefits": ["Subscriptions", "Remote", "Stock options"],
+          "culture_tags": ["Mission-driven", "Agile"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "Ola Electric",
+          "job_count": 25,
+          "match_score": 90,
+          "trend": "+30%",
+          "benefits": ["EV discounts", "Health", "ESOPs"],
+          "culture_tags": ["Innovation", "Fast-paced"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Myntra",
+          "job_count": 22,
+          "match_score": 87,
+          "trend": "+10%",
+          "benefits": ["Shopping discounts", "Health", "Flexible hours"],
+          "culture_tags": ["Data-driven", "Consumer-focused"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "Postman",
+          "job_count": 12,
+          "match_score": 81,
+          "trend": "+8%",
+          "benefits": ["Global benefits", "Remote", "Equity"],
+          "culture_tags": ["Developer-first", "Global"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "RAG and Vector DB skills are the hottest in AI right now",
+        "EV and EdTech are aggressively poaching AI talent"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Build a RAG-based project",
+        "body": "Showcase a working LLM app on GitHub to double your callbacks.",
+        "priority": "high"
+      },
+      {
+        "title": "Target AI-first startups",
+        "body": "Startups offer 25% more equity for AI specialists.",
+        "priority": "medium"
+      },
+      {
+        "title": "Write research papers",
+        "body": "Top AI teams value publications over degrees now.",
+        "priority": "low"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_6}}",
+      "full_name": "{{USER_FULL_NAME_6}}"
+    },
+    "profile_completion": 55,
+    "recommended_actions": [
+      {
+        "action": "Complete your profile details",
+        "reason": "Only 45% to go to unlock premium matches",
+        "priority": "high",
+        "estimated_impact": "+50% recruiter views"
+      },
+      {
+        "action": "Add Cybersecurity certifications",
+        "reason": "CEH/OSCP boosts security profile credibility",
+        "priority": "medium",
+        "estimated_impact": "+30% match rate"
+      },
+      {
+        "action": "Upload your resume",
+        "reason": "Recruiters prefer downloadable resumes",
+        "priority": "low",
+        "estimated_impact": "+15% response rate"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["Security", "Cloud", "DevOps", "Backend", "Compliance"],
+        "values": [280, 320, 300, 250, 140]
+      },
+      "insight_cards": [
+        {
+          "title": "🛡️ Cybersecurity up 25%",
+          "description": "Financial sector hiring security analysts rapidly",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "🔒 Zero Trust demand",
+          "description": "Companies shifting to Zero Trust frameworks",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 4, "trend": "+1 this week" },
+        { "stage": "Interview", "count": 1, "trend": "Pending HR round" },
+        { "stage": "Offer", "count": 0, "trend": "-" }
+      ],
+      "weekly_applications": 1,
+      "response_rate": "25%",
+      "time_to_offer": "N/A"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [75, 60, 65, 70, 45, 68]
+      },
+      "insights": [
+        {
+          "title": "Profile Incomplete",
+          "description": "Completing your profile will unlock 40% more matching roles",
+          "priority": "high"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "Cloud Security",
+          "reason": "AWS/Azure security skills are mandatory for 80% of roles",
+          "resources": ["AWS Security Specialty", "Cybrary"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "601",
+        "title": "Security Analyst",
+        "company": "HDFC Bank",
+        "location": "Mumbai",
+        "work_model": "office",
+        "match_score": 89,
+        "salary_range": "₹14L - ₹22L",
+        "tags": ["SIEM", "SOC", "Threat Analysis"],
+        "match_reasons": ["89% skill match", "Banking security domain", "Stable role"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "602",
+        "title": "InfoSec Engineer",
+        "company": "TCS",
+        "location": "Hyderabad",
+        "work_model": "hybrid",
+        "match_score": 86,
+        "salary_range": "₹12L - ₹20L",
+        "tags": ["Networking", "Firewalls", "Compliance"],
+        "match_reasons": ["Enterprise scale", "Good training"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "603",
+        "title": "Cybersecurity Consultant",
+        "company": "Deloitte India",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 83,
+        "salary_range": "₹16L - ₹25L",
+        "tags": ["Risk Assessment", "ISO 27001", "Audit"],
+        "match_reasons": ["Consulting exposure", "Multiple industries"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "604",
+        "title": "Cloud Security Engineer",
+        "company": "Infosys",
+        "location": "Pune",
+        "work_model": "hybrid",
+        "match_score": 80,
+        "salary_range": "₹15L - ₹24L",
+        "tags": ["AWS Security", "IAM", "KMS"],
+        "match_reasons": ["Cloud growth", "Enterprise clients"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "605",
+        "title": "Penetration Tester",
+        "company": "Razorpay",
+        "location": "Bangalore",
+        "work_model": "remote",
+        "match_score": 77,
+        "salary_range": "₹18L - ₹28L",
+        "tags": ["Pentesting", "Kali Linux", "Web Security"],
+        "match_reasons": ["Fintech security", "Bug bounty culture"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "606",
+        "title": "Security Engineer",
+        "company": "PhonePe",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 74,
+        "salary_range": "₹16L - ₹26L",
+        "tags": ["AppSec", "DevSecOps", "CI/CD"],
+        "match_reasons": ["Fintech scale", "Modern stack"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "HDFC Bank",
+          "job_count": 25,
+          "match_score": 89,
+          "trend": "+15%",
+          "benefits": ["Banking perks", "Health", "Loans at low rates"],
+          "culture_tags": ["Secure", "Process-heavy"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "TCS",
+          "job_count": 55,
+          "match_score": 86,
+          "trend": "+8%",
+          "benefits": ["Health", "Training", "Global exposure"],
+          "culture_tags": ["Structured", "Stable"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "Deloitte India",
+          "job_count": 15,
+          "match_score": 83,
+          "trend": "+12%",
+          "benefits": ["Insurance", "Wellness", "Flexibility"],
+          "culture_tags": ["Consulting", "Prestigious"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Infosys",
+          "job_count": 40,
+          "match_score": 80,
+          "trend": "+6%",
+          "benefits": ["Gym", "Campus", "Medical"],
+          "culture_tags": ["Enterprise", "Learning"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "Razorpay",
+          "job_count": 10,
+          "match_score": 77,
+          "trend": "+20%",
+          "benefits": ["ESOPs", "Health", "Remote"],
+          "culture_tags": ["Startup", "Security-first"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "BFSI sector is the largest employer for cybersecurity in India",
+        "DevSecOps skills command a 20% salary premium"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Complete your profile ASAP",
+        "body": "Recruiters skip incomplete profiles 80% of the time.",
+        "priority": "high"
+      },
+      {
+        "title": "Get AWS Security Certified",
+        "body": "Cloud security is the fastest-growing sub-domain.",
+        "priority": "medium"
+      },
+      {
+        "title": "Target BFSI sector",
+        "body": "Banking and finance have the highest security budgets.",
+        "priority": "medium"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_7}}",
+      "full_name": "{{USER_FULL_NAME_7}}"
+    },
+    "profile_completion": 78,
+    "recommended_actions": [
+      {
+        "action": "Apply to 4 UI/UX Designer roles",
+        "reason": "Your Figma portfolio matches 90% of requirements",
+        "priority": "high",
+        "estimated_impact": "+35% response rate"
+      },
+      {
+        "action": "Add design case studies",
+        "reason": "Show your design thinking process step-by-step",
+        "priority": "medium",
+        "estimated_impact": "+25% shortlist rate"
+      },
+      {
+        "action": "Learn design systems",
+        "reason": "70% of enterprise roles require design system knowledge",
+        "priority": "low",
+        "estimated_impact": "+15% match score"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["Design", "Frontend", "Product", "Marketing", "AI/ML"],
+        "values": [250, 380, 280, 140, 350]
+      },
+      "insight_cards": [
+        {
+          "title": "🎨 UX roles up 18%",
+          "description": "SaaS companies hiring product designers heavily",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💡 Design systems in demand",
+          "description": "Companies standardizing UI with design systems",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 9, "trend": "+2 this week" },
+        { "stage": "Interview", "count": 3, "trend": "1 portfolio review upcoming" },
+        { "stage": "Offer", "count": 1, "trend": "Received yesterday" }
+      ],
+      "weekly_applications": 2,
+      "response_rate": "33%",
+      "time_to_offer": "22 days"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [88, 72, 65, 85, 60, 90]
+      },
+      "insights": [
+        {
+          "title": "Design Leadership",
+          "description": "Mentoring junior designers will boost your seniority score",
+          "priority": "medium"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "Figma Advanced/Prototyping",
+          "reason": "High-fidelity prototyping is expected for Senior roles",
+          "resources": ["Figma Community", "Designercize"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "701",
+        "title": "UI/UX Lead",
+        "company": "Zomato",
+        "location": "Gurgaon",
+        "work_model": "hybrid",
+        "match_score": 94,
+        "salary_range": "₹22L - ₹35L",
+        "tags": ["Figma", "User Research", "Mobile"],
+        "match_reasons": ["94% skill match", "Consumer tech", "High design visibility"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "702",
+        "title": "Product Designer",
+        "company": "Freshworks",
+        "location": "Chennai",
+        "work_model": "hybrid",
+        "match_score": 91,
+        "salary_range": "₹18L - ₹28L",
+        "tags": ["B2B SaaS", "Design Systems", "Prototyping"],
+        "match_reasons": ["Global SaaS", "Design system team"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "703",
+        "title": "Senior UX Designer",
+        "company": "CRED",
+        "location": "Bangalore",
+        "work_model": "office",
+        "match_score": 88,
+        "salary_range": "₹24L - ₹38L",
+        "tags": ["Fintech", "Micro-interactions", "Premium UX"],
+        "match_reasons": ["Design-first company", "Elite team"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "704",
+        "title": "UX Designer",
+        "company": "Meesho",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 85,
+        "salary_range": "₹16L - ₹25L",
+        "tags": ["B2C", "Accessibility", "Android"],
+        "match_reasons": ["Social commerce", "Bharat users"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "705",
+        "title": "Visual Designer",
+        "company": "Swiggy",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 82,
+        "salary_range": "₹14L - ₹22L",
+        "tags": ["Branding", "Illustration", "Motion"],
+        "match_reasons": ["Food tech", "Brand scale"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "706",
+        "title": "Design System Lead",
+        "company": "Razorpay",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 79,
+        "salary_range": "₹20L - ₹32L",
+        "tags": ["Design Tokens", "Figma", "Documentation"],
+        "match_reasons": ["Fintech design scale", "Leadership role"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Zomato",
+          "job_count": 22,
+          "match_score": 94,
+          "trend": "+20%",
+          "benefits": ["Food credits", "Health", "ESOPs"],
+          "culture_tags": ["Customer-obsessed", "Fast-paced"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Freshworks",
+          "job_count": 18,
+          "match_score": 91,
+          "trend": "+10%",
+          "benefits": ["Gym", "Insurance", "Learning budget"],
+          "culture_tags": ["Global", "Design-led"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "CRED",
+          "job_count": 12,
+          "match_score": 88,
+          "trend": "+15%",
+          "benefits": ["Premium health", "Stock options", "Subscriptions"],
+          "culture_tags": ["Design-first", "Elite"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Meesho",
+          "job_count": 25,
+          "match_score": 85,
+          "trend": "+25%",
+          "benefits": ["Wellness", "Remote days", "ESOPs"],
+          "culture_tags": ["Inclusive", "Growth"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "Swiggy",
+          "job_count": 20,
+          "match_score": 82,
+          "trend": "+12%",
+          "benefits": ["Swiggy Money", "Health", "Food perks"],
+          "culture_tags": ["Data-driven", "Agile"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "Product designers with design system experience are in highest demand",
+        "Fintech and consumer tech pay 20% more for top design talent"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Build a design system portfolio",
+        "body": "Create a mini design system to showcase scalability skills.",
+        "priority": "high"
+      },
+      {
+        "title": "Add user research case studies",
+        "body": "Show data-driven design decisions to stand out.",
+        "priority": "medium"
+      },
+      {
+        "title": "Learn motion design",
+        "body": "Motion skills add 15% to your design value.",
+        "priority": "low"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_8}}",
+      "full_name": "{{USER_FULL_NAME_8}}"
+    },
+    "profile_completion": 92,
+    "recommended_actions": [
+      {
+        "action": "Apply to 6 Backend Engineer roles",
+        "reason": "Your Node.js & PostgreSQL skills are in top 5% demand",
+        "priority": "high",
+        "estimated_impact": "+40% response rate"
+      },
+      {
+        "action": "Add system design case studies",
+        "reason": "Senior backend roles require architecture knowledge",
+        "priority": "medium",
+        "estimated_impact": "+25% interview success"
+      },
+      {
+        "action": "Contribute to open-source Node.js projects",
+        "reason": "Shows deep understanding of the ecosystem",
+        "priority": "low",
+        "estimated_impact": "+15% recruiter interest"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["Backend", "DevOps", "Frontend", "Cloud", "AI/ML"],
+        "values": [450, 380, 350, 280, 320]
+      },
+      "insight_cards": [
+        {
+          "title": "⚙️ Backend roles up 15%",
+          "description": "Microservices architecture demand surging in SaaS",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💰 Senior backend salaries up 18%",
+          "description": "Top backend engineers crossing ₹30L packages",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 18, "trend": "+4 this week" },
+        { "stage": "Interview", "count": 4, "trend": "2 system design rounds" },
+        { "stage": "Offer", "count": 2, "trend": "1 accepted, 1 pending" }
+      ],
+      "weekly_applications": 4,
+      "response_rate": "38%",
+      "time_to_offer": "18 days"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [93, 82, 75, 72, 70, 78]
+      },
+      "insights": [
+        {
+          "title": "System Design Expertise",
+          "description": "Your architecture skills are ready for Staff Engineer roles",
+          "priority": "medium"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "Distributed Systems",
+          "reason": "90% of senior backend interviews test distributed systems",
+          "resources": ["DDIA Book", "System Design Primer"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "801",
+        "title": "Staff Backend Engineer",
+        "company": "Flipkart",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 97,
+        "salary_range": "₹35L - ₹50L",
+        "tags": ["Node.js", "PostgreSQL", "Microservices"],
+        "match_reasons": ["97% skill match", "E-commerce scale", "Staff level role"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "802",
+        "title": "Backend Lead",
+        "company": "Swiggy",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 94,
+        "salary_range": "₹28L - ₹42L",
+        "tags": ["Go", "Kafka", "Redis"],
+        "match_reasons": ["94% skill match", "High throughput systems", "Leadership"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "803",
+        "title": "Senior Backend Engineer",
+        "company": "PhonePe",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 91,
+        "salary_range": "₹25L - ₹38L",
+        "tags": ["Java", "Spring", "MySQL"],
+        "match_reasons": ["Fintech backend", "Payment systems", "High impact"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "804",
+        "title": "Platform Engineer",
+        "company": "Zerodha",
+        "location": "Bangalore",
+        "work_model": "remote",
+        "match_score": 88,
+        "salary_range": "₹22L - ₹35L",
+        "tags": ["Python", "Django", "AWS"],
+        "match_reasons": ["Trading platform", "Remote culture", "Tech-heavy"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "805",
+        "title": "Backend Engineer",
+        "company": "CRED",
+        "location": "Bangalore",
+        "work_model": "office",
+        "match_score": 85,
+        "salary_range": "₹20L - ₹32L",
+        "tags": ["Node.js", "GraphQL", "MongoDB"],
+        "match_reasons": ["Premium fintech", "Modern stack", "Design-driven"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "806",
+        "title": "Principal Engineer",
+        "company": "Groww",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 82,
+        "salary_range": "₹40L - ₹55L",
+        "tags": ["Architecture", "Mentoring", "Tech Strategy"],
+        "match_reasons": ["Principal level", "Fintech growth", "High equity"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Flipkart",
+          "job_count": 50,
+          "match_score": 97,
+          "trend": "+18%",
+          "benefits": ["Health", "ESOPs", "Relocation"],
+          "culture_tags": ["Scale", "Innovation"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Swiggy",
+          "job_count": 35,
+          "match_score": 94,
+          "trend": "+22%",
+          "benefits": ["Swiggy Money", "Health + Dental", "Stock options"],
+          "culture_tags": ["Data-driven", "Agile"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "PhonePe",
+          "job_count": 30,
+          "match_score": 91,
+          "trend": "+15%",
+          "benefits": ["Insurance", "Remote days", "Learning budget"],
+          "culture_tags": ["Engineering-first", "Transparent"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Zerodha",
+          "job_count": 18,
+          "match_score": 88,
+          "trend": "+10%",
+          "benefits": ["Profit-sharing", "Zero micromanagement", "Remote"],
+          "culture_tags": ["Autonomy", "Flat hierarchy"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "CRED",
+          "job_count": 15,
+          "match_score": 85,
+          "trend": "+12%",
+          "benefits": ["Premium healthcare", "Learning budget", "Stock options"],
+          "culture_tags": ["Design-driven", "Quality-focused"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "E-commerce and fintech are the biggest hirers for backend engineers",
+        "Microservices and event-driven architecture skills are premium"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Prepare system design interviews",
+        "body": "Practice designing large-scale systems for 2-3 weeks.",
+        "priority": "high"
+      },
+      {
+        "title": "Target Principal/Staff roles",
+        "body": "Your experience is ready for the next level.",
+        "priority": "medium"
+      },
+      {
+        "title": "Showcase open-source contributions",
+        "body": "Active GitHub profile increases credibility by 30%.",
+        "priority": "low"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_9}}",
+      "full_name": "{{USER_FULL_NAME_9}}"
+    },
+    "profile_completion": 67,
+    "recommended_actions": [
+      {
+        "action": "Apply to 5 Full Stack Developer roles",
+        "reason": "Your React + Node.js combo is highly marketable",
+        "priority": "high",
+        "estimated_impact": "+35% response rate"
+      },
+      {
+        "action": "Add a full-stack project",
+        "reason": "End-to-end projects demonstrate full capability",
+        "priority": "medium",
+        "estimated_impact": "+25% interview rate"
+      },
+      {
+        "action": "Learn Docker basics",
+        "reason": "Containerization is now expected for full-stack roles",
+        "priority": "low",
+        "estimated_impact": "+10% match score"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["Full Stack", "Frontend", "Backend", "DevOps", "Mobile"],
+        "values": [400, 350, 320, 250, 180]
+      },
+      "insight_cards": [
+        {
+          "title": "🔧 Full Stack demand up 20%",
+          "description": "Startups prefer full-stack engineers for speed",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💰 Full Stack salaries up 14%",
+          "description": "Versatile engineers getting premium pay",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 7, "trend": "+2 this week" },
+        { "stage": "Interview", "count": 2, "trend": "1 technical round pending" },
+        { "stage": "Offer", "count": 0, "trend": "-" }
+      ],
+      "weekly_applications": 2,
+      "response_rate": "29%",
+      "time_to_offer": "N/A"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [82, 68, 72, 75, 55, 78]
+      },
+      "insights": [
+        {
+          "title": "Full Stack Versatility",
+          "description": "Your ability to work across stack is a strong selling point",
+          "priority": "medium"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "AWS Basics",
+          "reason": "Cloud deployment knowledge is expected for 70% of roles",
+          "resources": ["AWS Free Tier", "Cloud Academy"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "901",
+        "title": "Full Stack Developer",
+        "company": "Urban Company",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 93,
+        "salary_range": "₹18L - ₹28L",
+        "tags": ["React", "Node.js", "MongoDB"],
+        "match_reasons": ["93% skill match", "Hyper-growth startup", "Full ownership"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "902",
+        "title": "Full Stack Engineer",
+        "company": "Lendingkart",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 90,
+        "salary_range": "₹16L - ₹25L",
+        "tags": ["Vue.js", "Python", "PostgreSQL"],
+        "match_reasons": ["90% skill match", "Fintech domain", "End-to-end work"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "903",
+        "title": "Software Engineer",
+        "company": "NoBroker",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 87,
+        "salary_range": "₹15L - ₹24L",
+        "tags": ["React", "Java", "MySQL"],
+        "match_reasons": ["PropTech growth", "Full stack role", "Good culture"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "904",
+        "title": "Full Stack Developer",
+        "company": "Paytm",
+        "location": "Noida",
+        "work_model": "office",
+        "match_score": 84,
+        "salary_range": "₹14L - ₹22L",
+        "tags": ["Angular", "Node.js", "Redis"],
+        "match_reasons": ["Fintech scale", "Stable company", "Learning opportunities"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "905",
+        "title": "Full Stack Engineer",
+        "company": "BYJU'S",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 81,
+        "salary_range": "₹16L - ₹26L",
+        "tags": ["React", "Python", "AWS"],
+        "match_reasons": ["EdTech impact", "Large user base", "Full stack exposure"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "906",
+        "title": "Senior Full Stack",
+        "company": "BigBasket",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 78,
+        "salary_range": "₹20L - ₹30L",
+        "tags": ["React", "Go", "Microservices"],
+        "match_reasons": ["Grocery tech", "Senior role", "Tech stack"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Urban Company",
+          "job_count": 25,
+          "match_score": 93,
+          "trend": "+25%",
+          "benefits": ["Health", "ESOPs", "Wellness"],
+          "culture_tags": ["Startup", "Fast-paced"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Lendingkart",
+          "job_count": 15,
+          "match_score": 90,
+          "trend": "+15%",
+          "benefits": ["Insurance", "Learning budget", "Stock options"],
+          "culture_tags": ["Fintech", "Agile"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "NoBroker",
+          "job_count": 18,
+          "match_score": 87,
+          "trend": "+18%",
+          "benefits": ["Health", "Remote days", "Gym"],
+          "culture_tags": ["PropTech", "Growth"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "Paytm",
+          "job_count": 40,
+          "match_score": 84,
+          "trend": "+8%",
+          "benefits": ["Healthcare", "Insurance", "Subsidized food"],
+          "culture_tags": ["Fintech", "Large scale"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "BYJU'S",
+          "job_count": 30,
+          "match_score": 81,
+          "trend": "+10%",
+          "benefits": ["Education benefits", "Health", "Learning budget"],
+          "culture_tags": ["EdTech", "Mission-driven"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "Startups prefer full-stack engineers for faster product iteration",
+        "Full-stack roles in fintech and edTech are growing fastest"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Build an end-to-end project",
+        "body": "Create a full app with frontend, backend, and deployment.",
+        "priority": "high"
+      },
+      {
+        "title": "Target early-stage startups",
+        "body": "They value full-stack versatility the most.",
+        "priority": "medium"
+      },
+      {
+        "title": "Learn cloud deployment",
+        "body": "AWS/Heroku deployment skills add 15% to your profile.",
+        "priority": "low"
+      }
+    ]
+  },
+  {
+    "stats": {
+      "first_name": "{{USER_FIRST_NAME_10}}",
+      "full_name": "{{USER_FULL_NAME_10}}"
+    },
+    "profile_completion": 85,
+    "recommended_actions": [
+      {
+        "action": "Apply to 4 Mobile Developer roles",
+        "reason": "Your React Native skills are in high demand",
+        "priority": "high",
+        "estimated_impact": "+38% response rate"
+      },
+      {
+        "action": "Add iOS native knowledge",
+        "reason": "Hybrid + native skills increase salary by 20%",
+        "priority": "medium",
+        "estimated_impact": "+20% match rate"
+      },
+      {
+        "action": "Publish apps on App Store",
+        "reason": "Published apps demonstrate real-world capability",
+        "priority": "low",
+        "estimated_impact": "+15% recruiter views"
+      }
+    ],
+    "market_trends": {
+      "chart": {
+        "title": "Top 5 Job Categories (Last 30 Days)",
+        "labels": ["Mobile", "Frontend", "Backend", "AI/ML", "DevOps"],
+        "values": [320, 380, 340, 280, 220]
+      },
+      "insight_cards": [
+        {
+          "title": "📱 Mobile roles up 16%",
+          "description": "Cross-platform demand surging in consumer apps",
+          "color": "#E6F6D4"
+        },
+        {
+          "title": "💰 Mobile salaries up 12%",
+          "description": "Senior mobile engineers hitting ₹25L+ packages",
+          "color": "#D8B4FE"
+        }
+      ]
+    },
+    "application_pipeline": {
+      "pipeline": [
+        { "stage": "Applied", "count": 10, "trend": "+3 this week" },
+        { "stage": "Interview", "count": 3, "trend": "1 coding test scheduled" },
+        { "stage": "Offer", "count": 1, "trend": "Offer received yesterday" }
+      ],
+      "weekly_applications": 3,
+      "response_rate": "30%",
+      "time_to_offer": "25 days"
+    },
+    "career_growth": {
+      "radar_chart": {
+        "labels": ["Technical Skills", "Experience", "Education", "Soft Skills", "Leadership", "Communication"],
+        "values": [90, 75, 70, 78, 55, 82]
+      },
+      "insights": [
+        {
+          "title": "Cross-Platform Expertise",
+          "description": "React Native + Flutter skills make you highly versatile",
+          "priority": "medium"
+        }
+      ],
+      "upskill_recommendations": [
+        {
+          "skill": "Flutter",
+          "reason": "60% of new mobile projects use Flutter",
+          "resources": ["Flutter Docs", "Flutter Academy"]
+        }
+      ]
+    },
+    "top_picks": [
+      {
+        "job_id": "1001",
+        "title": "Senior Mobile Engineer",
+        "company": "Swiggy",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 95,
+        "salary_range": "₹25L - ₹38L",
+        "tags": ["React Native", "iOS", "Android"],
+        "match_reasons": ["95% skill match", "Consumer scale", "High impact"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "1002",
+        "title": "Mobile Developer",
+        "company": "Zomato",
+        "location": "Gurgaon",
+        "work_model": "hybrid",
+        "match_score": 92,
+        "salary_range": "₹20L - ₹32L",
+        "tags": ["Flutter", "Dart", "Firebase"],
+        "match_reasons": ["92% skill match", "Food tech scale", "Flutter-first"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "1003",
+        "title": "React Native Developer",
+        "company": "Flipkart",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 89,
+        "salary_range": "₹22L - ₹35L",
+        "tags": ["React Native", "Redux", "TypeScript"],
+        "match_reasons": ["E-commerce mobile", "Large user base", "Modern stack"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#D8B4FE",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "1004",
+        "title": "Mobile Engineer",
+        "company": "PhonePe",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 86,
+        "salary_range": "₹24L - ₹36L",
+        "tags": ["React Native", "Native Modules", "Payments"],
+        "match_reasons": ["Fintech mobile", "Payment integration", "High compensation"],
+        "cardBg": "#E6F6D4",
+        "matchBg": "#FEF08A",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "1005",
+        "title": "iOS Developer",
+        "company": "CRED",
+        "location": "Bangalore",
+        "work_model": "office",
+        "match_score": 83,
+        "salary_range": "₹22L - ₹34L",
+        "tags": ["Swift", "UIKit", "Combine"],
+        "match_reasons": ["Premium fintech", "iOS-first", "Design-led"],
+        "cardBg": "#D8B4FE",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      },
+      {
+        "job_id": "1006",
+        "title": "Mobile Lead",
+        "company": "Razorpay",
+        "location": "Bangalore",
+        "work_model": "hybrid",
+        "match_score": 80,
+        "salary_range": "₹28L - ₹42L",
+        "tags": ["React Native", "Architecture", "Team Lead"],
+        "match_reasons": ["Leadership role", "Fintech scale", "High equity"],
+        "cardBg": "#FEF08A",
+        "matchBg": "#E6F6D4",
+        "matchColor": "#000000"
+      }
+    ],
+    "employer_insights": {
+      "top_employers": [
+        {
+          "name": "Swiggy",
+          "job_count": 28,
+          "match_score": 95,
+          "trend": "+20%",
+          "benefits": ["Swiggy Money", "Health + Dental", "ESOPs"],
+          "culture_tags": ["Data-driven", "Agile"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#F472B6"
+        },
+        {
+          "name": "Zomato",
+          "job_count": 22,
+          "match_score": 92,
+          "trend": "+18%",
+          "benefits": ["Food perks", "Health", "Stocks"],
+          "culture_tags": ["Fast-paced", "Customer-first"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#60A5FA"
+        },
+        {
+          "name": "Flipkart",
+          "job_count": 35,
+          "match_score": 89,
+          "trend": "+12%",
+          "benefits": ["Medical coverage", "Relocation", "Stock options"],
+          "culture_tags": ["Scale", "Innovation"],
+          "cardBg": "#FEF08A",
+          "avatarColor": "#34D399"
+        },
+        {
+          "name": "PhonePe",
+          "job_count": 20,
+          "match_score": 86,
+          "trend": "+16%",
+          "benefits": ["Insurance", "Remote days", "Learning budget"],
+          "culture_tags": ["Engineering-first", "Transparent"],
+          "cardBg": "#E6F6D4",
+          "avatarColor": "#FBBF24"
+        },
+        {
+          "name": "CRED",
+          "job_count": 12,
+          "match_score": 83,
+          "trend": "+14%",
+          "benefits": ["Premium healthcare", "Learning budget", "Stock options"],
+          "culture_tags": ["Design-driven", "Quality-focused"],
+          "cardBg": "#D8B4FE",
+          "avatarColor": "#A78BFA"
+        }
+      ],
+      "market_insights": [
+        "Consumer apps are the biggest hirers for mobile developers",
+        "Cross-platform skills (React Native + Flutter) command premium pay"
+      ]
+    },
+    "strategy_cards": [
+      {
+        "title": "Publish apps to stores",
+        "body": "Live apps on Play Store/App Store boost credibility by 40%.",
+        "priority": "high"
+      },
+      {
+        "title": "Learn native iOS/Android",
+        "body": "Native skills alongside cross-platform make you irreplaceable.",
+        "priority": "medium"
+      },
+      {
+        "title": "Target consumer apps",
+        "body": "Fintech and food tech pay the highest for mobile talent.",
+        "priority": "medium"
+      }
+    ]
+  }
+]

@@ -186,8 +186,8 @@ export default function Sidebar() {
   const { aiScore } = useAIScore();
   const [profileCompletion, setProfileCompletion] = useState(0);
 
-  // Skip showing AI score on /discover and /user pages
-  const hideAIScore = location.pathname === "/discover" || location.pathname === "/user";
+  // Show AI score on all pages
+  const hideAIScore = false;
 
   useEffect(() => {
     const fetchProfileCompletion = async () => {

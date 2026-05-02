@@ -28,6 +28,7 @@ from app.models.ai_pages import (
 )
 from app.models.coach import CoachSession, CoachMessage
 from app.models.settings import UserSettings, ConnectedAccount
+from app.models.dashboard import UserDashboardData
 from app.models.user import User
 
 # this is the Alembic Config object

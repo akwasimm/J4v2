@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getRoleTemplates, analyzeSkillGap } from "./services/skillGapService.js";
-import { getSkills } from "./api/client.js";
+import { getSkills, updatePreferences } from "./api/client.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
 import { useAIScore } from './contexts/AIScoreContext'
@@ -142,16 +142,32 @@ export default function SkillGapAnalysis() {
     role.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
-  const handleSelectRole = (role) => {
+  const handleSelectRole = async (role) => {
     setSelectedRole(role);
     setShowRoleSelector(false);
     setSearchQuery("");
+    
+    // Save target role to user preferences for dashboard personalization
+    try {
+      await updatePreferences({ target_role: role });
+      console.log(`Target role "${role}" saved to preferences`);
+    } catch (error) {
+      console.error("Failed to save target role to preferences:", error);
+    }
   };
   
-  const handleSelectJob = (job) => {
+  const handleSelectJob = async (job) => {
     setSelectedRole(job.title);
     setShowRoleSelector(false);
     setSearchQuery("");
+    
+    // Save target role to user preferences for dashboard personalization
+    try {
+      await updatePreferences({ target_role: job.title });
+      console.log(`Target role "${job.title}" saved to preferences`);
+    } catch (error) {
+      console.error("Failed to save target role to preferences:", error);
+    }
   };
   
   const handleStartLearning = (skillName) => {

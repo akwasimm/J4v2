@@ -214,7 +214,9 @@ def fetch_opportunities_from_ai(category: str) -> List[Dict[str, Any]]:
     try:
         result = call_groq_json(
             prompt=prompt,
-            system_prompt="You are a job market analyst specializing in Indian IT companies. Return only valid JSON arrays."
+            system_prompt="You are a job market analyst specializing in Indian IT companies. Return only valid JSON arrays.",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",  # 30K tokens/min, 1K req/day
+            max_tokens=3000
         )
         
         if isinstance(result, list):

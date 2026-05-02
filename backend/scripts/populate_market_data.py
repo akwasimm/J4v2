@@ -27,6 +27,14 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Dict, Any
 import logging
 
+# Load .env file explicitly before importing app modules
+from pathlib import Path
+env_path = Path(__file__).parent.parent / ".env"
+if env_path.exists():
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=env_path, override=True)
+    print(f"Loaded .env from {env_path}")
+
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -40,10 +48,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-# Rate limiter: 20 calls per minute = 1 call every 3 seconds
+# Rate limiter: 10 calls per minute = 1 call every 6 seconds
 class RateLimiter:
     """Simple rate limiter to avoid API throttling."""
-    def __init__(self, calls_per_minute: int = 20):
+    def __init__(self, calls_per_minute: int = 10):
         self.min_interval = 60.0 / calls_per_minute  # seconds between calls
         self.last_call_time = 0
     
@@ -57,8 +65,10 @@ class RateLimiter:
         self.last_call_time = time.time()
 
 
-# Global rate limiter instance - 2 calls per minute to stay within Groq free tier
-rate_limiter = RateLimiter(calls_per_minute=2)
+# Global rate limiter instance - 10 calls per minute
+# NOTE: compound-mini has 250 requests/day limit
+# 120 entries = 12 minutes to populate, but may need multiple days if limit hit
+rate_limiter = RateLimiter(calls_per_minute=10)
 
 
 # Default roles and locations (expandable)
@@ -231,6 +241,7 @@ def call_groq_for_market_data(role: str, location: str, max_retries: int = 2) ->
             result = call_groq_json(
                 prompt=prompt,
                 system_prompt="You are an expert job market analyst with deep knowledge of global salary data and hiring trends. Provide accurate, current market data.",
+                model="groq/compound-mini",  # 70K tokens/min, no daily limit - good for batch processing
                 temperature=0.2,
                 max_tokens=4000
             )
@@ -371,7 +382,8 @@ def populate_all_combinations(roles: List[str], locations: List[str], force: boo
     
     logger.info(f"Starting population: {len(roles)} roles x {len(locations)} locations = {total} combinations")
     logger.info(f"Force update: {force}")
-    logger.info(f"Rate limit: 2 calls/minute (approx {total * 30 // 60} minutes estimated)")
+    logger.info(f"Rate limit: 10 calls/minute (approx {total * 6 // 60} minutes estimated)")
+    logger.info(f"WARNING: compound-mini has 250 req/day limit. May need multiple runs over several days.")
     
     start_time = time.time()
     

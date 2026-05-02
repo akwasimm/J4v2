@@ -66,6 +66,8 @@ def search_jobs(
     max_exp: Optional[int] = Query(None),
     salary_min: Optional[int] = Query(None),
     salary_max: Optional[int] = Query(None),
+    sort_by: Optional[str] = Query(default="match_score", pattern="^(match_score|posted_at|relevance)$"),
+    user_id: Optional[str] = Query(None, description="User ID for personalized match scoring"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=50),
     db: Session = Depends(get_db)
@@ -76,6 +78,7 @@ def search_jobs(
         q=q, location=location, work_model=work_model,
         job_type=job_type, min_exp=min_exp, max_exp=max_exp,
         salary_min=salary_min, salary_max=salary_max,
+        sort_by=sort_by, user_id=user_id,
         page=page, page_size=page_size
     )
     return _search(db, params)

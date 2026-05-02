@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { fetchJobs } from "./services/jobsService.js";
+import { saveJob, unsaveJob, getSavedJobs } from "./api/client.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
 
@@ -149,13 +150,14 @@ function FilterLabel({ children }) {
 
 // ─── Job Card ─────────────────────────────────────────────────────────────────
 
-function JobCard({ job }) {
-  const [saved, setSaved] = useState(false);
+function JobCard({ job, userSkills, onSkillFitClick, isSaved, onSaveToggle }) {
   const [cardHover, setCardHover] = useState(false);
   const [saveHover, setSaveHover] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { bg, icon } = getCompanyStyle(job.company_name);
-  const matchScore = 80 + (job.id.charCodeAt(0) % 20);
+  // Use real match_score from API, fallback to 80 if not available
+  const matchScore = job.match_score || 80;
 
   const salaryLabel = job.salary_max
     ? `₹${(job.salary_min / 1000).toFixed(0)}k – ₹${(job.salary_max / 1000).toFixed(0)}k`
@@ -186,19 +188,31 @@ function JobCard({ job }) {
       {/* Bookmark */}
       <div style={{ position: "absolute", top: "16px", right: "16px" }}>
         <button
-          onClick={() => setSaved(!saved)}
+          onClick={async () => {
+            if (isLoading) return;
+            setIsLoading(true);
+            try {
+              await onSaveToggle?.(job.id, !isSaved, job.match_score);
+            } finally {
+              setIsLoading(false);
+            }
+          }}
           onMouseEnter={() => setSaveHover(true)}
           onMouseLeave={() => setSaveHover(false)}
+          disabled={isLoading}
           style={{
             padding: "10px", border: "2px solid #000000",
-            backgroundColor: saved ? "#D8B4FE" : saveHover ? "#D8B4FE" : "#ffffff",
-            boxShadow: saved ? "none" : "3px 3px 0px 0px #000000",
-            cursor: "pointer", transition: "all 0.15s ease",
+            backgroundColor: isSaved ? "#9ca3af" : saveHover ? "#D8B4FE" : "#ffffff",
+            boxShadow: isSaved ? "none" : "3px 3px 0px 0px #000000",
+            cursor: isLoading ? "not-allowed" : "pointer",
+            transition: "all 0.15s ease",
             display: "flex", alignItems: "center", justifyContent: "center",
+            opacity: isLoading ? 0.6 : 1,
           }}
+          title={isSaved ? "Saved to your jobs" : "Save this job"}
         >
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: saved ? "'FILL' 1, 'wght' 600" : "'FILL' 0, 'wght' 600", display: "block", fontSize: "20px" }}>
-            {saved ? "bookmark" : "bookmark_border"}
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: isSaved ? "'FILL' 1, 'wght' 600" : "'FILL' 0, 'wght' 600", display: "block", fontSize: "20px" }}>
+            {isSaved ? "bookmark" : "bookmark_border"}
           </span>
         </button>
       </div>
@@ -268,12 +282,710 @@ function JobCard({ job }) {
           )}
 
           <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-            <NeoBtn bg="#D8B4FE" color="#000000">Quick Apply</NeoBtn>
+            <NeoBtn 
+              bg="#D8B4FE" 
+              color="#000000"
+              onClick={() => onSkillFitClick?.(job)}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>analytics</span>
+                Check Skill Fit
+              </span>
+            </NeoBtn>
             <NeoBtn bg="#ffffff" color="#000000" shadow={false} style={{ border: "2px solid #000" }}>View Details</NeoBtn>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Skill Fit Modal (Glassmorphism) ─────────────────────────────────────────
+
+function SkillFitModal({ job, userSkills, onClose }) {
+  if (!job) return null;
+
+  const jobSkills = job.core_skills || [];
+  const userSkillsLower = (userSkills || []).map(s => s.toLowerCase().trim());
+  
+  const skillsMatch = (jobSkill, userSkill) => {
+    const job = jobSkill.toLowerCase();
+    const user = userSkill.toLowerCase();
+    return job === user || job.includes(user) || user.includes(job);
+  };
+  
+  const matchedSkills = jobSkills.filter(jobSkill => 
+    userSkillsLower.some(userSkill => skillsMatch(jobSkill, userSkill))
+  );
+  
+  const missingSkills = jobSkills.filter(jobSkill => 
+    !userSkillsLower.some(userSkill => skillsMatch(jobSkill, userSkill))
+  );
+  
+  const skillOverlapPercentage = jobSkills.length > 0 
+    ? Math.round((matchedSkills.length / jobSkills.length) * 100) 
+    : 0;
+  
+  const displayMatchScore = job.match_score || Math.min(100, Math.max(60, Math.round(skillOverlapPercentage * 0.7 + 30)));
+  
+  const getScoreColor = (score) => {
+    if (score >= 70) return { bg: 'rgba(34, 197, 94, 0.2)', border: '#22c55e', text: '#15803d', glow: '0 0 30px rgba(34, 197, 94, 0.4)' };
+    if (score >= 40) return { bg: 'rgba(234, 179, 8, 0.2)', border: '#eab308', text: '#a16207', glow: '0 0 30px rgba(234, 179, 8, 0.4)' };
+    return { bg: 'rgba(239, 68, 68, 0.2)', border: '#ef4444', text: '#b91c1c', glow: '0 0 30px rgba(239, 68, 68, 0.4)' };
+  };
+  
+  const scoreColors = getScoreColor(displayMatchScore);
+  
+  const getMatchMessage = (score) => {
+    if (score >= 70) return { icon: '🎉', title: 'Excellent Match!', subtitle: "You're highly qualified for this role" };
+    if (score >= 40) return { icon: '📈', title: 'Good Potential', subtitle: 'With some skill development, you can qualify' };
+    return { icon: '🚀', title: 'Growth Opportunity', subtitle: 'Build key skills to unlock this career path' };
+  };
+  
+  const matchMessage = getMatchMessage(displayMatchScore);
+
+  return (
+    <>
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px) scale(0.95); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+          50% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+        }
+        .skill-fit-modal {
+          animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .score-ring {
+          animation: pulse 2s ease-in-out infinite;
+        }
+        .floating-icon {
+          animation: float 3s ease-in-out infinite;
+        }
+      `}</style>
+      
+      <div 
+        style={{
+          position: "fixed",
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: "linear-gradient(135deg, rgba(99, 102, 241, 0.4) 0%, rgba(168, 85, 247, 0.4) 50%, rgba(236, 72, 153, 0.4) 100%)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          padding: "20px",
+        }}
+        onClick={onClose}
+      >
+        <div 
+          className="skill-fit-modal"
+          style={{
+            background: "rgba(255, 255, 255, 0.85)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            borderRadius: "24px",
+            border: "1px solid rgba(255, 255, 255, 0.5)",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.3) inset",
+            maxWidth: "1000px",
+            width: "100%",
+            maxHeight: "90vh",
+            overflow: "auto",
+            position: "relative",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Decorative Gradient Orbs */}
+          <div style={{
+            position: "absolute",
+            top: -50, right: -50,
+            width: 200, height: 200,
+            background: "radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, transparent 70%)",
+            borderRadius: "50%",
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            position: "absolute",
+            bottom: -80, left: -80,
+            width: 250, height: 250,
+            background: "radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%)",
+            borderRadius: "50%",
+            pointerEvents: "none",
+          }} />
+
+          {/* Header */}
+          <div style={{ 
+            padding: "32px",
+            borderBottom: "1px solid rgba(0,0,0,0.08)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            position: "relative",
+          }}>
+            <div style={{ flex: 1 }}>
+              <div style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "6px 14px",
+                background: "rgba(99, 102, 241, 0.1)",
+                borderRadius: "20px",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                color: "#6366f1",
+                marginBottom: "12px",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>analytics</span>
+                Skill Analysis
+              </div>
+              <h2 style={{ 
+                fontSize: "1.75rem", 
+                fontWeight: 800, 
+                fontFamily: "'Syne', sans-serif",
+                margin: 0,
+                background: "linear-gradient(135deg, #1e293b 0%, #475569 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                lineHeight: 1.2,
+              }}>
+                {job.title}
+              </h2>
+              <p style={{ 
+                fontSize: "1rem", 
+                fontWeight: 500,
+                margin: "8px 0 0",
+                color: "#64748b",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "18px" }}>business</span>
+                {job.company_name}
+              </p>
+            </div>
+            <button 
+              onClick={onClose}
+              style={{
+                background: "rgba(255,255,255,0.8)",
+                border: "none",
+                borderRadius: "12px",
+                width: "44px",
+                height: "44px",
+                cursor: "pointer",
+                fontSize: "1.5rem",
+                fontWeight: 400,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#64748b",
+                transition: "all 0.2s ease",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = "#ef4444";
+                e.target.style.color = "#fff";
+                e.target.style.transform = "rotate(90deg)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "rgba(255,255,255,0.8)";
+                e.target.style.color = "#64748b";
+                e.target.style.transform = "rotate(0deg)";
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Score Section */}
+          <div style={{ 
+            padding: "32px",
+            background: `linear-gradient(135deg, ${scoreColors.bg} 0%, rgba(255,255,255,0.5) 100%)`,
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "28px", flexWrap: "wrap" }}>
+              {/* Score Circle */}
+              <div style={{
+                position: "relative",
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                background: `conic-gradient(${scoreColors.border} ${displayMatchScore * 3.6}deg, rgba(255,255,255,0.5) 0deg)`,
+                padding: "8px",
+                boxShadow: scoreColors.glow,
+              }}>
+                <div style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.9)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                  <span style={{ 
+                    fontSize: "2rem", 
+                    fontWeight: 800, 
+                    fontFamily: "'Syne', sans-serif",
+                    color: scoreColors.text,
+                  }}>
+                    {displayMatchScore}%
+                  </span>
+                  <span style={{
+                    fontSize: "0.65rem",
+                    fontWeight: 600,
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                  }}>
+                    Match Score
+                  </span>
+                </div>
+              </div>
+              
+              {/* Message */}
+              <div style={{ flex: 1, minWidth: "200px" }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "8px",
+                }}>
+                  <span className="floating-icon" style={{ fontSize: "1.75rem" }}>{matchMessage.icon}</span>
+                  <h3 style={{
+                    fontSize: "1.375rem",
+                    fontWeight: 700,
+                    margin: 0,
+                    color: scoreColors.text,
+                    fontFamily: "'Space Grotesk', sans-serif",
+                  }}>
+                    {matchMessage.title}
+                  </h3>
+                </div>
+                <p style={{
+                  fontSize: "1rem",
+                  color: "#64748b",
+                  margin: 0,
+                  lineHeight: 1.5,
+                }}>
+                  {matchMessage.subtitle}
+                </p>
+                <div style={{
+                  display: "flex",
+                  gap: "16px",
+                  marginTop: "16px",
+                  flexWrap: "wrap",
+                }}>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    background: "rgba(255,255,255,0.8)",
+                    borderRadius: "20px",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: "#475569",
+                  }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px", color: scoreColors.border }}>check_circle</span>
+                    {matchedSkills.length} matched
+                  </div>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "8px 14px",
+                    background: "rgba(255,255,255,0.8)",
+                    borderRadius: "20px",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    color: "#475569",
+                  }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: "16px", color: "#94a3b8" }}>target</span>
+                    {skillOverlapPercentage}% overlap
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Skills Comparison */}
+          <div style={{ padding: "32px" }}>
+            <div style={{ 
+              display: "grid", 
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", 
+              gap: "24px",
+            }}>
+              {/* Your Skills Card */}
+              <div style={{
+                background: "rgba(248, 250, 252, 0.8)",
+                borderRadius: "20px",
+                padding: "24px",
+                border: "1px solid rgba(255,255,255,0.5)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "20px",
+                }}>
+                  <div style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "12px",
+                    background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 8px 20px rgba(99, 102, 241, 0.3)",
+                  }}>
+                    <span className="material-symbols-outlined" style={{ color: "#fff", fontSize: "22px" }}>person</span>
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: "1.125rem",
+                      fontWeight: 700,
+                      margin: 0,
+                      color: "#1e293b",
+                      fontFamily: "'Space Grotesk', sans-serif",
+                    }}>
+                      Your Skills
+                    </h3>
+                    <p style={{
+                      fontSize: "0.875rem",
+                      color: "#64748b",
+                      margin: "2px 0 0",
+                    }}>
+                      {userSkills?.length || 0} in your profile
+                    </p>
+                  </div>
+                </div>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {userSkills?.length > 0 ? (
+                    userSkills.map((skill, idx) => {
+                      const isMatched = matchedSkills.some(ms => 
+                        ms.toLowerCase().includes(skill.toLowerCase()) || 
+                        skill.toLowerCase().includes(ms.toLowerCase())
+                      );
+                      return (
+                        <div 
+                          key={idx}
+                          style={{
+                            padding: "12px 16px",
+                            borderRadius: "12px",
+                            background: isMatched 
+                              ? "linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%)"
+                              : "rgba(255,255,255,0.6)",
+                            border: `1px solid ${isMatched ? 'rgba(34, 197, 94, 0.3)' : 'rgba(0,0,0,0.06)'}`,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            transition: "all 0.2s ease",
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ 
+                            fontSize: "20px",
+                            color: isMatched ? "#22c55e" : "#94a3b8",
+                          }}>
+                            {isMatched ? "verified" : "radio_button_unchecked"}
+                          </span>
+                          <span style={{
+                            fontSize: "0.9375rem",
+                            fontWeight: 600,
+                            color: isMatched ? "#166534" : "#475569",
+                          }}>
+                            {skill}
+                          </span>
+                          {isMatched && (
+                            <span style={{
+                              marginLeft: "auto",
+                              padding: "4px 10px",
+                              background: "#22c55e",
+                              color: "#fff",
+                              borderRadius: "20px",
+                              fontSize: "0.65rem",
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                            }}>
+                              Match
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div style={{ 
+                      padding: "32px", 
+                      textAlign: "center",
+                      background: "rgba(255,255,255,0.5)",
+                      borderRadius: "16px",
+                    }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: "40px", color: "#cbd5e1", marginBottom: "12px" }}>psychology</span>
+                      <p style={{ fontSize: "0.9375rem", margin: 0, color: "#64748b", fontWeight: 500 }}>
+                        No skills added yet
+                      </p>
+                      <p style={{ fontSize: "0.8125rem", margin: "8px 0 0", color: "#94a3b8" }}>
+                        Add skills to see how you match
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Required Skills Card */}
+              <div style={{
+                background: "rgba(248, 250, 252, 0.8)",
+                borderRadius: "20px",
+                padding: "24px",
+                border: "1px solid rgba(255,255,255,0.5)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+              }}>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "20px",
+                }}>
+                  <div style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "12px",
+                    background: "linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 8px 20px rgba(245, 158, 11, 0.3)",
+                  }}>
+                    <span className="material-symbols-outlined" style={{ color: "#fff", fontSize: "22px" }}>stars</span>
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: "1.125rem",
+                      fontWeight: 700,
+                      margin: 0,
+                      color: "#1e293b",
+                      fontFamily: "'Space Grotesk', sans-serif",
+                    }}>
+                      Required Skills
+                    </h3>
+                    <p style={{
+                      fontSize: "0.875rem",
+                      color: "#64748b",
+                      margin: "2px 0 0",
+                    }}>
+                      {jobSkills.length} for this role
+                    </p>
+                  </div>
+                </div>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {jobSkills.length > 0 ? (
+                    jobSkills.map((skill, idx) => {
+                      const isMatched = matchedSkills.includes(skill);
+                      return (
+                        <div 
+                          key={idx}
+                          style={{
+                            padding: "12px 16px",
+                            borderRadius: "12px",
+                            background: isMatched 
+                              ? "linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(34, 197, 94, 0.05) 100%)"
+                              : "linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.03) 100%)",
+                            border: `1px solid ${isMatched ? 'rgba(34, 197, 94, 0.25)' : 'rgba(239, 68, 68, 0.15)'}`,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                          }}
+                        >
+                          <span className="material-symbols-outlined" style={{ 
+                            fontSize: "20px",
+                            color: isMatched ? "#22c55e" : "#ef4444",
+                          }}>
+                            {isMatched ? "check_circle" : "add_circle"}
+                          </span>
+                          <span style={{
+                            fontSize: "0.9375rem",
+                            fontWeight: 600,
+                            color: isMatched ? "#166534" : "#991b1b",
+                          }}>
+                            {skill}
+                          </span>
+                          {isMatched ? (
+                            <span style={{
+                              marginLeft: "auto",
+                              padding: "4px 10px",
+                              background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                              color: "#fff",
+                              borderRadius: "20px",
+                              fontSize: "0.65rem",
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                            }}>
+                              ✓ Have
+                            </span>
+                          ) : (
+                            <span style={{
+                              marginLeft: "auto",
+                              padding: "4px 10px",
+                              background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                              color: "#fff",
+                              borderRadius: "20px",
+                              fontSize: "0.65rem",
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                            }}>
+                              Need
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div style={{ 
+                      padding: "32px", 
+                      textAlign: "center",
+                      background: "rgba(255,255,255,0.5)",
+                      borderRadius: "16px",
+                    }}>
+                      <p style={{ fontSize: "0.9375rem", margin: 0, color: "#64748b" }}>
+                        No specific skills required
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Skills to Develop Section */}
+          {missingSkills.length > 0 && (
+            <div style={{ 
+              margin: "0 32px 32px",
+              padding: "28px",
+              background: "linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(251, 146, 60, 0.05) 100%)",
+              borderRadius: "20px",
+              border: "1px solid rgba(239, 68, 68, 0.15)",
+            }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "16px",
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: "24px", color: "#ea580c" }}>school</span>
+                <h4 style={{
+                  fontSize: "1.125rem",
+                  fontWeight: 700,
+                  margin: 0,
+                  color: "#c2410c",
+                  fontFamily: "'Space Grotesk', sans-serif",
+                }}>
+                  Skills to Develop
+                </h4>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+                {missingSkills.map((skill, idx) => (
+                  <span 
+                    key={idx}
+                    style={{
+                      padding: "10px 18px",
+                      background: "rgba(255,255,255,0.9)",
+                      borderRadius: "30px",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      color: "#ea580c",
+                      border: "1px solid rgba(234, 88, 12, 0.2)",
+                      boxShadow: "0 2px 8px rgba(234, 88, 12, 0.1)",
+                    }}
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div style={{ 
+            padding: "24px 32px",
+            borderTop: "1px solid rgba(0,0,0,0.06)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "16px",
+          }}>
+            <p style={{
+              fontSize: "0.875rem",
+              color: "#94a3b8",
+              margin: 0,
+            }}>
+              <span className="material-symbols-outlined" style={{ fontSize: "16px", verticalAlign: "middle", marginRight: "4px" }}>info</span>
+              Score based on: 70% skills · 20% experience · 10% freshness
+            </p>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={onClose}
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(0,0,0,0.1)",
+                  background: "rgba(255,255,255,0.8)",
+                  color: "#475569",
+                  fontSize: "0.9375rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => e.target.style.background = "rgba(0,0,0,0.05)"}
+                onMouseLeave={(e) => e.target.style.background = "rgba(255,255,255,0.8)"}
+              >
+                Close
+              </button>
+              <button
+                onClick={() => window.location.href = '/profile'}
+                style={{
+                  padding: "12px 24px",
+                  borderRadius: "12px",
+                  border: "none",
+                  background: "linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)",
+                  color: "#ffffff",
+                  fontSize: "0.9375rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 14px rgba(139, 92, 246, 0.4)",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = "translateY(-2px)";
+                  e.target.style.boxShadow = "0 6px 20px rgba(139, 92, 246, 0.5)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = "translateY(0)";
+                  e.target.style.boxShadow = "0 4px 14px rgba(139, 92, 246, 0.4)";
+                }}
+              >
+                Update Profile →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -323,6 +1035,32 @@ export default function JobDiscovery() {
   useEffect(() => {
     document.title = "Job Discovery — JobFor";
   }, []);
+  
+  // Fetch user skills on mount
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      try {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+        
+        // Fetch user profile data
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1"}/profile/me`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setUserSkills(data.skills?.map(s => s.name) || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user skills:", err);
+      }
+    };
+    
+    fetchUserSkills();
+  }, []);
 
   const [searchQuery, setSearchQuery]     = useState("");
   const [locationQuery, setLocationQuery] = useState("");
@@ -337,6 +1075,13 @@ export default function JobDiscovery() {
   const [totalJobs, setTotalJobs]     = useState(0);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
+  
+  // Skill Fit Modal state
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [userSkills, setUserSkills]   = useState([]);
+  
+  // Saved jobs state
+  const [savedJobIds, setSavedJobIds] = useState(new Set());
 
   const totalPages = Math.max(1, Math.ceil(totalJobs / PAGE_SIZE));
 
@@ -349,6 +1094,9 @@ export default function JobDiscovery() {
     setLoading(true);
     setError(null);
     try {
+      // Get user_id from localStorage for personalized matching
+      const userId = localStorage.getItem('user_id');
+      
       const data = await fetchJobs({
         q:          effectiveQ    || undefined,
         location:   locationQuery  || undefined,
@@ -357,6 +1105,8 @@ export default function JobDiscovery() {
         min_exp:    expLevel.value !== null ? expLevel.value : undefined,
         page:       currentPage,
         page_size:  PAGE_SIZE,
+        user_id:    userId || undefined,
+        sort_by:    'match_score', // Always sort by personalized match score
       });
       setJobListings(data.items || []);
       setTotalJobs(data.total  || 0);
@@ -389,6 +1139,50 @@ export default function JobDiscovery() {
     setSearchQuery("");
     setLocationQuery("");
     setCurrentPage(1);
+  };
+  
+  const handleSkillFitClick = (job) => {
+    setSelectedJob(job);
+  };
+  
+  const handleCloseModal = () => {
+    setSelectedJob(null);
+  };
+  
+  // Fetch saved job IDs on mount
+  useEffect(() => {
+    const fetchSavedJobIds = async () => {
+      try {
+        const savedJobs = await getSavedJobs();
+        const jobs = savedJobs.data || savedJobs || [];
+        const ids = new Set(jobs.map(j => j.job_id || j.job?.id));
+        setSavedJobIds(ids);
+      } catch (err) {
+        console.error("Failed to fetch saved jobs:", err);
+      }
+    };
+    
+    fetchSavedJobIds();
+  }, []);
+  
+  // Handle save/unsave job toggle
+  const handleSaveToggle = async (jobId, shouldSave, matchScore = null) => {
+    try {
+      if (shouldSave) {
+        await saveJob(jobId, matchScore);
+        setSavedJobIds(prev => new Set([...prev, jobId]));
+      } else {
+        await unsaveJob(jobId);
+        setSavedJobIds(prev => {
+          const next = new Set(prev);
+          next.delete(jobId);
+          return next;
+        });
+      }
+    } catch (err) {
+      console.error("Failed to toggle save job:", err);
+      alert(err.message || "Failed to save job. Please try again.");
+    }
   };
 
   const activeFilterCount = [
@@ -698,7 +1492,16 @@ export default function JobDiscovery() {
               {loading ? (
                 Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)
               ) : jobListings.length > 0 ? (
-                jobListings.map((job) => <JobCard key={job.id} job={job} />)
+                jobListings.map((job) => (
+                  <JobCard 
+                    key={job.id} 
+                    job={job} 
+                    userSkills={userSkills}
+                    onSkillFitClick={handleSkillFitClick}
+                    isSaved={savedJobIds.has(job.id)}
+                    onSaveToggle={handleSaveToggle}
+                  />
+                ))
               ) : (
                 <div style={{ padding: "64px 40px", textAlign: "center", border: "2px dashed #000" }}>
                   <span className="material-symbols-outlined" style={{ fontSize: "3rem", marginBottom: "16px", display: "block", opacity: 0.4 }}>search_off</span>
@@ -750,6 +1553,15 @@ export default function JobDiscovery() {
           </section>
         </div>
       </main>
+      
+      {/* Skill Fit Modal */}
+      {selectedJob && (
+        <SkillFitModal
+          job={selectedJob}
+          userSkills={userSkills}
+          onClose={handleCloseModal}
+        />
+      )}
     </>
   );
 }
