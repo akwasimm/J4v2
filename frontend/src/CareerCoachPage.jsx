@@ -78,6 +78,9 @@ export default function CareerCoach() {
     } catch (error) {
       console.error("Failed to load history:", error);
       setMessages([]);
+      // Clear invalid session from localStorage
+      localStorage.removeItem('lumeActiveSession');
+      setActiveSessionId(null);
     }
   };
 
@@ -895,12 +898,12 @@ export default function CareerCoach() {
                   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&amp;display=swap');
                 </style>
               </defs>
-              <circle cx="16" cy="24" r="7" fill="none" stroke="#0F172A" stroke-width="2.2"/>
+              <circle cx="16" cy="24" r="7" fill="none" stroke="#0F172A" strokeWidth="2.2"/>
               <circle cx="16" cy="24" r="2" fill="#0F172A"/>
-              <line x1="21" y1="19" x2="33" y2="7" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/>
-              <line x1="23" y1="22" x2="35" y2="15" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
-              <line x1="19" y1="17" x2="26" y2="5" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
-              <text x="48" y="28" font-family="Inter, Poppins, system-ui, sans-serif" font-weight="600" font-size="24" letter-spacing="1.2" fill="#0F172A">Lume</text>
+              <line x1="21" y1="19" x2="33" y2="7" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="23" y1="22" x2="35" y2="15" stroke="#0F172A" strokeWidth="1.4" strokeLinecap="round" opacity="0.5"/>
+              <line x1="19" y1="17" x2="26" y2="5" stroke="#0F172A" strokeWidth="1.4" strokeLinecap="round" opacity="0.5"/>
+              <text x="48" y="28" fontFamily="Inter, Poppins, system-ui, sans-serif" fontWeight="600" fontSize="24" letterSpacing="1.2" fill="#0F172A">Lume</text>
             </svg>
             Lume AI Coach
           </h3>
@@ -919,12 +922,12 @@ export default function CareerCoach() {
                       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600&amp;display=swap');
                     </style>
                   </defs>
-                  <circle cx="16" cy="24" r="7" fill="none" stroke="#0F172A" stroke-width="2.2"/>
+                  <circle cx="16" cy="24" r="7" fill="none" stroke="#0F172A" strokeWidth="2.2"/>
                   <circle cx="16" cy="24" r="2" fill="#0F172A"/>
-                  <line x1="21" y1="19" x2="33" y2="7" stroke="#0F172A" stroke-width="2.2" stroke-linecap="round"/>
-                  <line x1="23" y1="22" x2="35" y2="15" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
-                  <line x1="19" y1="17" x2="26" y2="5" stroke="#0F172A" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
-                  <text x="48" y="28" font-family="Inter, Poppins, system-ui, sans-serif" font-weight="600" font-size="24" letter-spacing="1.2" fill="#0F172A">Lume</text>
+                  <line x1="21" y1="19" x2="33" y2="7" stroke="#0F172A" strokeWidth="2.2" strokeLinecap="round"/>
+                  <line x1="23" y1="22" x2="35" y2="15" stroke="#0F172A" strokeWidth="1.4" strokeLinecap="round" opacity="0.5"/>
+                  <line x1="19" y1="17" x2="26" y2="5" stroke="#0F172A" strokeWidth="1.4" strokeLinecap="round" opacity="0.5"/>
+                  <text x="48" y="28" fontFamily="Inter, Poppins, system-ui, sans-serif" fontWeight="600" fontSize="24" letterSpacing="1.2" fill="#0F172A">Lume</text>
                 </svg>
               </div>
               <div className="welcome-title">Hi, I'm Lume </div>

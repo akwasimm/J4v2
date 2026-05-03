@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     libffi-dev \
     postgresql-client \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
@@ -21,8 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# Make entrypoint script executable
-RUN chmod +x entrypoint.sh
+# Convert line endings and make entrypoint script executable
+RUN dos2unix entrypoint.sh && chmod +x entrypoint.sh
 
 # Expose FastAPI port
 EXPOSE 8000

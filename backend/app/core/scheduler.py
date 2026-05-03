@@ -1,12 +1,17 @@
 """
 Scheduler Module - APScheduler for periodic tasks.
-Handles weekly Sunday 6 AM IST refresh of Big Opportunities data.
+Handles:
+- Weekly Sunday 6 AM IST refresh of Big Opportunities data
+- Job search cache warming every 5 minutes
+- Dashboard cache warming every hour
+- Daily cache cleanup
 """
 
 import logging
 from datetime import datetime, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
@@ -32,10 +37,37 @@ async def refresh_opportunities_task():
         db.close()
 
 
+async def warm_job_search_cache_task():
+    """Warm job search cache every 5 minutes for fast loads."""
+    from app.services.cache_warmer import warm_common_job_searches
+    try:
+        await warm_common_job_searches()
+    except Exception as e:
+        logger.error(f"Job search cache warming failed: {e}")
+
+
+async def warm_dashboard_cache_task():
+    """Warm dashboard cache every hour."""
+    from app.services.cache_warmer import warm_dashboard_cache
+    try:
+        await warm_dashboard_cache()
+    except Exception as e:
+        logger.error(f"Dashboard cache warming failed: {e}")
+
+
+async def cleanup_cache_task():
+    """Clean up stale cache entries daily."""
+    from app.services.cache_warmer import invalidate_stale_caches
+    try:
+        await invalidate_stale_caches()
+    except Exception as e:
+        logger.error(f"Cache cleanup failed: {e}")
+
+
 def start_scheduler():
-    """Start the APScheduler with weekly Sunday 6 AM IST trigger."""
-    # Sunday 6 AM IST = Sunday 00:30 UTC (IST is UTC+5:30)
-    # Cron: day_of_week=6 (Sunday), hour=0, minute=30 for UTC
+    """Start the APScheduler with all background tasks."""
+    
+    # 1. Weekly Big Opportunities refresh - Sunday 6 AM IST
     scheduler.add_job(
         refresh_opportunities_task,
         trigger=CronTrigger(
@@ -49,8 +81,39 @@ def start_scheduler():
         replace_existing=True
     )
     
+    # 2. Job search cache warming - every 5 minutes
+    scheduler.add_job(
+        warm_job_search_cache_task,
+        trigger=IntervalTrigger(minutes=5),
+        id="warm_job_search_cache",
+        name="Job Search Cache Warming",
+        replace_existing=True
+    )
+    
+    # 3. Dashboard cache warming - every hour
+    scheduler.add_job(
+        warm_dashboard_cache_task,
+        trigger=IntervalTrigger(hours=1),
+        id="warm_dashboard_cache",
+        name="Dashboard Cache Warming",
+        replace_existing=True
+    )
+    
+    # 4. Cache cleanup - daily at 3 AM UTC
+    scheduler.add_job(
+        cleanup_cache_task,
+        trigger=CronTrigger(hour=3, minute=0, timezone="UTC"),
+        id="cleanup_cache",
+        name="Daily Cache Cleanup",
+        replace_existing=True
+    )
+    
     scheduler.start()
-    logger.info("Scheduler started - Next refresh: Sunday 6:00 AM IST")
+    
+    # Log all scheduled jobs
+    logger.info("Scheduler started with jobs:")
+    for job in scheduler.get_jobs():
+        logger.info(f"  - {job.name}: {job.trigger}")
 
 
 def stop_scheduler():

@@ -31,7 +31,19 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
 @router.post("/login", response_model=AuthResponse)
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     from app.services.auth_service import login_user
-    return login_user(db, data)
+    result = login_user(db, data)
+    
+    # Warm cache in background for faster initial page load
+    if result and result.user and result.user.id:
+        import asyncio
+        from app.services.cache_warmer import warm_user_specific_caches
+        # Fire-and-forget cache warming (don't block response)
+        try:
+            asyncio.create_task(warm_user_specific_caches(result.user.id))
+        except Exception:
+            pass  # Don't fail login if cache warming fails
+    
+    return result
 
 
 @router.post("/refresh", response_model=TokenResponse)

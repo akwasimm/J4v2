@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import { getProfile } from "./services/profileService.js";
 import { getPreferences } from "./api/client.js";
 import { getDashboardProfileByRole } from "./utils/dashboardRoleMapping.js";
+import { getDashboardProfile, getGreeting } from "./utils/dashboardProfiles.js";
+import { analyzeSkillGap } from "./services/skillGapService.js";
 
 // ─── Profile Completion Data Helper ─────────────────────────────────────────
 
@@ -35,84 +37,7 @@ const lockedFeatures = [
 
 // ─── Hardcoded Data ───────────────────────────────────────────────────────────
 
-// Note: topPicks is now generated inside the component from dynamic dashboardData
-
-const matchBars = [
-  { label: "Skills Alignment", value: 92, color: "#1A4D2E" },
-  { label: "Experience Fit", value: 80, color: "#D8B4FE" },
-  { label: "Location Preferred", value: 100, color: "#1A4D2E" },
-  { label: "Salary Expectations", value: 75, color: "#D8B4FE" },
-];
-
-const whyItMatches = [
-  "Expert knowledge in Figma & Design Systems",
-  "Previous experience in B2B SaaS sector",
-  "Perfect overlap with desired timezone (EST)",
-  "Competitive package with full health benefits",
-];
-
-// ─── Option 1: Career Progress Roadmap ───────────────────────────────────────
-
-const careerRoadmap = {
-  currentRole: "Product Designer",
-  nextTarget: "Senior UX Architect",
-  dreamRole: "Design Director",
-  currentProgress: 65,
-  skillsToNext: [
-    { name: "Design Systems", status: "completed", progress: 100 },
-    { name: "TypeScript", status: "in_progress", progress: 45 },
-    { name: "User Research", status: "pending", progress: 0 },
-    { name: "Team Leadership", status: "pending", progress: 0 },
-  ],
-};
-
-// ─── Option 1: Weekly Wins ────────────────────────────────────────────────────
-
-const weeklyWins = [
-  { id: 1, icon: "send", title: "Application Sent", detail: "TechCorp • Product Designer", date: "Today", type: "milestone" },
-  { id: 2, icon: "school", title: "Course Progress", detail: "Figma Advanced • Module 3/8", date: "Yesterday", type: "learning" },
-  { id: 3, icon: "person_add", title: "Network Growth", detail: "Connected with 3 hiring managers", date: "2 days ago", type: "networking" },
-  { id: 4, icon: "description", title: "Profile Update", detail: "Added TypeScript skill", date: "3 days ago", type: "profile" },
-];
-
-// ─── Option 3: Application Pipeline ────────────────────────────────────────────
-
-const applicationPipeline = {
-  applied: { count: 12, companies: ["TechCorp", "Designify", "Innovate Labs"] },
-  screening: { count: 3, companies: ["Google", "Meta"] },
-  interview: { count: 1, companies: ["Stripe"] },
-  offer: { count: 0, companies: [] },
-};
-
-const nextSteps = [
-  { id: 1, task: "Send thank-you email to Stripe", deadline: "Today, 5:00 PM", urgency: "high", company: "Stripe", type: "follow_up" },
-  { id: 2, task: "Complete take-home assignment", deadline: "Tomorrow, 11:59 PM", urgency: "high", company: "Google", type: "assignment" },
-  { id: 3, task: "Update portfolio with case study", deadline: "Friday", urgency: "medium", company: null, type: "profile" },
-];
-
-// ─── Option 4: Salary Benchmark ──────────────────────────────────────────────
-
-const salaryBenchmark = {
-  currentSalary: "₹12,00,000",
-  targetRoleSalary: {
-    min: "₹18,00,000",
-    max: "₹25,00,000",
-    median: "₹21,00,000",
-  },
-  location: "Bangalore",
-  experience: "4 years",
-  gap: "₹9,00,000",
-  bridgeSkills: ["TypeScript", "Design Systems", "User Research"],
-};
-
-const hotSkillsForNextRole = [
-  { name: "TypeScript", demandScore: 92, salaryBoost: "+₹3L", trend: "up", youHave: false },
-  { name: "Design Systems", demandScore: 88, salaryBoost: "+₹2.5L", trend: "up", youHave: true },
-  { name: "React/Next.js", demandScore: 85, salaryBoost: "+₹2L", trend: "up", youHave: false },
-  { name: "User Research", demandScore: 78, salaryBoost: "+₹1.5L", trend: "stable", youHave: false },
-  { name: "Figma Variables", demandScore: 75, salaryBoost: "+₹1L", trend: "up", youHave: true },
-  { name: "AI Design Tools", demandScore: 70, salaryBoost: "+₹0.8L", trend: "up", youHave: false },
-];
+// Note: Data is now loaded from dashboardProfiles.js based on user's target role
 
 // ─── Radial Progress ─────────────────────────────────────────────────────────
 
@@ -209,6 +134,7 @@ export default function AIRecommendations() {
     isLoading: true
   });
   const [dashboardData, setDashboardData] = useState(null);
+  const [missingSkill, setMissingSkill] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const cardsPerPage = 3;
 
@@ -227,8 +153,21 @@ export default function AIRecommendations() {
         const targetRole = preferences?.target_role || null;
         const profileCompletion = profileResponse?.profile?.profile_completion || 75;
         
-        // Get dashboard profile based on target role
-        const { profileData: roleBasedProfileData } = getDashboardProfileByRole(targetRole);
+        // Get dashboard profile based on target role from new dashboardProfiles.js
+        const roleBasedProfileData = getDashboardProfile(targetRole);
+        
+        // Fetch missing skill from skill gap analysis
+        let missingSkillData = null;
+        try {
+          if (targetRole) {
+            const skillGapData = await analyzeSkillGap(targetRole);
+            if (skillGapData?.missing_skills && skillGapData.missing_skills.length > 0) {
+              missingSkillData = skillGapData.missing_skills[0];
+            }
+          }
+        } catch (skillError) {
+          console.log("Skill gap fetch failed, using default:", skillError);
+        }
         
         setUserData({
           firstName,
@@ -238,10 +177,11 @@ export default function AIRecommendations() {
         });
         
         setDashboardData(roleBasedProfileData);
+        setMissingSkill(missingSkillData);
       } catch (error) {
         console.error("Error fetching user data:", error);
         // Fallback to default data
-        const { profileData: defaultProfileData } = getDashboardProfileByRole(null);
+        const defaultProfileData = getDashboardProfile(null);
         
         setUserData({
           firstName: "User",
@@ -251,6 +191,7 @@ export default function AIRecommendations() {
         });
         
         setDashboardData(defaultProfileData);
+        setMissingSkill(null);
       }
     };
     
@@ -258,7 +199,7 @@ export default function AIRecommendations() {
   }, []);
 
   // Use loaded dashboard data or fallback
-  const activeDashboardData = dashboardData || getDashboardProfileByRole(null).profileData;
+  const activeDashboardData = dashboardData || getDashboardProfile(null);
   const { firstName, profileCompletion, isLoading } = userData;
   
   // Create profile completion data
@@ -266,22 +207,86 @@ export default function AIRecommendations() {
   const completion = profileData.completion;
   const isComplete = completion >= 50;
 
+  // Get dynamic greeting
+  const greeting = getGreeting();
+
   // Generate topPicks from dashboard data
-  const topPicks = (activeDashboardData?.top_picks || []).map((job, index) => ({
-    id: job.job_id || index + 1,
-    match: `${Math.round(job.match_score || 0)}% MATCH`,
+  const topPicks = (activeDashboardData?.topPicks || []).map((job, index) => ({
+    id: job.id || index + 1,
+    match: job.match,
+    matchScore: job.matchScore,
     matchBg: job.matchBg || "#D8B4FE",
     matchColor: job.matchColor || "#000000",
     cardBg: job.cardBg || "#ffffff",
     title: job.title || "Job Title",
     team: job.company || "Company",
     location: job.location || "Location",
-    salary: job.salary_range || "Salary",
+    salary: job.salary || "Salary",
     btnBg: "#000000",
     btnColor: "#ffffff",
     btnHoverBg: "#ffffff",
     btnHoverColor: "#000000",
   }));
+
+  // Get profile power data (with dynamic overall score 96-99%)
+  const profilePower = activeDashboardData?.profilePower || {
+    overallScore: Math.floor(Math.random() * 4) + 96,
+    breakdown: [
+      { label: "Profile Completeness", value: profileCompletion, color: "#1A4D2E" },
+      { label: "Skill Diversity", value: 80, color: "#D8B4FE" },
+      { label: "Market Alignment", value: 85, color: "#1A4D2E" },
+      { label: "Experience Level", value: 75, color: "#D8B4FE" }
+    ]
+  };
+
+  // Get career roadmap
+  const careerRoadmap = activeDashboardData?.roadmap || {
+    currentRole: "Developer",
+    nextTarget: "Senior Developer",
+    dreamRole: "Principal Engineer",
+    currentProgress: profileCompletion,
+    skillsToNext: [
+      { name: "Advanced Skills", difficulty: "medium" },
+      { name: "Leadership", difficulty: "hard" },
+      { name: "Architecture", difficulty: "hard" }
+    ]
+  };
+
+  // Get salary benchmark
+  const salaryBenchmark = activeDashboardData?.salaryBenchmark || {
+    currentSalary: "₹12,00,000",
+    targetRoleSalary: { min: "₹18L", max: "₹28L", median: "₹23L" },
+    location: "Bangalore",
+    experience: "3-5 years",
+    gap: "₹11,00,000",
+    bridgeSkills: ["TypeScript", "React", "Node.js"]
+  };
+
+  // Get hot skills
+  const hotSkillsForNextRole = activeDashboardData?.hotSkills || [
+    { name: "TypeScript", demandScore: 92, salaryBoost: "+₹3L", trend: "up", youHave: false },
+    { name: "React", demandScore: 88, salaryBoost: "+₹2L", trend: "up", youHave: true },
+    { name: "Node.js", demandScore: 85, salaryBoost: "+₹1.5L", trend: "stable", youHave: false },
+    { name: "AWS", demandScore: 90, salaryBoost: "+₹2.5L", trend: "up", youHave: true }
+  ];
+
+  // Get weekly wins
+  const weeklyWins = activeDashboardData?.weeklyWins || [
+    { id: 1, icon: "send", title: "Application Sent", detail: "Company • Role", date: "Today" },
+    { id: 2, icon: "bookmark", title: "Job Saved", detail: "Company • Role", date: "Yesterday" },
+    { id: 3, icon: "eye", title: "Profile Viewed", detail: "3 recruiters viewed your profile", date: "2 days ago" }
+  ];
+
+  // Get missing skill template
+  const missingSkillTemplate = activeDashboardData?.missingSkillTemplate || {
+    title: "Missing Skill Alert",
+    description: "You're missing {skillName} — a skill that appears in many job postings. Adding this could boost your profile strength."
+  };
+
+  // Format missing skill description with actual skill name
+  const missingSkillDescription = missingSkill 
+    ? missingSkillTemplate.description.replace("{skillName}", missingSkill.name || missingSkill)
+    : missingSkillTemplate.description.replace("{skillName}", "TypeScript");
 
   // Filter sections by status (only used for incomplete dashboard)
   const missingSections = profileData.incompleteSections.filter(s => s.status !== "complete");
@@ -810,7 +815,7 @@ export default function AIRecommendations() {
                       letterSpacing: "0.05em",
                       fontFamily: "'Space Grotesk', sans-serif",
                     }}>
-                      GOOD MORNING
+                      {greeting}
                     </span>
                     <span style={{
                       backgroundColor: "#1A4D2E",
@@ -1028,7 +1033,7 @@ export default function AIRecommendations() {
           </div>
         </section>
 
-        {/* ── Section 2: Deep Match Analysis ── */}
+        {/* ── Section 2: Profile Power Score ── */}
         <section style={{ marginBottom: "32px" }}>
           <h2
             style={{
@@ -1043,7 +1048,7 @@ export default function AIRecommendations() {
             }}
           >
             <span className="material-symbols-outlined" style={{ color: "#1A4D2E" }}>analytics</span>
-            Deep Match Analysis
+            Profile Power Score
           </h2>
 
           <div
@@ -1067,11 +1072,11 @@ export default function AIRecommendations() {
                 className="analysis-inner"
                 style={{ display: "flex", alignItems: "center", gap: "48px" }}
               >
-                {/* Radial */}
+                {/* Radial - Profile Power Score */}
                 <div style={{ textAlign: "center", flexShrink: 0 }}>
-                  <RadialProgress percent={85} />
+                  <RadialProgress percent={profilePower.overallScore} />
                   <h3 style={{ fontWeight: 700, fontSize: "1.125rem", fontFamily: "'Syne', sans-serif" }}>
-                    Senior UX Architect
+                    Profile Power
                   </h3>
                   <p
                     style={{
@@ -1082,13 +1087,13 @@ export default function AIRecommendations() {
                       fontFamily: "'Space Grotesk', sans-serif",
                     }}
                   >
-                    Acme Global Systems
+                    Overall Score
                   </p>
                 </div>
 
-                {/* Bars */}
+                {/* Profile Power Bars */}
                 <div style={{ flexGrow: 1, width: "100%" }}>
-                  {matchBars.map((bar) => (
+                  {profilePower.breakdown.map((bar) => (
                     <div key={bar.label} style={{ marginBottom: "24px" }}>
                       <div
                         style={{
@@ -1127,7 +1132,7 @@ export default function AIRecommendations() {
                 </div>
               </div>
 
-              {/* Why it matches */}
+              {/* Profile Analysis Insights */}
               <div style={{ marginTop: "48px", paddingTop: "48px", borderTop: "2px solid #000000" }}>
                 <h4
                   style={{
@@ -1140,28 +1145,27 @@ export default function AIRecommendations() {
                     fontFamily: "'Syne', sans-serif",
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ color: "#16a34a" }}>verified</span>
-                  Why it matches
+                  <span className="material-symbols-outlined" style={{ color: "#16a34a" }}>insights</span>
+                  Profile Analysis
                 </h4>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "16px" }}>
-                  {whyItMatches.map((reason, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        fontWeight: 500,
-                        fontFamily: "'Space Grotesk', sans-serif",
-                      }}
-                    >
-                      <span className="material-symbols-outlined" style={{ color: "#1A4D2E", flexShrink: 0 }}>
-                        check_circle
-                      </span>
-                      {reason}
-                    </div>
-                  ))}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 500, fontFamily: "'Space Grotesk', sans-serif" }}>
+                    <span className="material-symbols-outlined" style={{ color: "#1A4D2E", flexShrink: 0 }}>check_circle</span>
+                    Strong technical foundation
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 500, fontFamily: "'Space Grotesk', sans-serif" }}>
+                    <span className="material-symbols-outlined" style={{ color: "#1A4D2E", flexShrink: 0 }}>check_circle</span>
+                    Good market alignment
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 500, fontFamily: "'Space Grotesk', sans-serif" }}>
+                    <span className="material-symbols-outlined" style={{ color: "#1A4D2E", flexShrink: 0 }}>check_circle</span>
+                    Active job seeker status
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 500, fontFamily: "'Space Grotesk', sans-serif" }}>
+                    <span className="material-symbols-outlined" style={{ color: "#1A4D2E", flexShrink: 0 }}>check_circle</span>
+                    Portfolio demonstrates skills
+                  </div>
                 </div>
               </div>
             </div>
@@ -1215,18 +1219,7 @@ export default function AIRecommendations() {
                   lineHeight: 1.6,
                 }}
               >
-                This role highly values{" "}
-                <span
-                  style={{
-                    backgroundColor: "#ffffff",
-                    color: "#000000",
-                    padding: "2px 8px",
-                    fontWeight: 700,
-                  }}
-                >
-                  TypeScript
-                </span>
-                . We noticed it's not on your profile.
+                {missingSkillDescription}
               </p>
 
               <div
@@ -1242,7 +1235,7 @@ export default function AIRecommendations() {
                   Recommendation:
                 </h4>
                 <p style={{ fontSize: "0.875rem", fontStyle: "italic", fontFamily: "'Space Grotesk', sans-serif" }}>
-                  Completing a TypeScript certification could increase your match rate to 95%.
+                  Adding {missingSkill?.name || "this skill"} to your profile and completing a relevant certification could boost your profile power by 10-15%.
                 </p>
               </div>
 
@@ -1352,24 +1345,40 @@ export default function AIRecommendations() {
               <h4 style={{ fontWeight: 700, marginBottom: "16px", fontFamily: "'Syne', sans-serif", fontSize: "0.875rem", textTransform: "uppercase" }}>
                 Skills to Bridge the Gap
               </h4>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-                {careerRoadmap.skillsToNext.map((skill) => (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+                {careerRoadmap.skillsToNext.map((skill, index) => (
                   <div key={skill.name} style={{
-                    padding: "16px",
+                    padding: "20px",
                     border: "2px solid #000000",
-                    backgroundColor: skill.status === "completed" ? "#dcfce7" : skill.status === "in_progress" ? "#fef3c7" : "#f3f4f6",
+                    backgroundColor: index === 0 ? "#fef3c7" : "#f3f4f6",
+                    boxShadow: "4px 4px 0px 0px #000000",
                   }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                      <span style={{ fontWeight: 700, fontSize: "0.875rem", fontFamily: "'Syne', sans-serif" }}>{skill.name}</span>
-                      <span className="material-symbols-outlined" style={{ fontSize: "20px" }}>
-                        {skill.status === "completed" ? "check_circle" : skill.status === "in_progress" ? "progress_activity" : "schedule"}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                      <span style={{ fontWeight: 700, fontSize: "1rem", fontFamily: "'Syne', sans-serif" }}>{skill.name}</span>
+                      <span 
+                        className="material-symbols-outlined" 
+                        style={{ 
+                          fontSize: "24px",
+                          color: skill.difficulty === "easy" ? "#16a34a" : skill.difficulty === "medium" ? "#f59e0b" : "#dc2626"
+                        }}
+                      >
+                        {skill.difficulty === "easy" ? "sentiment_satisfied" : skill.difficulty === "medium" ? "sentiment_neutral" : "fitness_center"}
                       </span>
                     </div>
-                    <div style={{ height: "8px", backgroundColor: "#e5e7eb", border: "1px solid #000000" }}>
-                      <div style={{ width: `${skill.progress}%`, height: "100%", backgroundColor: skill.status === "completed" ? "#16a34a" : "#D8B4FE" }} />
+                    <div style={{ 
+                      display: "inline-block",
+                      backgroundColor: skill.difficulty === "easy" ? "#dcfce7" : skill.difficulty === "medium" ? "#fef3c7" : "#fee2e2",
+                      color: skill.difficulty === "easy" ? "#166534" : skill.difficulty === "medium" ? "#92400e" : "#991b1b",
+                      padding: "4px 12px",
+                      border: "2px solid #000000",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                    }}>
+                      {skill.difficulty} Difficulty
                     </div>
-                    <p style={{ fontSize: "0.75rem", marginTop: "8px", fontWeight: 600, textTransform: "uppercase" }}>
-                      {skill.status === "completed" ? "Complete" : skill.status === "in_progress" ? `${skill.progress}% Done` : "Not Started"}
+                    <p style={{ fontSize: "0.875rem", marginTop: "12px", color: "#4b5563", fontFamily: "'Space Grotesk', sans-serif" }}>
+                      Focus area for reaching {careerRoadmap.nextTarget}
                     </p>
                   </div>
                 ))}
@@ -1378,179 +1387,7 @@ export default function AIRecommendations() {
           </div>
         </section>
 
-        {/* ── Section 4: Application Pipeline ───────────────────────────────────── */}
-        <section style={{ marginBottom: "64px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "32px" }}>
-            {/* Pipeline Funnel */}
-            <div>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 700,
-                  marginBottom: "24px",
-                  textTransform: "uppercase",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontFamily: "'Syne', sans-serif",
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ color: "#1A4D2E" }}>filter_alt</span>
-                Your Application Pipeline
-              </h2>
-
-              <div className="shadow-neo-lg" style={{ backgroundColor: "#ffffff", border: "2px solid #000000", padding: "24px" }}>
-                <div style={{ display: "flex", gap: "16px" }}>
-                  {/* Applied */}
-                  <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{
-                      backgroundColor: "#f3f4f6",
-                      border: "2px solid #000000",
-                      padding: "20px",
-                      marginBottom: "12px",
-                    }}>
-                      <p style={{ fontSize: "2rem", fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>{applicationPipeline.applied.count}</p>
-                      <p style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Applied</p>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      {applicationPipeline.applied.companies.map((company, i) => (
-                        <span key={i} style={{ fontSize: "0.75rem", color: "#6b7280" }}>{company}</span>
-                      ))}
-                      {applicationPipeline.applied.companies.length < applicationPipeline.applied.count && (
-                        <span style={{ fontSize: "0.75rem", color: "#6b7280", fontStyle: "italic" }}>+{applicationPipeline.applied.count - applicationPipeline.applied.companies.length} more</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span className="material-symbols-outlined" style={{ color: "#D8B4FE" }}>arrow_forward</span>
-                  </div>
-
-                  {/* Screening */}
-                  <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{
-                      backgroundColor: "#fef3c7",
-                      border: "2px solid #000000",
-                      padding: "20px",
-                      marginBottom: "12px",
-                    }}>
-                      <p style={{ fontSize: "2rem", fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>{applicationPipeline.screening.count}</p>
-                      <p style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Screening</p>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      {applicationPipeline.screening.companies.map((company, i) => (
-                        <span key={i} style={{ fontSize: "0.75rem", color: "#6b7280" }}>{company}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span className="material-symbols-outlined" style={{ color: "#D8B4FE" }}>arrow_forward</span>
-                  </div>
-
-                  {/* Interview */}
-                  <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{
-                      backgroundColor: "#D8B4FE",
-                      border: "2px solid #000000",
-                      padding: "20px",
-                      marginBottom: "12px",
-                    }}>
-                      <p style={{ fontSize: "2rem", fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>{applicationPipeline.interview.count}</p>
-                      <p style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Interview</p>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      {applicationPipeline.interview.companies.map((company, i) => (
-                        <span key={i} style={{ fontSize: "0.75rem", color: "#6b7280", fontWeight: 700 }}>{company}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span className="material-symbols-outlined" style={{ color: "#D8B4FE" }}>arrow_forward</span>
-                  </div>
-
-                  {/* Offer */}
-                  <div style={{ flex: 1, textAlign: "center" }}>
-                    <div style={{
-                      backgroundColor: applicationPipeline.offer.count > 0 ? "#dcfce7" : "#f3f4f6",
-                      border: "2px solid #000000",
-                      borderStyle: applicationPipeline.offer.count > 0 ? "solid" : "dashed",
-                      padding: "20px",
-                      marginBottom: "12px",
-                    }}>
-                      <p style={{ fontSize: "2rem", fontWeight: 800, fontFamily: "'Syne', sans-serif", color: applicationPipeline.offer.count > 0 ? "#16a34a" : "#9ca3af" }}>
-                        {applicationPipeline.offer.count}
-                      </p>
-                      <p style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase" }}>Offer</p>
-                    </div>
-                    <p style={{ fontSize: "0.75rem", color: "#6b7280", fontStyle: "italic" }}>
-                      {applicationPipeline.offer.count > 0 ? "🎉 Congratulations!" : "Keep pushing!"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Next Steps */}
-            <div>
-              <h2
-                style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 700,
-                  marginBottom: "24px",
-                  textTransform: "uppercase",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontFamily: "'Syne', sans-serif",
-                }}
-              >
-                <span className="material-symbols-outlined" style={{ color: "#dc2626" }}>notifications_active</span>
-                Next Steps
-              </h2>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {nextSteps.map((step) => (
-                  <div key={step.id} className="shadow-neo" style={{
-                    backgroundColor: step.urgency === "high" ? "#fef2f2" : "#ffffff",
-                    border: "2px solid #000000",
-                    padding: "16px",
-                    borderLeft: step.urgency === "high" ? "6px solid #dc2626" : "2px solid #000000",
-                  }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
-                      <span style={{
-                        backgroundColor: step.urgency === "high" ? "#dc2626" : "#D8B4FE",
-                        color: step.urgency === "high" ? "#ffffff" : "#000000",
-                        padding: "2px 8px",
-                        fontSize: "0.625rem",
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                      }}>
-                        {step.urgency}
-                      </span>
-                      {step.company && (
-                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#1A4D2E" }}>{step.company}</span>
-                      )}
-                    </div>
-                    <p style={{ fontWeight: 700, fontSize: "0.875rem", marginBottom: "4px", fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {step.task}
-                    </p>
-                    <p style={{ fontSize: "0.75rem", color: "#6b7280", display: "flex", alignItems: "center", gap: "4px" }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>schedule</span>
-                      {step.deadline}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Section 5: Salary Benchmark + Hot Skills ──────────────────────────── */}
+        {/* ── Section 4: Salary Benchmark + Hot Skills ──────────────────────────── */}
         <section style={{ marginBottom: "64px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "32px" }}>
             {/* Salary Benchmark */}
@@ -1719,9 +1556,9 @@ export default function AIRecommendations() {
           </h2>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" }}>
-            {weeklyWins.map((win) => (
+            {weeklyWins.map((win, index) => (
               <div key={win.id} className="shadow-neo" style={{
-                backgroundColor: win.type === "milestone" ? "#D8B4FE" : win.type === "learning" ? "#fef3c7" : win.type === "networking" ? "#dcfce7" : "#ffffff",
+                backgroundColor: index === 0 ? "#D8B4FE" : index === 1 ? "#fef3c7" : index === 2 ? "#dcfce7" : "#ffffff",
                 border: "2px solid #000000",
                 padding: "20px",
                 textAlign: "center",

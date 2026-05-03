@@ -52,6 +52,13 @@ def get_or_create_session(
         ).first()
         if session:
             return session
+        # Check if UUID exists but belongs to different user
+        existing = db.query(CoachSession).filter(
+            CoachSession.session_uuid == session_uuid
+        ).first()
+        if existing:
+            # UUID taken by another user, generate new one
+            session_uuid = None
 
     # Create new session
     new_uuid = session_uuid or str(uuid.uuid4())

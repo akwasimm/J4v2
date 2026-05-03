@@ -16,12 +16,15 @@ router = APIRouter()
 @router.get("", response_model=DashboardResponse)
 def get_dashboard(
     force_refresh: bool = Query(default=False, description="Force AI regeneration of dashboard data"),
+    background_refresh: bool = Query(default=True, description="Trigger background refresh if cache stale"),
     user_id: str = Depends(get_current_user_id),
-    db: Session = Depends(get_db),
-    _: str = Depends(require_groq)
+    db: Session = Depends(get_db)
 ):
     """
-    Get personalized dashboard data for the current user.
+    Get personalized dashboard data for the current user - FAST.
+
+    Returns cached/placeholder data immediately without blocking on AI.
+    If cache is stale, triggers background refresh automatically.
 
     Returns:
     - **top_picks**: 6 best matching jobs with >90% match score
@@ -30,10 +33,16 @@ def get_dashboard(
     - **market_snapshot**: Brief market overview personalized to user
     - **stats**: User's application statistics
 
-    Data is cached for 6 hours. Use force_refresh=true to regenerate.
+    Data is cached for 6 hours. Use force_refresh=true to regenerate immediately.
     """
-    from app.services.dashboard_service import get_dashboard_data
-    return get_dashboard_data(db, user_id, force_refresh)
+    if force_refresh:
+        # Force immediate AI generation (may be slow)
+        from app.services.dashboard_service import get_dashboard_data
+        return get_dashboard_data(db, user_id, force_refresh=True)
+    
+    # Fast path: return cached/placeholder data immediately
+    from app.services.cache_warmer import get_dashboard_with_fallback
+    return get_dashboard_with_fallback(db, user_id)
 
 
 @router.get("/cached", response_model=DashboardResponse)

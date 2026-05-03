@@ -30,6 +30,10 @@ def get_user_stats(db: Session, user_id: str) -> dict:
         "first_name": None,
         "full_name": None,
         "profile_completion": 0,
+        # Additional fields required by schema
+        "applied_count": 0,
+        "saved_count": 0,
+        "interviews_count": 0,
     }
     
     try:
@@ -53,23 +57,28 @@ def get_user_stats(db: Session, user_id: str) -> dict:
     
     try:
         # Get application count
-        from app.models.application import JobApplication
+        from app.models.jobs import JobApplication
         total_apps = db.query(func.count(JobApplication.id)).filter(
             JobApplication.user_id == user_id
         ).scalar() or 0
         stats["total_applications"] = total_apps
+        stats["applied_count"] = total_apps
     except Exception as e:
         logger.warning(f"Could not get application stats: {e}")
     
     try:
         # Get saved jobs count
-        from app.models.saved_job import SavedJob
+        from app.models.jobs import SavedJob
         saved = db.query(func.count(SavedJob.id)).filter(
             SavedJob.user_id == user_id
         ).scalar() or 0
         stats["saved_jobs"] = saved
+        stats["saved_count"] = saved
     except Exception as e:
         logger.warning(f"Could not get saved jobs: {e}")
+    
+    # Set interviews_count from interviews_scheduled
+    stats["interviews_count"] = stats["interviews_scheduled"]
     
     return stats
 

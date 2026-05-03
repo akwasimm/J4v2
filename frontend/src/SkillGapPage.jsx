@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getRoleTemplates, analyzeSkillGap } from "./services/skillGapService.js";
-import { getSkills, updatePreferences } from "./api/client.js";
+import { getSkills, updatePreferences, getPreferences } from "./api/client.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
 import { useAIScore } from './contexts/AIScoreContext'
@@ -85,6 +85,21 @@ export default function SkillGapAnalysis() {
       }
     };
     fetchRoles();
+  }, []);
+
+  // Load saved target role from preferences on mount
+  useEffect(() => {
+    const loadSavedTargetRole = async () => {
+      try {
+        const preferences = await getPreferences();
+        if (preferences?.target_role) {
+          setSelectedRole(preferences.target_role);
+        }
+      } catch (error) {
+        console.error("Failed to load saved target role:", error);
+      }
+    };
+    loadSavedTargetRole();
   }, []);
 
   // Fetch user skills from profile

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   uploadProfileImage, uploadResume, getProfile, updateProfile, updatePreferences,
   getSkills, getExperience, getEducation, getResumes, deleteResume, setDefaultResume, getPreferences,
@@ -39,6 +40,7 @@ export default function EditProfile() {
 
   const avatarInputRef = useRef(null);
   const resumeInputRef = useRef(null);
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -191,7 +193,7 @@ export default function EditProfile() {
     };
 
     loadProfile();
-  }, []);
+  }, [location.key]);
 
   // Helper to validate URL
   const isValidUrl = (url) => {
@@ -235,72 +237,66 @@ export default function EditProfile() {
       // Save skills to backend
       // Backend expects: { skills: [{ name, level, source }] }
       // level must be: "Beginner", "Intermediate", "Advanced", "Expert"
-      if (skills && skills.length > 0) {
-        try {
-          const validLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
-          const normalizeLevel = (level) => {
-            if (!level) return "Intermediate";
-            const cleanLevel = level.trim();
-            // Check if level matches valid levels (case insensitive)
-            const matched = validLevels.find(vl => vl.toLowerCase() === cleanLevel.toLowerCase());
-            return matched || "Intermediate";
-          };
+      try {
+        const validLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
+        const normalizeLevel = (level) => {
+          if (!level) return "Intermediate";
+          const cleanLevel = level.trim();
+          // Check if level matches valid levels (case insensitive)
+          const matched = validLevels.find(vl => vl.toLowerCase() === cleanLevel.toLowerCase());
+          return matched || "Intermediate";
+        };
 
-          const skillsPayload = skills.map(s => ({
-            name: s.name,
-            level: normalizeLevel(s.level || s.proficiency_level),
-            source: s.source || "manual"
-          }));
-          console.log("Sending skills payload:", skillsPayload);
-          await bulkUpdateSkills({ skills: skillsPayload });
-          console.log("Skills saved:", skills.length);
-        } catch (skillsError) {
-          console.error("Error saving skills:", skillsError);
-          // Don't fail the whole save if skills fail
-        }
+        const skillsPayload = skills?.map(s => ({
+          name: s.name,
+          level: normalizeLevel(s.level || s.proficiency_level),
+          source: s.source || "manual"
+        })) || [];
+        console.log("Sending skills payload:", skillsPayload);
+        await bulkUpdateSkills({ skills: skillsPayload });
+        console.log("Skills saved:", skillsPayload.length);
+      } catch (skillsError) {
+        console.error("Error saving skills:", skillsError);
+        // Don't fail the whole save if skills fail
       }
 
       // Save experience to backend
       // Backend expects: { experience: [{ title, company, location, start_date, end_date, current, description, source }] }
-      if (experience && experience.length > 0) {
-        try {
-          const expPayload = experience.map(e => ({
-            title: e.title,
-            company: e.company,
-            location: e.location,
-            start_date: e.start_date || null,
-            end_date: e.end_date || null,
-            current: e.current || false,
-            description: Array.isArray(e.description) ? e.description : (e.description ? [e.description] : []),
-            source: e.source || "manual"
-          }));
-          console.log("Sending experience payload:", expPayload);
-          await bulkUpdateExperience({ experience: expPayload });
-          console.log("Experience saved:", experience.length);
-        } catch (expError) {
-          console.error("Error saving experience:", expError);
-          // Don't fail the whole save if experience fails
-        }
+      try {
+        const expPayload = experience?.map(e => ({
+          title: e.title,
+          company: e.company,
+          location: e.location,
+          start_date: e.start_date || null,
+          end_date: e.end_date || null,
+          current: e.current || false,
+          description: Array.isArray(e.description) ? e.description : (e.description ? [e.description] : []),
+          source: e.source || "manual"
+        })) || [];
+        console.log("Sending experience payload:", expPayload);
+        await bulkUpdateExperience({ experience: expPayload });
+        console.log("Experience saved:", expPayload.length);
+      } catch (expError) {
+        console.error("Error saving experience:", expError);
+        // Don't fail the whole save if experience fails
       }
 
       // Save education to backend
       // Backend expects: { education: [{ degree, field, school, info, source }] }
-      if (education && education.length > 0) {
-        try {
-          const eduPayload = education.map(e => ({
-            degree: e.degree,
-            field: e.field,
-            school: e.school,
-            info: e.info || "",
-            source: e.source || "manual"
-          }));
-          console.log("Sending education payload:", eduPayload);
-          await bulkUpdateEducation({ education: eduPayload });
-          console.log("Education saved:", education.length);
-        } catch (eduError) {
-          console.error("Error saving education:", eduError);
-          // Don't fail the whole save if education fails
-        }
+      try {
+        const eduPayload = education?.map(e => ({
+          degree: e.degree,
+          field: e.field,
+          school: e.school,
+          info: e.info || "",
+          source: e.source || "manual"
+        })) || [];
+        console.log("Sending education payload:", eduPayload);
+        await bulkUpdateEducation({ education: eduPayload });
+        console.log("Education saved:", eduPayload.length);
+      } catch (eduError) {
+        console.error("Error saving education:", eduError);
+        // Don't fail the whole save if education fails
       }
 
       // Update preferences separately if they exist

@@ -72,8 +72,14 @@ def search_jobs(
     page_size: int = Query(default=10, ge=1, le=50),
     db: Session = Depends(get_db)
 ):
-    from app.services.job_service import search_jobs as _search
+    """
+    Search jobs with optimized database-level pagination and caching.
+    Returns cached results immediately if available.
+    """
+    from app.services.optimized_job_service import search_jobs_optimized
+    from app.services.cache_warmer import get_jobs_fast_with_fallback
     from app.schemas.jobs import JobSearchParams
+    
     params = JobSearchParams(
         q=q, location=location, work_model=work_model,
         job_type=job_type, min_exp=min_exp, max_exp=max_exp,
@@ -81,7 +87,10 @@ def search_jobs(
         sort_by=sort_by, user_id=user_id,
         page=page, page_size=page_size
     )
-    return _search(db, params)
+    
+    # Use optimized search with fallback for fast response
+    params_dict = params.model_dump()
+    return get_jobs_fast_with_fallback(db, user_id, params_dict)
 
 @router.get("/{job_id}", response_model=JobResponse)
 def get_job(
