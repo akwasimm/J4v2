@@ -3,7 +3,7 @@ import { getRoleTemplates, analyzeSkillGap } from "./services/skillGapService.js
 import { getSkills, updatePreferences, getPreferences } from "./api/client.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
-import { useAIScore } from './contexts/AIScoreContext'
+import { useAIScore } from './contexts/useAIScore.js'
 
 const NEO = { boxShadow: "4px 4px 0px 0px #000000" };
 const NEO_SM = { boxShadow: "2px 2px 0px 0px #000000" };
@@ -50,12 +50,16 @@ const TOP_TECH_ROLES = [
 ];
 
 export default function SkillGapAnalysis() {
-  const { updateAIScore } = useAIScore();
-
   // Placeholder check
   if (!FEATURES.skillGap) {
     return <ComingSoon pageName="Skill Gap Analysis" description="Analyze your readiness for target roles" />
   }
+
+  return <SkillGapAnalysisView />;
+}
+
+function SkillGapAnalysisView() {
+  const { updateAIScore } = useAIScore();
 
   useEffect(() => {
     document.title = "Skill Gap Analysis — JobFor";
@@ -64,7 +68,6 @@ export default function SkillGapAnalysis() {
   const [selectedRole, setSelectedRole] = useState("Software Engineer");
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [dbJobs, setDbJobs] = useState([]);
   const [userSkills, setUserSkills] = useState([]);
   const [skillGapData, setSkillGapData] = useState(null);
   const [availableRoles, setAvailableRoles] = useState([]);
@@ -136,23 +139,6 @@ export default function SkillGapAnalysis() {
     performSkillGapAnalysis();
   }, [selectedRole]);
   
-  // Mock jobs search
-  useEffect(() => {
-    if (searchQuery.length > 2) {
-      const mockJobs = [
-        { id: 1, title: "Software Engineer", company: "Google" },
-        { id: 2, title: "Frontend Developer", company: "Meta" },
-        { id: 3, title: "Backend Engineer", company: "Amazon" }
-      ].filter(job => 
-        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.company.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setDbJobs(mockJobs);
-    } else {
-      setDbJobs([]);
-    }
-  }, [searchQuery]);
-  
   const filteredRoles = TOP_TECH_ROLES.filter(role =>
     role.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -166,20 +152,6 @@ export default function SkillGapAnalysis() {
     try {
       await updatePreferences({ target_role: role });
       console.log(`Target role "${role}" saved to preferences`);
-    } catch (error) {
-      console.error("Failed to save target role to preferences:", error);
-    }
-  };
-  
-  const handleSelectJob = async (job) => {
-    setSelectedRole(job.title);
-    setShowRoleSelector(false);
-    setSearchQuery("");
-    
-    // Save target role to user preferences for dashboard personalization
-    try {
-      await updatePreferences({ target_role: job.title });
-      console.log(`Target role "${job.title}" saved to preferences`);
     } catch (error) {
       console.error("Failed to save target role to preferences:", error);
     }
@@ -221,7 +193,6 @@ export default function SkillGapAnalysis() {
     }
   }, [readinessScore, updateAIScore]);
   const readinessLabel = skillGapData?.readiness_label || 'Unknown';
-  const matchedSkills = skillGapData?.matched_skills || [];
   const gapSkills = skillGapData?.missing_skills || [];
   const skillsToImprove = (skillGapData?.skills_to_improve || []).map(skill => ({
     skill: skill,

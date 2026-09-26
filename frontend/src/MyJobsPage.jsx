@@ -4,14 +4,6 @@ import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
 import { getMyApplications, deleteApplication, updateApplication, getSavedJobs, unsaveJob, createManualApplication } from './api/client'
 
-// Mock collections for saved jobs
-const collections = [
-  { id: 1, icon: "all_inbox", label: "All Saved", count: 24, active: false, iconColor: "#1A4D2E" },
-  { id: 2, icon: "priority_high", label: "Top Priority", count: 5, active: true, iconColor: "#000000" },
-  { id: 3, icon: "language", label: "Remote Roles", count: 12, active: false, iconColor: "#1A4D2E" },
-  { id: 4, icon: "rocket_launch", label: "Startup Tech", count: 7, active: false, iconColor: "#1A4D2E" },
-];
-
 // Applied jobs columns structure
 const INITIAL_COLUMNS = {
   applied: { id: "applied", title: "Applied", badgeBg: "#000000", badgeColor: "#ffffff", cardIds: [] },
@@ -49,6 +41,10 @@ export default function SavedJobs() {
     return <ComingSoon pageName="Saved Jobs" description="View your bookmarked jobs" />
   }
 
+  return <SavedJobsView />;
+}
+
+function SavedJobsView() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'applied' ? 'applied' : 'saved');

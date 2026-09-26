@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SectionTitle from "./components/SectionTitle";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
-import { getOpportunities, getOpportunitiesStatus } from './api/client'
+import { getOpportunities } from './api/client'
 
 const NAV_LINKS = ["Big Opportunities", "Mass Hiring", "Campus Drives"];
 
@@ -15,6 +15,10 @@ export default function BigOpportunities() {
     return <ComingSoon pageName="Big Opportunities" description="Mass hiring and campus drives" />
   }
 
+  return <BigOpportunitiesView />;
+}
+
+function BigOpportunitiesView() {
   const [data, setData] = useState({
     mass_hiring: [],
     product_companies: [],

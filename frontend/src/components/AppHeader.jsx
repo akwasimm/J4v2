@@ -6,8 +6,12 @@ import { getProfile, getFileUrl } from "../services/profileService.js";
 const DEFAULT_AVATAR = "https://lh3.googleusercontent.com/aida-public/AB6AXuBVDul7LZBkrrNeh-RW3pF2jxqrYFulpgFY700jl_r6-zpGSccec5jLkR7kb8AvhksbPpLHAgU2h363mSxfO53pS4E35pON8YQH2B83nUhWx_evJLWN8Mh1R9owp8ODuahL-FIqqngd24rjCj1VobYl0B38PGy36rw_fIWL_v-k6PMJwt-U7FVPD86V8XJ9kurEsNAaSGwCCpIhagKJQ5LUkZZp_5wSePdRPua5n-yUR4VcOi6otqrZ1py70S3G_chcHLXrYLayQiU";
 
 export default function AppHeader() {
-  const [userName, setUserName] = useState("User");
-  const [avatarUrl, setAvatarUrl] = useState(getFileUrl(localStorage.getItem("user_avatar_url")) || DEFAULT_AVATAR);
+  const [userName, setUserName] = useState(
+    () => localStorage.getItem("user_first_name") || "User"
+  );
+  const [avatarUrl] = useState(
+    () => getFileUrl(localStorage.getItem("user_avatar_url")) || DEFAULT_AVATAR
+  );
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -20,16 +24,9 @@ export default function AppHeader() {
       }
     };
 
-    // Initial load from localStorage or API
-    const storedName = localStorage.getItem("user_first_name");
-    if (storedName) {
-      setUserName(storedName);
-    } else {
+    // Fall back to the API only when nothing was cached locally
+    if (!localStorage.getItem("user_first_name")) {
       fetchUserName();
-    }
-    const storedAvatar = localStorage.getItem("user_avatar_url");
-    if (storedAvatar) {
-      setAvatarUrl(getFileUrl(storedAvatar));
     }
 
     // Listen for profile updates

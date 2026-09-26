@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, useCallback } from "react";
-
-const AIScoreContext = createContext(null);
+import { useState, useCallback } from "react";
+import { AIScoreContext } from "./aiScoreStore.js";
 
 export function AIScoreProvider({ children }) {
   const [aiScore, setAIScore] = useState(null);
@@ -28,12 +27,4 @@ export function AIScoreProvider({ children }) {
       {children}
     </AIScoreContext.Provider>
   );
-}
-
-export function useAIScore() {
-  const context = useContext(AIScoreContext);
-  if (!context) {
-    throw new Error("useAIScore must be used within AIScoreProvider");
-  }
-  return context;
 }

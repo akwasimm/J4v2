@@ -10,6 +10,10 @@ export default function CareerCoach() {
     return <ComingSoon pageName="Career Coach" description="Chat with your AI career coach" />
   }
 
+  return <CareerCoachView />;
+}
+
+function CareerCoachView() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,8 +95,9 @@ export default function CareerCoach() {
   }, [messages]);
 
   // On initial page load with no messages — stay at top
+  const initialMessageCountRef = useRef(messages.length);
   useEffect(() => {
-    if (messages.length === 0 && messagesContainerRef.current) {
+    if (initialMessageCountRef.current === 0 && messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = 0;
     }
   }, []);
@@ -1001,12 +1006,7 @@ export default function CareerCoach() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask Lume anything about your career..."
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
+            onKeyDown={handleKey}
           />
           <button
             onClick={() => sendMessage()}
@@ -1030,8 +1030,8 @@ export default function CareerCoach() {
               <button className="delete-modal-btn cancel" onClick={cancelDelete}>
                 Cancel
               </button>
-              <button className="delete-modal-btn confirm" onClick={confirmDelete}>
-                Delete
+              <button className="delete-modal-btn confirm" onClick={confirmDelete} disabled={isDeleting}>
+                {isDeleting ? "Deleting…" : "Delete"}
               </button>
             </div>
           </div>

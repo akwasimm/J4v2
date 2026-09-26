@@ -150,7 +150,7 @@ function FilterLabel({ children }) {
 
 // ─── Job Card ─────────────────────────────────────────────────────────────────
 
-function JobCard({ job, userSkills, onSkillFitClick, isSaved, onSaveToggle }) {
+function JobCard({ job, onSkillFitClick, isSaved, onSaveToggle }) {
   const [cardHover, setCardHover] = useState(false);
   const [saveHover, setSaveHover] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -1032,34 +1032,12 @@ export default function JobDiscovery() {
     return <ComingSoon pageName="Job Discovery" description="Browse and search all available jobs" />
   }
 
+  return <JobDiscoveryView />;
+}
+
+function JobDiscoveryView() {
   useEffect(() => {
     document.title = "Job Discovery — JobFor";
-  }, []);
-  
-  // Fetch user skills on mount
-  useEffect(() => {
-    const fetchUserSkills = async () => {
-      try {
-        const userId = localStorage.getItem('user_id');
-        if (!userId) return;
-        
-        // Fetch user profile data
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1"}/profile/me`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setUserSkills(data.skills?.map(s => s.name) || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user skills:", err);
-      }
-    };
-    
-    fetchUserSkills();
   }, []);
 
   const [searchQuery, setSearchQuery]     = useState("");
@@ -1075,13 +1053,39 @@ export default function JobDiscovery() {
   const [totalJobs, setTotalJobs]     = useState(0);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState(null);
-  
+
   // Skill Fit Modal state
   const [selectedJob, setSelectedJob] = useState(null);
   const [userSkills, setUserSkills]   = useState([]);
-  
+
   // Saved jobs state
   const [savedJobIds, setSavedJobIds] = useState(new Set());
+
+  // Fetch user skills on mount
+  useEffect(() => {
+    const fetchUserSkills = async () => {
+      try {
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+
+        // Fetch user profile data
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1"}/profile/me`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserSkills(data.skills?.map(s => s.name) || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch user skills:", err);
+      }
+    };
+
+    fetchUserSkills();
+  }, []);
 
   const totalPages = Math.max(1, Math.ceil(totalJobs / PAGE_SIZE));
 

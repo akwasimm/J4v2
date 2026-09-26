@@ -36,7 +36,7 @@ export async function apiClient(endpoint, customConfig = {}) {
             errorMessage = errorJson.detail;
           }
         }
-      } catch (e) { }
+      } catch { }
       throw new Error(errorMessage);
     }
     return await response.json();
@@ -251,7 +251,7 @@ export async function login(email, password) {
     const me = await apiClient("/auth/me");
     if (me?.id) localStorage.setItem("user_id", me.id);
     persistProfileAssets(me);
-  } catch (e) { }
+  } catch { }
   return data;
 }
 
@@ -273,7 +273,7 @@ export async function register(email, password, fullName, agreedToTerms = true) 
     const me = await apiClient("/auth/me");
     if (me?.id) localStorage.setItem("user_id", me.id);
     persistProfileAssets(me);
-  } catch (e) { }
+  } catch { }
   return data;
 }
 
@@ -325,7 +325,7 @@ export async function uploadProfileImage(file) {
         if (errorJson.detail) {
           errorMessage = errorJson.detail;
         }
-      } catch (e) { }
+      } catch { }
       throw new Error(errorMessage);
     }
 
@@ -360,7 +360,7 @@ export async function uploadResume(file) {
         if (errorJson.detail) {
           errorMessage = errorJson.detail;
         }
-      } catch (e) { }
+      } catch { }
       throw new Error(errorMessage);
     }
 

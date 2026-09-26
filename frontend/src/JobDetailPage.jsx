@@ -119,6 +119,10 @@ export default function JobDetail() {
     return <ComingSoon pageName="Job Detail" description="View full job details and AI match score" />
   }
 
+  return <JobDetailView />;
+}
+
+function JobDetailView() {
   useEffect(() => {
     document.title = "Job Details — JobFor";
   }, []);

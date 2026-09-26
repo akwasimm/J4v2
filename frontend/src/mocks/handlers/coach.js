@@ -25,7 +25,7 @@ export const coachHandlers = {
     };
   },
 
-  deleteCoachSession: async (sessionUuid) => {
+  deleteCoachSession: async () => {
     return { success: true };
   },
 };

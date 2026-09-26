@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
+import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = 3001;
@@ -16,7 +17,7 @@ app.use(express.json());
 app.use('/data', express.static('data'));
 
 // Ensure data directories exist
-const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([a-zA-Z]):/, '$1:');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const profileImagesDir = path.join(__dirname, 'data', 'profile-images');
 const resumesDir = path.join(__dirname, 'data', 'resumes');
 

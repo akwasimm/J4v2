@@ -1,6 +1,5 @@
 // Mock handlers for authentication endpoints
 import { mockAuthData } from '../data/auth.js';
-import { mockProfileData } from '../data/profile.js';
 
 // Simulate network delay
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));

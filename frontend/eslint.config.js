@@ -24,6 +24,14 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-empty': ['error', { allowEmptyCatch: true }],
+    },
+  },
+  {
+    // Node-side tooling: build config and standalone dev scripts
+    files: ['*.config.js', 'start-mock-api.js', 'mock-api.js'],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ])

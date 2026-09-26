@@ -10,8 +10,7 @@ import { useTypingEffect } from "../hooks/useTypingEffect";
  * @param {Function} props.onScrollToBottom - Callback to scroll to bottom during typing
  */
 export function MessageBubble({ message, isLatest, onAnimationComplete, onScrollToBottom }) {
-  const { role, content, alreadyDisplayed = false } = message;
-  const messageRef = useRef(null);
+  const { role, content } = message;
 
   // User messages render instantly
   if (role === "user") {
@@ -21,6 +20,20 @@ export function MessageBubble({ message, isLatest, onAnimationComplete, onScroll
       </div>
     );
   }
+
+  return (
+    <AssistantMessage
+      message={message}
+      isLatest={isLatest}
+      onAnimationComplete={onAnimationComplete}
+      onScrollToBottom={onScrollToBottom}
+    />
+  );
+}
+
+function AssistantMessage({ message, isLatest, onAnimationComplete, onScrollToBottom }) {
+  const { content, alreadyDisplayed = false } = message;
+  const messageRef = useRef(null);
 
   // Assistant messages
   const shouldAnimate = isLatest && !alreadyDisplayed && content;

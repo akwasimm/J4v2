@@ -192,7 +192,7 @@ export default function MarketInsights() {
               <span className="text-xs bg-[#D8B4FE] px-2 py-1 border border-black font-bold">BY DEMAND</span>
             </div>
             <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-              {MARKET_DATA.skills.map((skill, index) => (
+              {MARKET_DATA.skills.map((skill) => (
                 <div key={skill.label} className="space-y-1">
                   <div className="flex justify-between items-end">
                     <span className="font-bold text-sm">{skill.label}</span>
@@ -371,7 +371,7 @@ export default function MarketInsights() {
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {MARKET_DATA.geo.map((geo, idx) => (
+              {MARKET_DATA.geo.map((geo) => (
                 <div key={geo.country} className={`p-4 ${BORDER} ${geo.highlight ? 'bg-[#D8B4FE]' : 'bg-[#F9FAFB]'}`}>
                   <div className="flex justify-between items-start mb-2">
                     <span className="font-bold text-sm">{geo.country}</span>

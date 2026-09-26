@@ -7,9 +7,8 @@ export default function ResetPassword() {
 
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [btnHover, setBtnHover] = useState(false);
   const [backHover, setBackHover] = useState(false);
-  const [inputFocused, setInputFocused] = useState(false);
+  const [, setInputFocused] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();

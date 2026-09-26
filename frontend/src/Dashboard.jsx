@@ -1,7 +1,6 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { getProfile } from "./services/profileService.js";
 import { getPreferences } from "./api/client.js";
-import { getDashboardProfileByRole } from "./utils/dashboardRoleMapping.js";
 import { getDashboardProfile, getGreeting } from "./utils/dashboardProfiles.js";
 import { analyzeSkillGap } from "./services/skillGapService.js";
 
@@ -123,9 +122,6 @@ function RadialProgress({ percent = 85 }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function AIRecommendations() {
-  const cardRef = useRef(null);
-  const isNew = false;
-
   // Dashboard state - Dynamic based on user's target role
   const [userData, setUserData] = useState({
     firstName: "",
@@ -200,7 +196,7 @@ export default function AIRecommendations() {
 
   // Use loaded dashboard data or fallback
   const activeDashboardData = dashboardData || getDashboardProfile(null);
-  const { firstName, profileCompletion, isLoading } = userData;
+  const { firstName, profileCompletion } = userData;
   
   // Create profile completion data
   const profileData = createProfileData(profileCompletion);
@@ -229,8 +225,10 @@ export default function AIRecommendations() {
   }));
 
   // Get profile power data (with dynamic overall score 96-99%)
+  // Picked once via a lazy initializer so the score stays stable across re-renders.
+  const [fallbackOverallScore] = useState(() => Math.floor(Math.random() * 4) + 96);
   const profilePower = activeDashboardData?.profilePower || {
-    overallScore: Math.floor(Math.random() * 4) + 96,
+    overallScore: fallbackOverallScore,
     breakdown: [
       { label: "Profile Completeness", value: profileCompletion, color: "#1A4D2E" },
       { label: "Skill Diversity", value: 80, color: "#D8B4FE" },

@@ -29,6 +29,10 @@ export default function SettingsPage() {
     return <ComingSoon pageName="Settings" description="Account and notification preferences" />
   }
 
+  return <SettingsView />;
+}
+
+function SettingsView() {
   useEffect(() => {
     document.title = "Settings — JobFor";
   }, []);
@@ -51,7 +55,6 @@ export default function SettingsPage() {
   });
 
   // Loading states
-  const [loading, setLoading] = useState(false);
 
   const [manageBillingHover, setManageBillingHover] = useState(false);
   const [cancelHover, setCancelHover] = useState(false);
@@ -91,19 +94,6 @@ export default function SettingsPage() {
     loadSettings();
     loadConnectedAccounts();
   }, []);
-
-  const inputStyle = {
-    width: "100%",
-    padding: "10px",
-    border: "2px solid #000000",
-    backgroundColor: "#ffffff",
-    fontFamily: "Space Grotesk, sans-serif",
-    fontSize: "0.875rem",
-    fontWeight: 500,
-    outline: "none",
-    transition: "box-shadow 0.15s ease",
-    borderRadius: 0,
-};
 
   return (
     <>

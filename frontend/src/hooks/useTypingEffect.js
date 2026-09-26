@@ -8,35 +8,40 @@ import { useState, useEffect, useRef, useCallback } from "react";
  * @returns {Object} { displayedText, isTyping, isComplete, skipToEnd }
  */
 export function useTypingEffect(fullText, enabled = true, speed = 25) {
-  const [displayedText, setDisplayedText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-  
+  const shouldAnimate = Boolean(enabled && fullText);
+
+  const [displayedText, setDisplayedText] = useState(
+    shouldAnimate ? "" : fullText || ""
+  );
+  const [isTyping, setIsTyping] = useState(shouldAnimate);
+  const [isComplete, setIsComplete] = useState(!shouldAnimate);
+
   const timerRef = useRef(null);
   const wordsRef = useRef([]);
   const currentIndexRef = useRef(0);
   const skipRequestedRef = useRef(false);
+
+  // Adjust state during render when the animation target changes, so the
+  // effect below only has to drive the timer.
+  const animKey = shouldAnimate ? `${speed}::${fullText}` : null;
+  const [prevKey, setPrevKey] = useState(animKey);
+  if (animKey !== prevKey) {
+    setPrevKey(animKey);
+    setDisplayedText(shouldAnimate ? "" : fullText || "");
+    setIsTyping(shouldAnimate);
+    setIsComplete(!shouldAnimate);
+  }
 
   const skipToEnd = useCallback(() => {
     skipRequestedRef.current = true;
   }, []);
 
   useEffect(() => {
-    // If disabled or no text, show full text immediately
-    if (!enabled || !fullText) {
-      setDisplayedText(fullText || "");
-      setIsTyping(false);
-      setIsComplete(true);
-      return;
-    }
+    if (!shouldAnimate) return;
 
-    // Reset state
     wordsRef.current = fullText.split(" ");
     currentIndexRef.current = 0;
     skipRequestedRef.current = false;
-    setDisplayedText("");
-    setIsTyping(true);
-    setIsComplete(false);
 
     // Start typing animation
     const typeNextWord = () => {
@@ -75,7 +80,7 @@ export function useTypingEffect(fullText, enabled = true, speed = 25) {
         clearTimeout(timerRef.current);
       }
     };
-  }, [fullText, enabled, speed]);
+  }, [fullText, shouldAnimate, speed]);
 
   return { displayedText, isTyping, isComplete, skipToEnd };
 }

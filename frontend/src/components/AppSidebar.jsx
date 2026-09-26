@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getProfile } from "../services/profileService.js";
-import { useAIScore } from "../contexts/AIScoreContext";
+import { useAIScore } from "../contexts/useAIScore.js";
 
 const navItems = [
   {
@@ -240,12 +240,16 @@ export default function Sidebar() {
     return "dashboard";
   };
 
-  const [active, setActive] = useState(getIdForPath(location.pathname));
+  const [active, setActive] = useState(() => getIdForPath(location.pathname));
   const [hovered, setHovered] = useState(null);
 
-  useEffect(() => {
+  // Re-derive the active item during render when the route changes, so the
+  // click handler can still set it optimistically without an extra render pass.
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
     setActive(getIdForPath(location.pathname));
-  }, [location.pathname]);
+  }
 
   const handleClick = (id) => {
     setActive(id);

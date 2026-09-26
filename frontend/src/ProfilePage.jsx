@@ -7,30 +7,6 @@ import {
   getFileUrl
 } from "./services/profileService.js";
 
-// â”€â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-const initialSkills = [
-  { id: 1, name: "Kubernetes", level: "Expert" },
-  { id: 2, name: "AWS Ecosystem", level: "Advanced" },
-  { id: 3, name: "Terraform", level: "Expert" },
-  { id: 4, name: "Python / Go", level: "Advanced" },
-  { id: 5, name: "CI/CD Pipeline Design", level: "Expert" },
-];
-
-const targetRoles = [
-  { label: "Solutions Architect", selected: true },
-  { label: "Infrastructure Lead", selected: true },
-  { label: "VP Engineering", selected: false },
-  { label: "CTO", selected: false },
-];
-
-const locationOptions = [
-  { label: "Fully Remote", selected: true },
-  { label: "Hybrid (SF)", selected: false },
-  { label: "Hybrid (NYC)", selected: false },
-  { label: "On-Site", selected: false },
-];
-
 // â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function EditProfile() {
@@ -44,20 +20,15 @@ export default function EditProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [resumeUrl, setResumeUrl] = useState("");
+  const [, setResumeUrl] = useState("");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
   const [skills, setSkills] = useState([]);
-  const [roles, setRoles] = useState([]);
-  const [locations, setLocations] = useState([]);
-  const [targetRoles, setTargetRoles] = useState([]);
-  const [preferredLocations, setPreferredLocations] = useState([]);
-  const [targetSalary, setTargetSalary] = useState("185k");
   const [newSkillName, setNewSkillName] = useState("");
   const [newSkillLevel, setNewSkillLevel] = useState("Intermediate");
-  const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [isAddingSkill] = useState(false);
   const [experience, setExperience] = useState([]);
   const [showAddExperience, setShowAddExperience] = useState(false);
   const [newExperience, setNewExperience] = useState({
@@ -78,10 +49,6 @@ export default function EditProfile() {
     info: ""
   });
   const [resumes, setResumes] = useState([]);
-  const [showAddResume, setShowAddResume] = useState(false);
-  const [newResume, setNewResume] = useState({
-    name: ""
-  });
   const [preferences, setPreferences] = useState({
     target_salary_min: null,
     target_salary_max: null,
@@ -117,7 +84,6 @@ export default function EditProfile() {
 
   const [saveHover, setSaveHover] = useState(false);
   const [discardHover, setDiscardHover] = useState(false);
-  const [addRoleHover, setAddRoleHover] = useState(false);
   const [profileCompletion, setProfileCompletion] = useState(0);
 
   // Load profile data on component mount
@@ -414,24 +380,6 @@ export default function EditProfile() {
     setEducation((prev) => prev.filter((e) => e.id !== educationId));
   };
 
-  const handleAddResume = async (file) => {
-    if (!file) return;
-    
-    try {
-      const data = await uploadResume(file);
-      // Use the backend-generated resume ID - don't overwrite with fake ID
-      const newResume = data.resume || data;
-      setResumes((prev) => [...prev, newResume]);
-      setNewResume({ name: "" });
-      setUploadSuccess("Resume uploaded successfully!");
-      setTimeout(() => setUploadSuccess(""), 3000);
-      setShowAddResume(false);
-    } catch (error) {
-      console.error("Error uploading resume:", error);
-      setUploadError(error.message || "Failed to upload resume");
-    }
-  };
-
   const handleDeleteResume = async (resumeId) => {
     try {
       console.log("Deleting resume with ID:", resumeId);
@@ -460,8 +408,6 @@ export default function EditProfile() {
     }
   };
 
-  const toggleRole = (idx) => setRoles((prev) => prev.map((r, i) => (i === idx ? { ...r, selected: !r.selected } : r)));
-  const toggleLocation = (idx) => setLocations((prev) => prev.map((l, i) => ({ ...l, selected: i === idx })));
   const handleChange = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleAvatarChange = async (e) => {
