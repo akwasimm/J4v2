@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getSettings, updateSettings, changePassword,
   getConnectedAccounts, disconnectAccount, exportData, deleteAccount,
 } from "./services/settingsService.js";
+import { logout } from "./services/authService.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
 
@@ -33,6 +35,7 @@ export default function SettingsPage() {
 }
 
 function SettingsView() {
+  const navigate = useNavigate();
   useEffect(() => {
     document.title = "Settings — JobFor";
   }, []);
@@ -342,7 +345,8 @@ function SettingsView() {
                           fontFamily: "Syne, sans-serif",
                         }}
                         onClick={async () => {
-                          alert("Session logged out (placeholder - needs session management endpoint)");
+                          await logout();
+                          navigate("/login");
                         }}
                       >
                         Logout
