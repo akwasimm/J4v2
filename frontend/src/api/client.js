@@ -1,11 +1,14 @@
 // src/api/client.js
 
+import { startLoading, stopLoading } from "../contexts/loadingStore.js";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
 
 /**
  * Enhanced generic fetch wrapper.
  */
 export async function apiClient(endpoint, customConfig = {}) {
+  startLoading();
   const token = localStorage.getItem("auth_token");
   const headers = {
     "Content-Type": "application/json",
@@ -48,6 +51,8 @@ export async function apiClient(endpoint, customConfig = {}) {
   } catch (error) {
     console.error(`Error fetching ${endpoint}:`, error);
     throw error;
+  } finally {
+    stopLoading();
   }
 }
 
@@ -351,6 +356,7 @@ export async function uploadProfileImage(file) {
   const formData = new FormData();
   formData.append("file", file);
 
+  startLoading();
   try {
     const response = await fetch(`${API_BASE_URL}/profile/avatar`, {
       method: "POST",
@@ -378,6 +384,8 @@ export async function uploadProfileImage(file) {
   } catch (error) {
     console.error("Error uploading profile image:", error);
     throw error;
+  } finally {
+    stopLoading();
   }
 }
 
@@ -386,6 +394,7 @@ export async function uploadResume(file) {
   formData.append("file", file);
   formData.append("name", file.name);
 
+  startLoading();
   try {
     const response = await fetch(`${API_BASE_URL}/profile/resume`, {
       method: "POST",
@@ -413,6 +422,8 @@ export async function uploadResume(file) {
   } catch (error) {
     console.error("Error uploading resume:", error);
     throw error;
+  } finally {
+    stopLoading();
   }
 }
 
