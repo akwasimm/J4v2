@@ -68,7 +68,7 @@ def search_jobs(
     salary_min: Optional[int] = Query(None),
     salary_max: Optional[int] = Query(None),
     sort_by: Optional[str] = Query(default="match_score", pattern="^(match_score|posted_at|relevance)$"),
-    page: int = Query(default=1, ge=1),
+    page: int = Query(default=1, ge=1, le=1000),
     page_size: int = Query(default=10, ge=1, le=50),
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_user)

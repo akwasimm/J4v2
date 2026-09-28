@@ -43,6 +43,39 @@ def generate_stored_filename(original_filename: str, prefix: str = "") -> str:
     return f"{timestamp}_{unique_id}.{ext}"
 
 
+async def _read_limited(file: UploadFile, max_bytes: int) -> bytes:
+    """
+    Read an upload, refusing anything over max_bytes.
+
+    `await file.read()` pulls the entire body into memory before any size
+    check can run, so a single large upload can exhaust the process. This
+    reads in chunks and stops as soon as the limit is passed, so peak memory
+    stays bounded no matter how large the request is.
+    """
+    # Fast path: if the client declared a length, reject before reading a byte.
+    declared = None
+    if getattr(file, "headers", None):
+        declared = file.headers.get("content-length")
+    if declared and str(declared).isdigit() and int(declared) > max_bytes:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Max size: {settings.MAX_FILE_SIZE_MB}MB"
+        )
+
+    buf = bytearray()
+    while True:
+        chunk = await file.read(64 * 1024)
+        if not chunk:
+            break
+        buf.extend(chunk)
+        if len(buf) > max_bytes:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File too large. Max size: {settings.MAX_FILE_SIZE_MB}MB"
+            )
+    return bytes(buf)
+
+
 async def read_and_validate_resume(file: UploadFile) -> Tuple[bytes, str, str]:
     """
     Read resume file, validate type and size.
@@ -64,19 +97,13 @@ async def read_and_validate_resume(file: UploadFile) -> Tuple[bytes, str, str]:
             detail=f"Invalid file type. Only PDF and DOCX allowed. Got: {content_type}"
         )
     
-    # Read file bytes
-    file_bytes = await file.read()
+    # Read file bytes, bounded so a huge upload cannot exhaust memory
+    file_bytes = await _read_limited(file, settings.max_file_size_bytes)
     
     # Validate file size
     file_size = len(file_bytes)
     if file_size == 0:
         raise HTTPException(status_code=400, detail="File is empty")
-    
-    if file_size > settings.max_file_size_bytes:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File too large. Max size: {settings.MAX_FILE_SIZE_MB}MB"
-        )
     
     # Basic magic bytes validation for PDF
     if file_type == "pdf" and not file_bytes.startswith(b"%PDF"):
@@ -106,14 +133,10 @@ async def read_and_validate_image(file: UploadFile) -> Tuple[bytes, str, str]:
             detail="Invalid image type. Only JPG, PNG, and WebP allowed."
         )
     
-    file_bytes = await file.read()
+    file_bytes = await _read_limited(file, 5 * 1024 * 1024)
     
     if len(file_bytes) == 0:
         raise HTTPException(status_code=400, detail="Image file is empty")
-    
-    # 5MB limit for images
-    if len(file_bytes) > 5 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="Image too large. Max 5MB.")
     
     return file_bytes, file_type, file.filename or "avatar"
 

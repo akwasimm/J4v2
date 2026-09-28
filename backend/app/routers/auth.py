@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user_id
@@ -29,20 +29,24 @@ def register(data: RegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=AuthResponse)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
+def login(
+    background_tasks: BackgroundTasks,
+    data: LoginRequest,
+    db: Session = Depends(get_db),
+):
     from app.services.auth_service import login_user
     result = login_user(db, data)
-    
-    # Warm cache in background for faster initial page load
+
+    # Warm cache in background for faster initial page load.
+    # This used to call asyncio.create_task() from a sync def, which always
+    # raised RuntimeError: no running event loop. The bare except swallowed
+    # it, so cache warming had never once run.
     if result and result.user and result.user.id:
-        import asyncio
         from app.services.cache_warmer import warm_user_specific_caches
-        # Fire-and-forget cache warming (don't block response)
-        try:
-            asyncio.create_task(warm_user_specific_caches(result.user.id))
-        except Exception:
-            pass  # Don't fail login if cache warming fails
-    
+        # BackgroundTasks runs after the response is sent, so login is not
+        # delayed, and a failure here cannot affect the response.
+        background_tasks.add_task(warm_user_specific_caches, result.user.id)
+
     return result
 
 

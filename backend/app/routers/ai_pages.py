@@ -2,7 +2,7 @@
 AI Pages Router - Job Match, Skill Gap, Resume Analysis, Recommendations, Market Insights.
 """
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -16,6 +16,23 @@ from app.schemas.ai_pages import (
 from app.schemas.common import SuccessResponse
 
 router = APIRouter()
+
+
+def require_daily_ai_quota(db: Session, user_id: str) -> tuple[bool, int, int]:
+    """
+    Shared daily AI quota check.
+
+    The dashboard already enforced this; the market-insights endpoints, which
+    spend a live web search plus an AI call, did not. Reuses the existing
+    helper rather than introducing a second limiter.
+    """
+    from app.services.dashboard_service import check_daily_ai_limit
+    return check_daily_ai_limit(db, user_id)
+
+
+def record_ai_call(db: Session, user_id: str) -> None:
+    from app.services.dashboard_service import record_ai_call as _record
+    _record(db, user_id)
 
 # ─── Job Match ─────────────────────────────────────────────────────────────────
 
@@ -93,7 +110,21 @@ def get_market_insights(
     _: str = Depends(require_groq)
 ):
     from app.services.ai_pages_service import get_market_insights
+    # This endpoint spends a paid AI call per uncached request. The dashboard
+    # already guards its AI path with check_daily_ai_limit; this one did not,
+    # so a script could call it in a loop and bill without bound.
+    allowed, calls_made, calls_remaining = require_daily_ai_quota(db, user_id)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=(
+                f"Daily AI limit reached ({calls_made} calls). "
+                f"Resets tomorrow."
+            ),
+            headers={"Retry-After": "86400"},
+        )
     result = get_market_insights(db, user_id, role, location, force_recalculate=force)
+    record_ai_call(db, user_id)
     return {
         "user_id": user_id,
         "role": result.role,
@@ -110,7 +141,8 @@ def get_market_insights_v2(
     location: str = Query(..., description="Location (e.g., 'New York, USA' or 'India')"),
     show_inr: bool = Query(default=False, description="Convert all values to Indian Rupees"),
     force: bool = Query(default=False),
-    user_id: str = Depends(get_current_user_id)
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db)
 ):
     """
     Enhanced market insights with real-time web search.
@@ -121,6 +153,16 @@ def get_market_insights_v2(
     - Includes dynamic charts: salary trends, skills, companies, geo-distribution
     """
     from app.services.market_ai_service import get_real_time_market_insights, format_for_frontend
+
+    # v2 does a live web search plus an AI call, so it is the most expensive
+    # endpoint in this router. Guarded like the dashboard.
+    allowed, calls_made, calls_remaining = require_daily_ai_quota(db, user_id)
+    if not allowed:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Daily AI limit reached ({calls_made} calls). Resets tomorrow.",
+            headers={"Retry-After": "86400"},
+        )
     
     try:
         # Get real-time data from web search + AI
@@ -146,8 +188,9 @@ def get_market_insights_v2(
     except Exception as e:
         # Fallback to v1 if v2 fails
         from app.services.ai_pages_service import get_market_insights
-        from app.core.database import get_db
-        db = next(get_db())
+        # Uses the injected session. The old next(get_db()) abandoned the
+        # generator without closing it, so the pooled connection was never
+        # released - enough errors here and the API runs out of connections.
         result = get_market_insights(db, user_id, role, location, force_recalculate=force)
         return {
             "user_id": user_id,
