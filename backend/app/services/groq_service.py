@@ -61,7 +61,7 @@ def call_groq(
     Returns raw response text or None on failure.
     
     Args:
-        use_fallback: If True, will try fallback models (compound-mini -> compound -> llama-3.1-8b-instant) on errors
+        use_fallback: If True, will try the models in GROQ_FALLBACK_MODEL, in order
     """
     # Use module-level client if available, otherwise try to get one
     groq_client = client if client else get_groq_client()
@@ -71,8 +71,7 @@ def call_groq(
     
     # Use model from settings if not specified
     primary_model = model if model else settings.GROQ_MODEL
-    # Fallback chain: compound-mini (70K tokens/min) -> compound -> llama-3.1-8b-instant
-    fallback_models = ["groq/compound-mini", "groq/compound", "llama-3.1-8b-instant"]
+    fallback_models = [m.strip() for m in settings.GROQ_FALLBACK_MODEL.split(",") if m.strip()]
     
     messages = [
         {"role": "system", "content": system_prompt},

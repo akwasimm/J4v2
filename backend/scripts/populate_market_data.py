@@ -241,7 +241,6 @@ def call_groq_for_market_data(role: str, location: str, max_retries: int = 2) ->
             result = call_groq_json(
                 prompt=prompt,
                 system_prompt="You are an expert job market analyst with deep knowledge of global salary data and hiring trends. Provide accurate, current market data.",
-                model="groq/compound-mini",  # 70K tokens/min, no daily limit - good for batch processing
                 temperature=0.2,
                 max_tokens=4000
             )

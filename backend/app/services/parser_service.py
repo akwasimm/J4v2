@@ -134,7 +134,6 @@ Rules:
     result = call_groq_json(
         prompt=prompt,
         system_prompt=RESUME_PARSER_SYSTEM_PROMPT,
-        model="groq/compound-mini",  # 70K tokens/min, no daily limit
         temperature=0.1,
         max_tokens=5000
     )

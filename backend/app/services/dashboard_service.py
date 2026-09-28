@@ -481,7 +481,6 @@ CRITICAL RULES:
     result = call_groq_json(
         prompt=prompt,
         system_prompt="You are an expert technical recruiter and career advisor. Provide accurate, personalized job recommendations with honest match scores based on actual skill overlap.",
-        model="groq/compound-mini",  # 70K tokens/min, no daily limit
         temperature=0.2,
         max_tokens=4000
     )

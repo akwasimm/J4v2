@@ -171,10 +171,15 @@ def get_market_insights_v2(
             location=location,
             convert_to_rupees=True  # Always get INR for toggle option
         )
+
+        # Only a call that actually produced data is billable, so recording
+        # sits after this returns and inside the try: an exception means no
+        # spend happened and must not consume the user's daily allowance.
+        record_ai_call(db, user_id)
         
         # Format for frontend
         formatted = format_for_frontend(insights_data, show_inr=show_inr)
-        
+
         return {
             "user_id": user_id,
             "role": role,
