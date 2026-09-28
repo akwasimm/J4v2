@@ -58,4 +58,38 @@ with engine.connect() as c:
         c.execute(text("drop table if exists legacy_user_map"))
         print("\ntemporary mapping table dropped; database unchanged")
     else:
-        raise SystemExit("LIVE mode not implemented yet - review the dry run first")
+        # The legacy table has no name columns, and first_name is NOT NULL with
+        # no default, so derive it from the local part of the email.
+        c.execute(text(MAP))
+        migrated = c.execute(text("""
+            insert into public.users (
+                id, email, hashed_password, first_name, full_name,
+                is_active, is_verified, is_new_user, last_login_at,
+                created_at, updated_at
+            )
+            select
+                m.new_id,
+                lu.email,
+                lu."passwordHash",
+                split_part(lu.email, '@', 1),
+                split_part(lu.email, '@', 1),
+                true,
+                lu."isEmailVerified",
+                true,
+                lu."lastLoginAt",
+                lu."createdAt",
+                lu."updatedAt"
+            from public."User" lu
+            join legacy_user_map m on m.legacy_id = lu.id
+        """)).rowcount
+
+        after = c.execute(text("select count(*) from public.users")).scalar()
+        print(f"\n=== MIGRATED {migrated} USERS ===")
+        print(f"  public.users now holds {after} rows")
+        for email, is_verified in c.execute(text(
+            "select email, is_verified from public.users order by email"
+        )):
+            flag = "" if is_verified else "  (unverified)"
+            print(f"  {email:38} verified={is_verified}{flag}")
+        c.commit()
+        print("\ncommitted. public.\"User\" left untouched as the rollback source.")
