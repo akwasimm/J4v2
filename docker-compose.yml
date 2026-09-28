@@ -1,25 +1,19 @@
 
+# No local postgres service. The app talks to Neon via DATABASE_URL, so a
+# local server here was never used by any code path.
+#
+# The backend image has pg_dump, so a backup needs no extra service:
+#
+#   # 1. dump inside the container (never redirect binary through the shell)
+#   docker compose exec -T backend sh -c 'pg_dump "$DATABASE_URL" -Fc -f /tmp/b.dump'
+#   # 2. confirm the archive is intact BEFORE trusting the host copy
+#   docker compose exec -T backend pg_restore --list /tmp/b.dump | tail -3
+#   # 3. copy to the host
+#   docker compose cp backend:/tmp/b.dump ./b.dump
+#
+# PowerShell's ">" mangles binary output and produced a corrupt archive once
+# already. Steps 1-3 are the sequence that actually works.
 services:
-  postgres:
-    image: postgres:17-alpine
-    container_name: jobfor_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - jobfor_postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - jobfor_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   backend:
     build:
       context: ./backend
@@ -47,9 +41,6 @@ services:
       - "8000:8000"
     networks:
       - jobfor_network
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   frontend:
     build:
@@ -77,8 +68,6 @@ services:
       - backend
 
 volumes:
-  jobfor_postgres_data:
-    name: jobfor_postgres_data
   jobfor_uploads:
     name: jobfor_uploads
 
