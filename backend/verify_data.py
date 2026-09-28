@@ -115,8 +115,14 @@ def main() -> int:
         # migrated accounts are empty test accounts whose real completion
         # is 0. What actually matters is that each canonical value equals
         # the legacy value it came from, so compare them directly.
+        #
+        # profile_completion is deliberately NOT in this list. It is not
+        # migrated data, it is a cache of calculate_profile_completion(), and
+        # the weights in that function have changed since the legacy snapshot
+        # was written. Requiring agreement with legacy now pins the column to
+        # a permanently wrong number - it is checked against the live
+        # calculator further down instead.
         fidelity = [
-            ("profile_completion", '"profileCompletion"', True),
             ("bio", '"summary"', False),
             ("headline", '"headline"', False),
         ]
@@ -146,6 +152,35 @@ def main() -> int:
         if n:
             failures.append(f"{n} user(s) with a null or out-of-range completion")
         notes.append(f"{'bad completion':20} {n:>8,}")
+
+    # --- stored completion matches the current formula --------------------
+    # The range check above only proves the number is a percentage. What
+    # matters is that it is the percentage the app would compute right now,
+    # because the AI gate and the dashboard both read this column.
+    try:
+        from app.core.database import SessionLocal
+        from app.models.user import User
+        from app.utils.profile_completion import calculate_profile_completion
+        from sqlalchemy import select
+
+        db = SessionLocal()
+        try:
+            drift = [
+                u.email
+                for u in db.execute(select(User)).scalars()
+                if (u.profile_completion or 0) != calculate_profile_completion(u)
+            ]
+        finally:
+            db.close()
+        notes.append(f"{'completion drift':20} {len(drift):>8,}")
+        if drift:
+            failures.append(
+                f"{len(drift)} user(s) whose stored profile_completion no longer "
+                f"matches calculate_profile_completion() - run "
+                f"migrate_recompute_profile_completion.py --apply"
+            )
+    except Exception as exc:  # noqa: BLE001
+        failures.append(f"could not check completion against the calculator: {exc}")
 
         # --- legacy tables are still intact -------------------------------
         # They are the only rollback path, so their loss would be silent

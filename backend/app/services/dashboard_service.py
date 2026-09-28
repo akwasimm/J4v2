@@ -210,140 +210,6 @@ def get_user_experience_summary(db: Session, user_id: str) -> str:
 
 # AI functions removed - dashboard uses manual data only
 
-async def generate_and_save_ai_top_picks(db: Session, user_id: str) -> dict:
-    """Get user's application stats."""
-    applied_count = db.query(JobApplication).filter(
-        JobApplication.user_id == user_id
-    ).count()
-
-    saved_count = db.query(SavedJob).filter(
-        SavedJob.user_id == user_id
-    ).count()
-
-    # Get user profile completion
-    user = db.query(User).filter(User.id == user_id).first()
-    profile_completion = 0
-    if user:
-        # Use getattr() for safe attribute access - won't crash if field is missing
-        fields = [
-            getattr(user, 'first_name', None),
-            getattr(user, 'last_name', None),
-            getattr(user, 'email', None),
-            getattr(user, 'headline', None),
-            getattr(user, 'location', None),
-            getattr(user, 'bio', None),
-            getattr(user, 'linkedin', None),
-            getattr(user, 'github', None),
-            getattr(user, 'portfolio', None),
-            getattr(user, 'avatar_url', None),
-        ]
-        filled = sum(1 for f in fields if f)
-        profile_completion = int((filled / len(fields)) * 100)
-
-    return {
-        "applied_count": applied_count,
-        "saved_count": saved_count,
-        "interviews_count": 0,  # Will be updated when interview feature added
-        "profile_completion": profile_completion,
-        "first_name": getattr(user, 'first_name', None) if user else None,
-        "full_name": getattr(user, 'full_name', None) if user else None,
-    }
-
-
-def get_market_trends_data(db: Session) -> Dict[str, Any]:
-    """Get current market trends for placeholder dashboard."""
-    # Get latest market data
-    market_entries = db.query(MarketData).order_by(MarketData.created_at.desc()).limit(10).all()
-    
-    # Extract trending skills from skills_in_demand field
-    trending_skills = []
-    hot_roles = []
-    salary_ranges = []
-    
-    for entry in market_entries:
-        if entry.skills_in_demand:
-            # skills_in_demand is list of dicts with skill_name
-            if isinstance(entry.skills_in_demand, list):
-                for skill in entry.skills_in_demand:
-                    if isinstance(skill, dict) and skill.get('skill_name'):
-                        trending_skills.append(skill['skill_name'])
-                    elif isinstance(skill, str):
-                        trending_skills.append(skill)
-        if entry.role:
-            hot_roles.append(entry.role)
-        if entry.salary_min and entry.salary_max:
-            salary_ranges.append((entry.salary_min + entry.salary_max) / 2)
-    
-    # Get unique values
-    trending_skills = list(dict.fromkeys(trending_skills))[:8]  # Top 8 unique
-    hot_roles = list(dict.fromkeys(hot_roles))[:5]  # Top 5 unique
-    
-    # Calculate average salary
-    avg_salary = sum(salary_ranges) / len(salary_ranges) if salary_ranges else 800000
-    
-    # Format salary for display
-    avg_salary_str = f"₹{avg_salary/100000:.1f}L - ₹{(avg_salary*1.5)/100000:.1f}L"
-    
-    # Current market skills (2024-2025 trends)
-    default_skills = [
-        {"skill_name": "React.js", "demand_score": 0.95, "trend_direction": "up", "user_has": False, "salary_premium": "+18%"},
-        {"skill_name": "Python", "demand_score": 0.93, "trend_direction": "up", "user_has": False, "salary_premium": "+15%"},
-        {"skill_name": "Node.js", "demand_score": 0.88, "trend_direction": "stable", "user_has": False, "salary_premium": "+12%"},
-        {"skill_name": "AWS", "demand_score": 0.90, "trend_direction": "up", "user_has": False, "salary_premium": "+20%"},
-        {"skill_name": "TypeScript", "demand_score": 0.85, "trend_direction": "up", "user_has": False, "salary_premium": "+10%"},
-        {"skill_name": "Docker", "demand_score": 0.82, "trend_direction": "up", "user_has": False, "salary_premium": "+14%"},
-        {"skill_name": "Kubernetes", "demand_score": 0.78, "trend_direction": "up", "user_has": False, "salary_premium": "+22%"},
-        {"skill_name": "AI/ML", "demand_score": 0.96, "trend_direction": "up", "user_has": False, "salary_premium": "+35%"},
-    ]
-    
-    # Use market data skills if available, otherwise defaults
-    skills_in_demand = []
-    for i, skill_name in enumerate(trending_skills[:8] if trending_skills else [s["skill_name"] for s in default_skills]):
-        base_skill = default_skills[i] if i < len(default_skills) else default_skills[0]
-        skills_in_demand.append({
-            "skill_name": skill_name,
-            "demand_score": base_skill["demand_score"] - (i * 0.02),
-            "trend_direction": "up",
-            "user_has": False,
-            "salary_premium": base_skill["salary_premium"]
-        })
-    
-    # Mock top picks (locked/placeholder jobs)
-    top_picks = [
-        {
-            "job_id": f"placeholder_{i}",
-            "title": hot_roles[i] if i < len(hot_roles) else f"Senior {['Developer', 'Engineer', 'Manager'][i%3]}",
-            "company": ["TechCorp", "StartupXYZ", "BigTech Inc", "InnovateLabs", "FutureWorks"][i%5],
-            "location": ["Bangalore", "Remote", "Hyderabad", "Pune", "Chennai"][i%5],
-            "work_model": ["hybrid", "remote", "onsite"][i%3],
-            "match_score": 95,
-            "salary_range": f"₹{8+i}L - ₹{15+i}L",
-            "tags": [trending_skills[i] if i < len(trending_skills) else "In-Demand", "Trending", "Hot"] if trending_skills else ["In-Demand", "Trending", "Hot"],
-            "match_reasons": ["Complete your profile to see personalized match reasons", "Add skills that match this role"],
-            "is_placeholder": True
-        }
-        for i in range(6)
-    ]
-    
-    # Mock missing skills (generic)
-    missing_skills = [
-        {"skill": "Complete profile to see missing skills", "importance": "High", "impact": "Finish your profile to get personalized skill recommendations", "jobs_requiring": 0}
-    ]
-    
-    return {
-        "top_picks": top_picks,
-        "missing_skills": missing_skills,
-        "skills_in_demand": skills_in_demand,
-        "market_snapshot": {
-            "hot_roles": hot_roles if hot_roles else ["Full Stack Developer", "AI Engineer", "DevOps Engineer"],
-            "avg_salary_for_profile": avg_salary_str,
-            "market_trend": "Tech hiring is growing 15% YoY. Complete your profile to see personalized insights!",
-            "companies_actively_hiring": len(market_entries) * 3 if market_entries else 150,
-            "message": "Complete your profile to unlock personalized job matches"
-        }
-    }
-
-
 def check_rate_limit(db: Session, user_id: str) -> tuple[bool, Optional[datetime]]:
     """Check if user can make AI call. Returns (allowed, next_available_time)."""
     last_entry = db.query(UserDashboardData).filter(
@@ -657,18 +523,12 @@ CRITICAL RULES:
         db.refresh(dashboard_data)
         logger.info(f"Dashboard SAVED: user={user_id} jobs={len(result.get('top_picks', []))} expires={expires}")
         
-        # Return dict instead of ORM object for proper serialization
-        return {
-            "user_id": dashboard_data.user_id,
-            "top_picks": dashboard_data.top_picks,
-            "missing_skills": dashboard_data.missing_skills,
-            "skills_in_demand": dashboard_data.skills_in_demand,
-            "market_snapshot": dashboard_data.market_snapshot,
-            "stats": dashboard_data.stats_summary,
-            "generated_at": dashboard_data.generated_at,
-            "expires_at": dashboard_data.expires_at,
-            "profile_completion": stats.get("profile_completion", 0)
-        }
+        # Return the ORM object, matching the other three return paths in this
+        # function (cached, placeholder, empty_data). This used to return a
+        # dict instead, so get_dashboard_data() - which reads .top_picks and
+        # .ai_model_used off the result - raised AttributeError and the whole
+        # AI dashboard path was dead. Serialization is that caller's job.
+        return dashboard_data
     except Exception as e:
         db.rollback()
         logger.error(f"Dashboard save ERROR: {e}")
@@ -721,19 +581,6 @@ def get_dashboard_data(db: Session, user_id: str, force_refresh: bool = False) -
         "is_empty": is_empty,
         **rate_limit_info
     }
-
-
-async def generate_and_save_ai_top_picks(db: Session, user_id: str) -> dict:
-    """
-    DEPRECATED: AI generation removed.
-    Returns fallback picks from database only.
-    """
-    return {
-        "top_picks": get_fallback_top_picks(),
-        "message": "AI disabled - using manual data",
-        "ai_enabled": False
-    }
-
 
 def get_cached_dashboard_data(db: Session, user_id: str) -> dict:
     """
