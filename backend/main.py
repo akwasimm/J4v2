@@ -94,7 +94,8 @@ app.add_middleware(
 
 
 # Health check (no auth required)
-@app.get("/health")
+# GET for browsers/curl; HEAD for uptime monitors (UptimeRobot free tier)
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     db_ok = check_db_connection()
     return {
