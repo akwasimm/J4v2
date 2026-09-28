@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "jobfor-frontend",
+  "name": "j4v2",
   "builds": [
     {
       "src": "package.json",
@@ -19,9 +19,5 @@
       "src": "/.*",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_API_MODE": "real",
-    "VITE_API_BASE_URL": "https://jobfor-backend.onrender.com/api/v1"
-  }
+  ]
 }

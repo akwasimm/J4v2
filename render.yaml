@@ -32,7 +32,7 @@ services:
       - key: MAX_FILE_SIZE_MB
         value: "10"
       - key: ALLOWED_ORIGINS
-        value: https://jobfor-frontend.vercel.app
+        value: https://j4v2.vercel.app
       - key: APP_NAME
         value: JobFor API
       - key: APP_VERSION
