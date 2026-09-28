@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user_id, get_optional_user
+from app.models.user import User
 from app.schemas.jobs import (
     JobResponse,
     JobSearchResponse,
@@ -67,19 +68,26 @@ def search_jobs(
     salary_min: Optional[int] = Query(None),
     salary_max: Optional[int] = Query(None),
     sort_by: Optional[str] = Query(default="match_score", pattern="^(match_score|posted_at|relevance)$"),
-    user_id: Optional[str] = Query(None, description="User ID for personalized match scoring"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=10, ge=1, le=50),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_optional_user)
 ):
     """
     Search jobs with optimized database-level pagination and caching.
     Returns cached results immediately if available.
+
+    Personalization is derived from the bearer token, never from a
+    parameter. This route previously accepted ?user_id= with no auth,
+    which let an unauthenticated caller have match scores computed
+    against any other user's skills and experience.
     """
     from app.services.optimized_job_service import search_jobs_optimized
     from app.services.cache_warmer import get_jobs_fast_with_fallback
     from app.schemas.jobs import JobSearchParams
-    
+
+    user_id = current_user.id if current_user else None
+
     params = JobSearchParams(
         q=q, location=location, work_model=work_model,
         job_type=job_type, min_exp=min_exp, max_exp=max_exp,

@@ -199,9 +199,15 @@ def forgot_password(db: Session, email: str) -> dict:
         db.add(reset_token)
         db.commit()
         logger.info(f"Password reset token created for: {user.email}")
-        # In production: send email here
-        # For now: log the token for testing
-        logger.info(f"[DEV] Reset token: {token}")
+        # No mailer is wired up yet, so the token currently has no
+        # delivery path. It used to be logged unconditionally, which put
+        # a one-hour account-takeover credential into stdout - and into
+        # Render's log dashboard, and into any log shipper. Confine it to
+        # DEBUG so a production deployment never writes one.
+        if settings.DEBUG:
+            logger.warning(
+                f"[DEV ONLY] Password reset token for {user.email}: {token}"
+            )
     except Exception as e:
         db.rollback()
         logger.error(f"Could not create reset token: {e}")

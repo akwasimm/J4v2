@@ -8,24 +8,29 @@ echo "=========================================="
 # Create uploads directory if it doesn't exist
 mkdir -p /app/uploads
 
-# Wait for postgres to be ready
-echo "Waiting for PostgreSQL to be ready..."
+# Wait for the database the app actually uses.
+# This used to poll a local postgres service (${POSTGRES_HOST:-postgres}),
+# which the app does not connect to - it reads DATABASE_URL, which points
+# at Neon. That check therefore passed or failed independently of whether
+# the real database was reachable, and after the local service was removed
+# it just burned 60s of retries on a host that never existed.
+echo "Waiting for the database to be ready..."
 max_retries=30
 retry_count=0
 
-while ! pg_isready -h "${POSTGRES_HOST:-postgres}" -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-jobfor_user}" > /dev/null 2>&1; do
+while ! pg_isready -d "$DATABASE_URL" > /dev/null 2>&1; do
     retry_count=$((retry_count + 1))
     if [ $retry_count -ge $max_retries ]; then
-        echo "ERROR: PostgreSQL did not become ready after $max_retries attempts"
+        echo "ERROR: Database not ready after $max_retries attempts"
         echo "Starting server anyway, but database connections may fail..."
         break
     fi
-    echo "PostgreSQL not ready yet... attempt $retry_count/$max_retries"
+    echo "Database not ready yet... attempt $retry_count/$max_retries"
     sleep 2
 done
 
 if [ $retry_count -lt $max_retries ]; then
-    echo "PostgreSQL is ready!"
+    echo "Database is ready!"
 fi
 
 # Run Alembic migrations with retry logic
