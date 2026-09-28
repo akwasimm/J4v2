@@ -58,7 +58,7 @@ class JobApplication(Base):
     job_id = Column(
         UUID(as_uuid=False),
         ForeignKey("jobs.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
         index=True
     )
     status = Column(String(50), nullable=False, default="applied")

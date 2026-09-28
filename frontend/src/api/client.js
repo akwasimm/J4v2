@@ -86,100 +86,121 @@ export async function applyToJob(jobId, matchScoreAtApply = null) {
   });
 }
 
-// LocalStorage-based Manual Applications (replaces backend API)
-const MANUAL_APPLICATIONS_KEY = 'manualApplications';
+// ─── Applications ─────────────────────────────────────────────────────────────
+// These live in Postgres. This used to be a setTimeout + localStorage mock,
+// which meant Apply wrote a real row while the Applied tab read the browser -
+// so a user's application history vanished on any other device.
 
-function getManualApplicationsFromStorage() {
-  try {
-    const stored = localStorage.getItem(MANUAL_APPLICATIONS_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (e) {
-    console.error('Error reading manual applications:', e);
-    return [];
-  }
+const LEGACY_LOCAL_APPLICATIONS_KEY = 'manualApplications';
+
+// The API returns flat denormalized fields; MyJobsPage renders a nested
+// `job` object and reads `notes`. This is the one place that bridges the two,
+// so the contract is stated once instead of invented in two files.
+function toCard(a) {
+  return {
+    id: a.id,
+    status: a.status,
+    applied_at: a.applied_at,
+    status_updated_at: a.status_updated_at,
+    notes: a.status_note || '',
+    source: a.job_id ? 'job' : 'manual',
+    job: {
+      id: a.job_id || null,
+      title: a.role_title || 'Job Title',
+      company: a.company_name || '',
+      location: a.location || 'Remote',
+      company_logo: null
+    }
+  };
 }
 
-function saveManualApplicationsToStorage(applications) {
-  localStorage.setItem(MANUAL_APPLICATIONS_KEY, JSON.stringify(applications));
-}
-
-// Create a new manual application (user-created job card)
 export async function createManualApplication(jobData) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const applications = getManualApplicationsFromStorage();
-      const newApplication = {
-        id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: jobData.status || 'applied',
-        applied_at: new Date().toISOString(),
-        notes: jobData.notes || '',
-        source: 'manual',
-        job: {
-          id: null, // manual jobs don't have a real job ID
-          title: jobData.title,
-          company: jobData.company,
-          location: jobData.location || 'Remote',
-          company_logo: null
-        }
-      };
-      applications.push(newApplication);
-      saveManualApplicationsToStorage(applications);
-      resolve({ data: newApplication, success: true });
-    }, 100); // Simulate network delay
+  // No job_id: this is a job the user typed in that is not in the jobs table.
+  const res = await apiClient("/jobs/applications", {
+    method: "POST",
+    body: {
+      role_title: jobData.title,
+      company_name: jobData.company,
+      location: jobData.location,
+      status_note: jobData.notes || null,
+    },
   });
+  return { data: toCard(res), success: true };
 }
 
 export async function updateApplication(applicationId, updateData) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const applications = getManualApplicationsFromStorage();
-      const index = applications.findIndex(app => app.id === applicationId);
+  const body = {};
+  if (updateData.status !== undefined) body.status = updateData.status;
+  // The API calls it status_note; the UI calls it notes.
+  if (updateData.notes !== undefined) body.status_note = updateData.notes;
 
-      if (index === -1) {
-        reject(new Error('Application not found'));
-        return;
-      }
+  // The edit form corrects a mistyped company/title in a nested `job` object.
+  // Flatten it to the fields the endpoint accepts.
+  if (updateData.job) {
+    if (updateData.job.title) body.role_title = updateData.job.title;
+    if (updateData.job.company) body.company_name = updateData.job.company;
+    if (updateData.job.location) body.location = updateData.job.location;
+  }
 
-      // Update application fields
-      applications[index] = {
-        ...applications[index],
-        ...updateData,
-        // Preserve nested job updates if provided
-        job: updateData.job ? { ...applications[index].job, ...updateData.job } : applications[index].job
-      };
-
-      saveManualApplicationsToStorage(applications);
-      resolve({ data: applications[index], success: true });
-    }, 100);
+  const res = await apiClient(`/jobs/applications/${applicationId}`, {
+    method: "PUT",
+    body,
   });
+  return { data: toCard(res), success: true };
 }
 
 export async function deleteApplication(applicationId) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const applications = getManualApplicationsFromStorage();
-      const filtered = applications.filter(app => app.id !== applicationId);
+  return apiClient(`/jobs/applications/${applicationId}`, { method: "DELETE" });
+}
 
-      if (filtered.length === applications.length) {
-        reject(new Error('Application not found'));
-        return;
-      }
+async function importLegacyLocalApplications() {
+  // One-time rescue for entries written by the old localStorage mock before
+  // this shipped. Without it, real users silently lose their history on
+  // deploy. Best effort: a failure here must not break the Applied tab.
+  let legacy = [];
+  try {
+    legacy = JSON.parse(localStorage.getItem(LEGACY_LOCAL_APPLICATIONS_KEY) || '[]');
+  } catch {
+    localStorage.removeItem(LEGACY_LOCAL_APPLICATIONS_KEY);
+    return 0;
+  }
+  if (!Array.isArray(legacy) || legacy.length === 0) return 0;
 
-      saveManualApplicationsToStorage(filtered);
-      resolve({ success: true });
-    }, 100);
-  });
+  let imported = 0;
+  for (const entry of legacy) {
+    const title = entry?.job?.title || entry?.title;
+    if (!title) continue; // nothing meaningful to store
+    try {
+      await apiClient("/jobs/applications", {
+        method: "POST",
+        body: {
+          role_title: title,
+          company_name: entry?.job?.company || entry?.company || null,
+          location: entry?.job?.location || entry?.location || null,
+        },
+      });
+      imported += 1;
+    } catch {
+      // Leave the key in place so the next visit can retry this one.
+      return imported;
+    }
+  }
+  localStorage.removeItem(LEGACY_LOCAL_APPLICATIONS_KEY);
+  return imported;
 }
 
 export async function getMyApplications() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const applications = getManualApplicationsFromStorage();
-      // Return in format matching backend API response
-      resolve({ data: applications, success: true });
-    }, 150);
-  });
+  const res = await apiClient("/jobs/applications/me");
+  const imported = await importLegacyLocalApplications();
+  const rows = Array.isArray(res) ? res : [];
+  if (imported) {
+    // Re-read so freshly imported rows appear without a page reload dance.
+    const again = await apiClient("/jobs/applications/me");
+    return { data: (Array.isArray(again) ? again : []).map(toCard), success: true };
+  }
+  return { data: rows.map(toCard), success: true };
 }
+
 
 export async function saveJob(jobId, matchScore = null) {
   const body = { job_id: jobId };

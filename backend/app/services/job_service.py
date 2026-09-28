@@ -246,30 +246,42 @@ def apply_to_job(
     db: Session,
     user_id: str,
     data: ApplicationCreate
-) -> JobApplication:
-    # Check job exists
-    job = get_job_by_id(db, data.job_id)
+    ) -> JobApplication:
+    # A job_id means "applied to a job we know about". No job_id means a
+    # manually entered application, which the schema validates carries a
+    # role_title. Either way the row is stored the same way.
+    if data.job_id:
+        job = get_job_by_id(db, data.job_id)
 
-    # Check if already applied
-    existing = db.query(JobApplication).filter(
-        JobApplication.user_id == user_id,
-        JobApplication.job_id == data.job_id
-    ).first()
+        # Check if already applied
+        existing = db.query(JobApplication).filter(
+            JobApplication.user_id == user_id,
+            JobApplication.job_id == data.job_id
+        ).first()
 
-    if existing:
-        raise HTTPException(
-            status_code=409,
-            detail="You have already applied to this job"
-        )
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="You have already applied to this job"
+            )
+
+        role_title = job.title
+        company_name = job.company_name
+        location = job.location
+    else:
+        role_title = data.role_title
+        company_name = data.company_name
+        location = data.location
 
     application = JobApplication(
         user_id=user_id,
         job_id=data.job_id,
         status="applied",
-        role_title=job.title,
-        company_name=job.company_name,
-        location=job.location,
+        role_title=role_title,
+        company_name=company_name,
+        location=location,
         column_id="applied",
+        status_note=data.status_note,
         match_score_at_apply=data.match_score_at_apply
     )
 

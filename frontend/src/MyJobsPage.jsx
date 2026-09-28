@@ -875,9 +875,7 @@ function SavedJobsView() {
                                 <option value="viewed">Viewed</option>
                                 <option value="interviewing">Interviewing</option>
                                 <option value="offered">Offered</option>
-                                <option value="accepted">Accepted</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="withdrawn">Withdrawn</option>
+                                <option value="closed">Closed</option>
                               </select>
                               <button
                                 onClick={() => handleEditJob(app)}

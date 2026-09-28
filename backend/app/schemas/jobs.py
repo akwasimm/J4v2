@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, model_validator
 from typing import Optional, List, Any
 from datetime import datetime
 
@@ -58,8 +58,27 @@ VALID_APPLICATION_STATUSES = [
 ]
 
 class ApplicationCreate(BaseModel):
-    job_id: str
+    # job_id is optional so a user can log an application for a job that
+    # is not in the jobs table. When absent, the three fields below carry
+    # the meaning instead. job_applications.job_id was NOT NULL until
+    # migrate_nullable_application_job.py.
+    job_id: Optional[str] = None
     match_score_at_apply: Optional[int] = None
+    role_title: Optional[str] = Field(None, max_length=200)
+    company_name: Optional[str] = Field(None, max_length=200)
+    location: Optional[str] = Field(None, max_length=200)
+    status_note: Optional[str] = Field(None, max_length=200)
+
+    @model_validator(mode='after')
+    def manual_application_has_a_title(self):
+        # model_validator, not @validator: a plain field validator is
+        # skipped when the field is absent, so a title-less manual
+        # application would sail through.
+        if not self.job_id and not (self.role_title or '').strip():
+            raise ValueError(
+                'role_title is required when job_id is omitted (manual application)'
+            )
+        return self
 
 class ApplicationUpdate(BaseModel):
     status: Optional[str] = None
@@ -67,6 +86,12 @@ class ApplicationUpdate(BaseModel):
     position_index: Optional[int] = None
     column_id: Optional[str] = None
     is_closed: Optional[bool] = None
+    # The edit form on MyJobsPage can correct a mistyped company or title.
+    # update_application applies these through its generic setattr loop, so
+    # without them the form would appear to save and change nothing.
+    role_title: Optional[str] = Field(None, max_length=200)
+    company_name: Optional[str] = Field(None, max_length=200)
+    location: Optional[str] = Field(None, max_length=200)
 
     @validator('status')
     def status_valid(cls, v):
@@ -77,7 +102,7 @@ class ApplicationUpdate(BaseModel):
 class ApplicationResponse(BaseModel):
     id: str
     user_id: str
-    job_id: str
+    job_id: Optional[str] = None
     status: str
     role_title: Optional[str] = None
     company_name: Optional[str] = None
