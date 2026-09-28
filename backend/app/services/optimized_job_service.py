@@ -278,40 +278,47 @@ def get_jobs_fast(
     Fast job fetch for initial page load with optional filters.
     Returns cached results if available.
     """
-    cache_key = f"jobs_fast:{page}:{page_size}:{location}:{work_model}"
-    
+    # The @cached decorator derives its key from the wrapped function's
+    # arguments, so the filter values must be passed in as parameters rather
+    # than closed over. Closing over them produced a single cache key
+    # (md5 of an empty arg list) shared by every filter combination.
     @cached(prefix="jobs_fast", ttl_seconds=120)
-    def _fetch():
+    def _fetch(
+        _page: int,
+        _page_size: int,
+        _location: Optional[str],
+        _work_model: Optional[str]
+    ):
         query = db.query(Job).filter(Job.is_active == True)
         
-        if location:
-            query = query.filter(func.lower(Job.location).like(f"%{location.lower()}%"))
+        if _location:
+            query = query.filter(func.lower(Job.location).like(f"%{_location.lower()}%"))
         
-        if work_model:
-            query = query.filter(func.lower(Job.work_model) == work_model.lower())
+        if _work_model:
+            query = query.filter(func.lower(Job.work_model) == _work_model.lower())
         
         total = query.count()
-        offset = (page - 1) * page_size
+        offset = (_page - 1) * _page_size
         
-        jobs = query.order_by(desc(Job.posted_at)).offset(offset).limit(page_size).all()
+        jobs = query.order_by(desc(Job.posted_at)).offset(offset).limit(_page_size).all()
         
         # Assign default match scores
         for job in jobs:
             job.match_score = 75  # Default score for non-personalized results
         
-        total_pages = (total + page_size - 1) // page_size
+        total_pages = (total + _page_size - 1) // _page_size
         
         return {
             "items": jobs,
             "total": total,
-            "page": page,
-            "page_size": page_size,
+            "page": _page,
+            "page_size": _page_size,
             "total_pages": total_pages,
-            "has_next": page < total_pages,
-            "has_prev": page > 1
+            "has_next": _page < total_pages,
+            "has_prev": _page > 1
         }
     
-    return _fetch()
+    return _fetch(page, page_size, location, work_model)
 
 
 # ─── Background Cache Warming ────────────────────────────────────────────────

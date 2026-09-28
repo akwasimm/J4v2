@@ -4,7 +4,7 @@ Runs periodically to ensure fast initial page loads.
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 
@@ -25,7 +25,7 @@ async def warm_common_job_searches():
     try:
         # Get recently active users
         recent_users = db.query(User).filter(
-            User.last_login_at >= datetime.now(timezone.utc).replace(hours=24)
+            User.last_login_at >= datetime.now(timezone.utc) - timedelta(hours=24)
         ).limit(50).all()
         
         # Also warm for anonymous users (common patterns)
@@ -61,7 +61,7 @@ async def warm_dashboard_cache():
         
         # Find users with expiring dashboard data (expires within next hour)
         expiring_soon = db.query(UserDashboardData).filter(
-            UserDashboardData.expires_at <= now + datetime.timedelta(hours=1),
+            UserDashboardData.expires_at <= now + timedelta(hours=1),
             UserDashboardData.expires_at > now
         ).all()
         
@@ -176,17 +176,21 @@ def get_jobs_fast_with_fallback(db: Session, user_id: Optional[str] = None, para
     
     params = params or {}
     
-    # Try to get personalized results quickly
-    if user_id:
-        try:
-            search_params = JobSearchParams(**params)
-            result = search_jobs_optimized(db, search_params, user_id)
-            if result.get("items"):
-                return result
-        except Exception as e:
-            logger.warning(f"Personalized search failed, using fallback: {e}")
+    # search_jobs_optimized applies every filter at the database level and
+    # handles an absent user_id, so it is correct for anonymous searches too.
+    # Previously it was only tried when a user_id was present, which sent every
+    # anonymous search down the get_jobs_fast path below and silently dropped
+    # q, job_type, min_exp, max_exp, salary_min, salary_max and sort_by.
+    try:
+        search_params = JobSearchParams(**params)
+        result = search_jobs_optimized(db, search_params, user_id)
+        if result.get("items"):
+            return result
+    except Exception as e:
+        logger.warning(f"Optimized search failed, using fast fallback: {e}")
     
-    # Fallback to general fast fetch
+    # Last-resort fallback. Only location/work_model are supported here, so it
+    # is reached when the optimized path yields nothing or raises.
     return get_jobs_fast(
         db,
         page=params.get("page", 1),
