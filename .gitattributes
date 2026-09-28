@@ -1,0 +1,36 @@
+# Normalize line endings so the same checkout works on Windows and in Linux
+# containers. Without this, a file bind-mounted into a Linux image keeps its
+# CRLF endings and a shebang becomes `#!/bin/sh\r`, which the kernel reads as
+# an interpreter path that does not exist.
+#
+# Symptom this prevents: `exec ./entrypoint.sh: no such file or directory`
+# even though the file is present, executable, and has a valid shebang.
+
+# Default: text files, normalized in the repo, LF in the working tree.
+* text=auto eol=lf
+
+# Windows-native formats that must stay CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary: never touch.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary
+
+# Shell scripts must be LF even on a Windows checkout: they are executed
+# directly by the kernel in the container.
+*.sh text eol=lf
+
+# Generated
+*.sql text eol=lf
