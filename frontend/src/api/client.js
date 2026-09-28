@@ -260,6 +260,23 @@ export async function fetchCompanies(limit = 20) {
 
 // ─── Authentication ──────────────────────────────────────────────────────────
 
+// Both reset steps exist on the backend. forgot-password always reports the
+// same message whether or not the address is registered, so neither call can be
+// used to discover which emails have accounts.
+export async function requestPasswordReset(email) {
+  return apiClient("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token, newPassword) {
+  return apiClient("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+}
+
 export async function login(email, password) {
   const data = await apiClient("/auth/login", {
     method: "POST",

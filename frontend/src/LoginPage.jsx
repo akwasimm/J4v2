@@ -316,7 +316,7 @@ export default function LoginPage() {
                     <label htmlFor="login-password" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#111111" }}>
                       Password
                     </label>
-                    <a href="#" className="forgot-link">Forgot Password?</a>
+                    <Link to="/reset" className="forgot-link">Forgot Password?</Link>
                   </div>
                   <div style={{ position: "relative" }}>
                     <input
