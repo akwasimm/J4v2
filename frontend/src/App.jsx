@@ -42,6 +42,7 @@ export default function App() {
         <Route path="/opportunities" element={<AppLayout><OpportunitiesPage /></AppLayout>} />
         <Route path="/coach" element={<AppLayout><CareerCoachPage /></AppLayout>} />
         <Route path="/job" element={<PublicLayout><JobDetailPage /></PublicLayout>} />
+      <Route path="/job/:jobId" element={<PublicLayout><JobDetailPage /></PublicLayout>} />
         <Route path="/join" element={<RegisterPage />} />
         
         {/* ── Temporary Dev Map ── */}

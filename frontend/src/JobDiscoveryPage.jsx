@@ -3,6 +3,7 @@ import { fetchJobs } from "./services/jobsService.js";
 import { saveJob, unsaveJob, getSavedJobs } from "./api/client.js";
 import { FEATURES } from './config/features'
 import ComingSoon from './components/ComingSoon'
+import { useNavigate } from "react-router-dom";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ function FilterLabel({ children }) {
 
 // ─── Job Card ─────────────────────────────────────────────────────────────────
 
-function JobCard({ job, onSkillFitClick, isSaved, onSaveToggle }) {
+function JobCard({ job, onSkillFitClick, onViewDetails, isSaved, onSaveToggle }) {
   const [cardHover, setCardHover] = useState(false);
   const [saveHover, setSaveHover] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -292,7 +293,15 @@ function JobCard({ job, onSkillFitClick, isSaved, onSaveToggle }) {
                 Check Skill Fit
               </span>
             </NeoBtn>
-            <NeoBtn bg="#ffffff" color="#000000" shadow={false} style={{ border: "2px solid #000" }}>View Details</NeoBtn>
+            <NeoBtn
+              bg="#ffffff"
+              color="#000000"
+              shadow={false}
+              style={{ border: "2px solid #000" }}
+              onClick={() => onViewDetails?.(job)}
+            >
+              View Details
+            </NeoBtn>
           </div>
         </div>
       </div>
@@ -1036,6 +1045,8 @@ export default function JobDiscovery() {
 }
 
 function JobDiscoveryView() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     document.title = "Job Discovery — JobFor";
   }, []);
@@ -1147,6 +1158,10 @@ function JobDiscoveryView() {
   
   const handleSkillFitClick = (job) => {
     setSelectedJob(job);
+  };
+
+  const handleViewDetails = (job) => {
+    navigate(`/job/${job.id}`);
   };
   
   const handleCloseModal = () => {
@@ -1502,6 +1517,7 @@ function JobDiscoveryView() {
                     job={job} 
                     userSkills={userSkills}
                     onSkillFitClick={handleSkillFitClick}
+                    onViewDetails={handleViewDetails}
                     isSaved={savedJobIds.has(job.id)}
                     onSaveToggle={handleSaveToggle}
                   />
