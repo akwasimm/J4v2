@@ -76,6 +76,7 @@ export default function EditProfile() {
     last_name: "",
     location: "",
     headline: "",
+    bio: "",
     linkedin: "",
     github: "",
     leetcode: "",
@@ -100,8 +101,9 @@ export default function EditProfile() {
           first_name: profile.first_name || "",
           last_name: profile.last_name || "",
           location: profile.location || "",
-          headline: profile.headline || "",
-          linkedin: profile.linkedin || "",
+      headline: profile.headline || "",
+      bio: profile.bio || "",
+      linkedin: profile.linkedin || "",
           github: profile.github || "",
           leetcode: profile.leetcode || "",
           portfolio: profile.portfolio || "",
@@ -186,8 +188,9 @@ export default function EditProfile() {
       const profileUpdate = {
         first_name: form.first_name,
         last_name: form.last_name,
-        headline: form.headline,
-        location: form.location,
+      headline: form.headline,
+      bio: form.bio,
+      location: form.location,
         linkedin: form.linkedin,
         github: form.github,
         leetcode: form.leetcode,
@@ -658,8 +661,22 @@ export default function EditProfile() {
                       {/* Professional Headline */}
                       <div style={{ gridColumn: "span 2", display: "flex", flexDirection: "column", gap: "6px" }}>
                         <label style={{ fontWeight: 700, textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.05em", color: "#4b5563" }}>Professional Headline</label>
-                        <input className="neo-input" style={inputStyle} value={form.headline} onChange={handleChange("headline")} placeholder="e.g. Senior Software Engineer" />
-                      </div>
+        <input className="neo-input" style={inputStyle} value={form.headline} onChange={handleChange("headline")} placeholder="e.g. Senior Software Engineer" />
+      </div>
+
+      {/* Bio */}
+      <div style={{ gridColumn: "span 2", display: "flex", flexDirection: "column", gap: "6px" }}>
+        <label style={{ fontWeight: 700, textTransform: "uppercase", fontSize: "0.75rem", letterSpacing: "0.05em", color: "#4b5563" }}>Bio</label>
+        <textarea
+          className="neo-input"
+          style={{ ...inputStyle, minHeight: "110px", resize: "vertical", height: "auto" }}
+          value={form.bio}
+          onChange={handleChange("bio")}
+          maxLength={2000}
+          placeholder="Tell employers who you are and what you do best."
+        />
+      </div>
+
 
                       {/* LinkedIn */}
                       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>

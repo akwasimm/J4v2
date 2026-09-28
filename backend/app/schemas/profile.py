@@ -20,6 +20,7 @@ class ProfileUpdate(BaseModel):
     github: Optional[str] = Field(None, max_length=100)
     leetcode: Optional[str] = Field(None, max_length=100)
     portfolio: Optional[str] = Field(None, max_length=500)
+    bio: Optional[str] = Field(None, max_length=2000)
 
     @validator('first_name')
     def first_name_not_empty(cls, v):
@@ -46,6 +47,7 @@ class ProfileResponse(BaseModel):
     github: Optional[str] = None
     leetcode: Optional[str] = None
     portfolio: Optional[str] = None
+    bio: Optional[str] = None
     avatar_url: Optional[str] = None
     avatar_uploaded_at: Optional[datetime] = None
     is_active: bool
