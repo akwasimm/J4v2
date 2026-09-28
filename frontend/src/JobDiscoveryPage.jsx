@@ -1057,7 +1057,7 @@ function JobDiscoveryView() {
   const [expLevel, setExpLevel]           = useState(FRESHER_EXP_LEVELS[0]);
   const [activeSkill, setActiveSkill]     = useState(null);
   const [currentPage, setCurrentPage]     = useState(1);
-  const [sortBy, setSortBy]               = useState("Newest First");
+  const [sortBy, setSortBy]               = useState("match_score");
   const [searchBtnHover, setSearchBtnHover] = useState(false);
 
   const [jobListings, setJobListings] = useState([]);
@@ -1121,7 +1121,10 @@ function JobDiscoveryView() {
         page:       currentPage,
         page_size:  PAGE_SIZE,
         user_id:    userId || undefined,
-        sort_by:    'match_score', // Always sort by personalized match score
+        // The dropdown used to hold a label while the request always sent
+        // match_score, so changing it did nothing. Map the choice onto the
+        // three values the endpoint accepts instead.
+        sort_by:    sortBy,
       });
       setJobListings(data.items || []);
       setTotalJobs(data.total  || 0);
@@ -1131,7 +1134,7 @@ function JobDiscoveryView() {
     } finally {
       setLoading(false);
     }
-  }, [effectiveQ, locationQuery, workMode, expLevel, currentPage]);
+  }, [effectiveQ, locationQuery, workMode, expLevel, currentPage, sortBy]);
 
   useEffect(() => {
     const delay = setTimeout(loadJobs, 350);
@@ -1466,8 +1469,13 @@ function JobDiscoveryView() {
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <span style={{ fontSize: "0.625rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "'Space Grotesk', sans-serif" }}>Sort:</span>
-                <select className="neo-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                  {["Newest First", "Most Relevant"].map((s) => <option key={s}>{s}</option>)}
+                <select
+                  className="neo-select"
+                  value={sortBy}
+                  onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                >
+                  <option value="match_score">Most Relevant</option>
+                  <option value="posted_at">Newest First</option>
                 </select>
               </div>
             </div>
