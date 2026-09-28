@@ -6,8 +6,12 @@ import { analyzeSkillGap } from "./services/skillGapService.js";
 
 // ─── Profile Completion Data Helper ─────────────────────────────────────────
 
-const createProfileData = (completion) => ({
-  completion: completion || 75,
+const createProfileData = (completion) => {
+  // ?? not ||: a genuine 0% profile is a real state, and `0 || 75` reported
+  // 75% for a user who has filled in nothing.
+  const pct = completion ?? 0;
+  return {
+  completion: pct,
   incompleteSections: [
     { id: "photo", label: "Profile Photo", weight: 10, status: "missing", quickWin: true },
     { id: "skills", label: "Add 3+ Skills", weight: 20, status: "partial", quickWin: false },
@@ -18,10 +22,11 @@ const createProfileData = (completion) => ({
   ],
   nextMilestone: {
     target: 50,
-    remaining: 100 - (completion || 75),
+    remaining: 100 - pct,
     fastestPath: ["preferences", "bio"],
   },
-});
+  };
+};
 
 // ─── Locked Features Preview Data ───────────────────────────────────────────
 
@@ -147,7 +152,7 @@ export default function AIRecommendations() {
         // Fetch preferences (for target_role)
         const preferences = await getPreferences();
         const targetRole = preferences?.target_role || null;
-        const profileCompletion = profileResponse?.profile?.profile_completion || 75;
+        const profileCompletion = profileResponse?.profile?.profile_completion ?? 0;
         
         // Get dashboard profile based on target role from new dashboardProfiles.js
         const roleBasedProfileData = getDashboardProfile(targetRole);

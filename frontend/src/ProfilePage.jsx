@@ -199,6 +199,11 @@ export default function EditProfile() {
 
       console.log("Saving profile data (no resume required):", profileUpdate);
 
+      // Each sub-save below swallows its own error so one failure does not
+      // abort the rest. That means the summary message has to be built from
+      // what actually happened, not assumed.
+      const failed = [];
+
       // Update basic profile - NO resume/PDF required
       await updateProfile(profileUpdate);
       console.log("Profile saved successfully");
@@ -226,7 +231,7 @@ export default function EditProfile() {
         console.log("Skills saved:", skillsPayload.length);
       } catch (skillsError) {
         console.error("Error saving skills:", skillsError);
-        // Don't fail the whole save if skills fail
+        failed.push("skills");
       }
 
       // Save experience to backend
@@ -247,7 +252,7 @@ export default function EditProfile() {
         console.log("Experience saved:", expPayload.length);
       } catch (expError) {
         console.error("Error saving experience:", expError);
-        // Don't fail the whole save if experience fails
+        failed.push("experience");
       }
 
       // Save education to backend
@@ -265,7 +270,7 @@ export default function EditProfile() {
         console.log("Education saved:", eduPayload.length);
       } catch (eduError) {
         console.error("Error saving education:", eduError);
-        // Don't fail the whole save if education fails
+        failed.push("education");
       }
 
       // Update preferences separately if they exist
@@ -283,7 +288,7 @@ export default function EditProfile() {
           });
         } catch (prefError) {
           console.error("Error saving preferences:", prefError);
-          // Don't fail the whole save if preferences fail
+          failed.push("preferences");
         }
       }
 
@@ -298,8 +303,16 @@ export default function EditProfile() {
       window.dispatchEvent(new CustomEvent('profileUpdated'));
 
       console.log("Profile updated successfully");
-      setUploadSuccess("Profile saved successfully!");
-      setTimeout(() => setUploadSuccess(""), 3000);
+      if (failed.length === 0) {
+        setUploadSuccess("Profile saved successfully!");
+      } else {
+        // Saying "saved successfully" when half the form silently failed is
+        // worse than showing the failure.
+        setUploadSuccess(
+          `Saved, but these did not save: ${failed.join(", ")}. Check your connection and try again.`
+        );
+      }
+      setTimeout(() => setUploadSuccess(""), 6000);
 
     } catch (error) {
       console.error("Error saving profile:", error);

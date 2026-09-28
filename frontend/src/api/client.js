@@ -37,7 +37,12 @@ export async function apiClient(endpoint, customConfig = {}) {
           }
         }
       } catch { }
-      throw new Error(errorMessage);
+      const err = new Error(errorMessage);
+      // Carry the status so callers can tell 401 (log in again) from 403
+      // (not your job) from 404 (gone) from 500 (our fault). Without it every
+      // failure looks like the same unhandled Error.
+      err.status = response.status;
+      throw err;
     }
     return await response.json();
   } catch (error) {
@@ -397,7 +402,10 @@ export async function uploadResume(file) {
 export async function getProfile() {
   try {
     const data = await apiClient("/profile/me");
-    persistProfileAssets(data);
+    // GET /profile/me wraps the profile in { profile: ... }. Passing the
+    // wrapper meant avatar_url and resume_url were always undefined here, so
+    // the avatar and resume never made it into localStorage.
+    persistProfileAssets(data?.profile);
     return data;
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -591,7 +599,9 @@ export async function getResumes() {
 
 export async function deleteResume(resumeId) {
   try {
-    const data = await apiClient(`/profile/resumes/${resumeId}`, {
+    // Singular "resume" and /default, matching the route the server actually
+    // registers. The old plural /set-default path 404'd on every call.
+    const data = await apiClient(`/profile/resume/${resumeId}`, {
       method: "DELETE",
     });
     return data;
@@ -603,7 +613,7 @@ export async function deleteResume(resumeId) {
 
 export async function setDefaultResume(resumeId) {
   try {
-    const data = await apiClient(`/profile/resumes/${resumeId}/set-default`, {
+    const data = await apiClient(`/profile/resume/${resumeId}/default`, {
       method: "PUT",
     });
     return data;

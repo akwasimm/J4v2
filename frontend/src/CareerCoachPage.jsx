@@ -83,7 +83,7 @@ function CareerCoachView() {
       console.error("Failed to load history:", error);
       setMessages([]);
       // Clear invalid session from localStorage
-      localStorage.removeItem('lumeActiveSession');
+      localStorage.removeItem('lume_session_id');
       setActiveSessionId(null);
     }
   };
