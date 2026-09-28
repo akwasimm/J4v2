@@ -12,15 +12,6 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "https://your-backend.onrender.com/api/$1",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
-      }
-    },
-    {
       "src": "/(.*)",
       "dest": "/$1"
     },
@@ -31,6 +22,6 @@
   ],
   "env": {
     "VITE_API_MODE": "real",
-    "VITE_API_BASE_URL": "https://your-backend.onrender.com/api/v1"
+    "VITE_API_BASE_URL": "https://jobfor-backend.onrender.com/api/v1"
   }
 }
